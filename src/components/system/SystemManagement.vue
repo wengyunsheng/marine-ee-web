@@ -78,10 +78,10 @@
 import { ref, computed } from 'vue'
 import DeviceTypeManagement from './device-type-management/DeviceTypeManagement.vue'
 import DeviceParamsManagement from './device-params-management/DeviceParamsManagement.vue'
-import WeightParams from './weight-params/WeightParams.vue'
+import WeightParamsManagement from './weight-params-management/WeightParamsManagement.vue'
 import ModelManagement from './model-management/ModelManagement.vue'
 import EfficiencyLevelManagement from './efficiency-level-management/EfficiencyLevelManagement.vue'
-import HistoryData from './history-data/HistoryData.vue'
+import EfficiencyDataManagement from './efficiency-data-management/EfficiencyDataManagement.vue'
 
 const currentSubModule = ref(null)
 
@@ -89,10 +89,10 @@ const currentSubModuleComponent = computed(() => {
   const components = {
     'device-type': DeviceTypeManagement,
     'device-params': DeviceParamsManagement,
-    'weight-params': WeightParams,
+    'weight-params': WeightParamsManagement,
     'model-management': ModelManagement,
     'efficiency-level': EfficiencyLevelManagement,
-    'history-data': HistoryData
+    'history-data': EfficiencyDataManagement
   }
   return components[currentSubModule.value]
 })
@@ -108,7 +108,7 @@ const getSubModuleTitle = (module) => {
     'weight-params': '加权参数管理',
     'model-management': '模型管理',
     'efficiency-level': '能效等级管理',
-    'history-data': '历史数据管理'
+    'history-data': '能效数据管理'
   }
   return titles[module] || '子模块'
 }

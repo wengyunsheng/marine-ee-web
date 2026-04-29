@@ -1,9 +1,5 @@
 <template>
   <div class="weight-params-container">
-    <div class="page-header">
-      <h3>加权参数管理</h3>
-    </div>
-
     <div class="mode-controls">
       <div class="control-group">
         <button class="btn btn-primary" @click="addMode">+ 新增运行模式</button>
@@ -48,7 +44,7 @@
       </div>
       
       <!-- 分页组件 -->
-      <div v-if="totalPages > 1" class="pagination-container">
+      <div class="pagination-container">
         <div class="pagination-info">
           共 {{ filteredModes.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
         </div>
@@ -81,14 +77,14 @@
     </div>
 
     <!-- 查看运行模式弹窗 -->
-    <ModeView
+    <WeightParamsView
       v-if="showViewModal"
       :mode="selectedMode"
       @close="closeViewModal"
     />
 
     <!-- 编辑/新增运行模式弹窗 -->
-    <ModeEdit
+    <WeightParamsForm
       v-if="showEditModal"
       :mode="editingMode"
       @close="closeEditModal"
@@ -96,7 +92,7 @@
     />
 
     <!-- 权重配置弹窗 -->
-    <ModeWeightConfig
+    <WeightParamsConfig
       v-if="showWeightConfigModal"
       :mode="selectedMode"
       @close="closeWeightConfig"
@@ -107,9 +103,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import ModeView from './components/ModeView.vue'
-import ModeEdit from './components/ModeEdit.vue'
-import ModeWeightConfig from './components/ModeWeightConfig.vue'
+import WeightParamsView from './components/WeightParamsView.vue'
+import WeightParamsForm from './components/WeightParamsForm.vue'
+import WeightParamsConfig from './components/WeightParamsConfig.vue'
 
 const runModes = ref([
   {
@@ -502,5 +498,50 @@ const handleSaveWeights = (weights) => {
   .action-buttons {
     flex-wrap: wrap;
   }
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.pagination {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: white;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.pagination-btn.active {
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

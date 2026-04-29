@@ -1,7 +1,7 @@
 <template>
   <div class="panel-section">
     <div class="section-header">
-      <h3>📊 指标差异分析</h3>
+      <h3>指标差异分析</h3>
       <button class="btn-link" @click="showDetail = !showDetail">
         {{ showDetail ? '收起' : '详情' }}
       </button>

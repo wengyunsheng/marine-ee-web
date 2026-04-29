@@ -70,12 +70,34 @@
         </tbody>
       </table>
     </div>
-    <div class="pagination">
-      <span class="pagination-info">显示 1 到 5 条，共 {{ totalTasks }} 条记录</span>
-      <div class="pagination-buttons">
-        <button class="btn btn-sm" @click="prevPage" :disabled="currentPage === 1">上一页</button>
-        <button class="btn btn-sm" v-for="page in visiblePages" :key="page" :class="{ active: page === currentPage }" @click="goToPage(page)">{{ page }}</button>
-        <button class="btn btn-sm" @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
+    <div class="pagination-container">
+      <div class="pagination-info">
+        共 {{ totalTasks }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
+      </div>
+      <div class="pagination">
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage === 1" 
+          @click="prevPage"
+        >
+          上一页
+        </button>
+        <button 
+          v-for="page in visiblePages" 
+          :key="page"
+          class="pagination-btn"
+          :class="{ active: currentPage === page }"
+          @click="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage === totalPages" 
+          @click="nextPage"
+        >
+          下一页
+        </button>
       </div>
     </div>
   </div>
@@ -475,15 +497,12 @@ defineExpose({
   color: #92400e;
 }
 
-.pagination {
+.pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: white;
-  border-radius: 0 0 8px 8px;
-  border: 1px solid #e2e8f0;
-  border-top: none;
+  border-top: 1px solid #e2e8f0;
 }
 
 .pagination-info {
@@ -491,9 +510,35 @@ defineExpose({
   color: #666;
 }
 
-.pagination-buttons {
+.pagination {
   display: flex;
   gap: 8px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.pagination-btn.active {
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 响应式布局 */

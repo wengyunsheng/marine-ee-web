@@ -1,9 +1,5 @@
 <template>
   <div class="history-data-management-container">
-    <div class="page-header">
-      <h3>能效数据管理</h3>
-    </div>
-
     <div class="history-data-controls">
       <div class="control-group">
         <button class="btn btn-primary" @click="openAddModal">+ 新增数据</button>
@@ -89,7 +85,7 @@
       </div>
       
       <!-- 分页组件 -->
-      <div v-if="totalPages > 1" class="pagination-container">
+      <div class="pagination-container">
         <div class="pagination-info">
           共 {{ filteredData.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
         </div>
@@ -122,7 +118,7 @@
     </div>
 
     <!-- 新增/编辑历史数据弹窗 -->
-    <HistoryDataForm
+    <EfficiencyDataForm
       v-if="showFormModal"
       :is-edit="isEditMode"
       :form-data="formData"
@@ -131,7 +127,7 @@
     />
 
     <!-- 查看历史数据弹窗 -->
-    <HistoryDataView 
+    <EfficiencyDataView 
       v-if="showViewModal" 
       :data="currentData" 
       @close="closeViewModal" 
@@ -141,8 +137,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import HistoryDataForm from './components/HistoryDataForm.vue'
-import HistoryDataView from './components/HistoryDataView.vue'
+import EfficiencyDataForm from './components/EfficiencyDataForm.vue'
+import EfficiencyDataView from './components/EfficiencyDataView.vue'
 
 const props = defineProps({
   historyData: {
@@ -703,5 +699,50 @@ const deleteData = (id) => {
   .history-data-table {
     min-width: 600px;
   }
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.pagination {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: white;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.pagination-btn.active {
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

@@ -1,9 +1,5 @@
 <template>
   <div class="energy-evaluation-container">
-    <div class="page-header">
-      <h3>能效评估</h3>
-    </div>
-
     <!-- 评估概览组件 -->
     <EvaluationOverview />
 

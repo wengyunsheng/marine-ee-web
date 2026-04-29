@@ -31,45 +31,44 @@
               <span class="nav-text">可视化</span>
             </a>
           </li>
-          <li class="nav-item nav-item-with-submenu" :class="{ active: currentModule === 'system-management', open: menuState.systemManagement }">
+          <li class="nav-item nav-item-with-submenu" :class="{ active: currentModule === 'system-management' && currentSystemSubModule, open: menuState.systemManagement }">
             <a href="#" @click.prevent="toggleMenu('systemManagement')">
               <span class="nav-icon">⚙️</span>
               <span class="nav-text">系统管理</span>
               <span class="nav-arrow">{{ menuState.systemManagement ? '▼' : '▶' }}</span>
             </a>
             <ul class="submenu" v-show="menuState.systemManagement">
-              <li class="submenu-item" :class="{ active: currentSystemSubModule === 'device-type-management' }">
+              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'device-type-management' }">
                 <a href="#" @click.prevent="switchSystemSubModule('device-type-management')">
                   <span class="nav-icon">📋</span>
                   <span class="nav-text">设备类型管理</span>
                 </a>
               </li>
-              <li class="submenu-item" :class="{ active: currentSystemSubModule === 'device-params' }">
+              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'device-params' }">
                 <a href="#" @click.prevent="switchSystemSubModule('device-params')">
                   <span class="nav-icon">📝</span>
                   <span class="nav-text">设备参数管理</span>
                 </a>
               </li>
-              <li class="submenu-item" :class="{ active: currentSystemSubModule === 'weight-params' }">
+              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'weight-params' }">
                 <a href="#" @click.prevent="switchSystemSubModule('weight-params')">
                   <span class="nav-icon">⚖️</span>
                   <span class="nav-text">加权参数管理</span>
                 </a>
               </li>
-              <li class="submenu-item" :class="{ active: currentSystemSubModule === 'model-management' }">
-                <a href="#" @click.prevent="switchSystemSubModule('model-management')">
-                  <span class="nav-icon">🔧</span>
-                  <span class="nav-text">样机模型管理</span>
-                </a>
-              </li>
-
-              <li class="submenu-item" :class="{ active: currentSystemSubModule === 'efficiency-level-management' }">
+              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'efficiency-level-management' }">
                 <a href="#" @click.prevent="switchSystemSubModule('efficiency-level-management')">
                   <span class="nav-icon">🏆</span>
                   <span class="nav-text">能效等级管理</span>
                 </a>
               </li>
-              <li class="submenu-item" :class="{ active: currentSystemSubModule === 'history-data' }">
+              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'model-management' }">
+                <a href="#" @click.prevent="switchSystemSubModule('model-management')">
+                  <span class="nav-icon">🔧</span>
+                  <span class="nav-text">样机模型管理</span>
+                </a>
+              </li>
+              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'history-data' }">
                 <a href="#" @click.prevent="switchSystemSubModule('history-data')">
                   <span class="nav-icon">📁</span>
                   <span class="nav-text">能效数据管理</span>
@@ -90,11 +89,11 @@
     <div class="main-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
       <header class="top-header">
         <div class="header-content">
-          <div class="platform-name">船用设备能效评估平台</div>
+          <div class="platform-name">船用设备能效评估平台 / {{ currentModuleName }}</div>
         </div>
       </header>
       <main class="content">
-<DataAccess v-if="false" />
+        <DataAccess v-if="false" />
         <template v-else-if="currentModule === 'evaluation'">
           <Evaluation v-if="currentEvalPage === 'eval-overview'" @navigate="navigateEvalPage" @evalComplete="handleEvalComplete" />
           <DeviceSelect v-else-if="currentEvalPage === 'device-select'" @navigate="navigateEvalPage" />
@@ -109,9 +108,9 @@
           <DeviceTypeManagement v-else-if="currentSystemSubModule === 'device-type-management'" />
           <EfficiencyLevelManagement v-else-if="currentSystemSubModule === 'efficiency-level-management'" />
 
-          <HistoryData v-else-if="currentSystemSubModule === 'history-data'" :historyData="historyData" @delete="deleteHistoryData" />
+          <EfficiencyDataManagement v-else-if="currentSystemSubModule === 'history-data'" />
           <DeviceParamsManagement v-else-if="currentSystemSubModule === 'device-params'" />
-          <WeightParams v-else-if="currentSystemSubModule === 'weight-params'" />
+          <WeightParamsManagement v-else-if="currentSystemSubModule === 'weight-params'" />
         </template>
       </main>
     </div>
@@ -148,9 +147,9 @@ import ModelManagement from './components/system/model-management/ModelManagemen
 import DeviceTypeManagement from './components/system/device-type-management/DeviceTypeManagement.vue'
 import EfficiencyLevelManagement from './components/system/efficiency-level-management/EfficiencyLevelManagement.vue'
 
-import HistoryData from './components/system/history-data/HistoryData.vue'
+import EfficiencyDataManagement from './components/system/efficiency-data-management/EfficiencyDataManagement.vue'
 import DeviceParamsManagement from './components/system/device-params-management/DeviceParamsManagement.vue'
-import WeightParams from './components/system/weight-params/WeightParams.vue'
+import WeightParamsManagement from './components/system/weight-params-management/WeightParamsManagement.vue'
 
 const currentModule = ref('evaluation')
 const activeSidebarItem = ref('overview')
@@ -245,9 +244,9 @@ const deleteHistoryData = (id) => {
 }
 
 const moduleNames = {
-  'data-access': '数据接入模块',
-  'evaluation': '能效评估模块',
-  'visualization': '可视化模块'
+  'data-access': '数据接入',
+  'evaluation': '能效评估',
+  'visualization': '可视化'
 }
 
 const modalTitles = {
@@ -258,6 +257,22 @@ const modalTitles = {
   'model-management': '样机模型管理',
   'device-type-management': '设备类型管理'
 }
+
+const systemSubModuleNames = {
+  'device-type-management': '设备类型管理',
+  'device-params': '设备参数管理',
+  'weight-params': '加权参数管理',
+  'efficiency-level-management': '能效等级管理',
+  'model-management': '样机模型管理',
+  'history-data': '能效数据管理'
+}
+
+const currentModuleName = computed(() => {
+  if (currentModule.value === 'system-management' && currentSystemSubModule.value) {
+    return '系统管理 / ' + (systemSubModuleNames[currentSystemSubModule.value] || '')
+  }
+  return moduleNames[currentModule.value] || ''
+})
 
 const moduleProgress = computed(() => {
   const progressMap = {
@@ -318,14 +333,10 @@ const switchSystemSubModule = (subModule) => {
 
 // 切换菜单展开/收起
 const toggleMenu = (menuName) => {
-  // 检查当前菜单是否已经展开
   const wasOpen = menuState.value[menuName]
-  // 先关闭所有菜单
   Object.keys(menuState.value).forEach(key => {
     menuState.value[key] = false
   })
-  // 如果当前菜单之前是展开的，保持关闭状态
-  // 如果当前菜单之前是关闭的，展开它
   if (!wasOpen) {
     menuState.value[menuName] = true
   }
@@ -577,17 +588,14 @@ const mapDeviceClassToName = (deviceClass) => {
 }
 
 .nav-item-with-submenu.open a {
-  background-color: rgba(255,255,255,0.25);
-  border-left-color: #3498db;
-  font-weight: 600;
-  box-shadow: inset 0 0 0 1px rgba(52,152,219,0.3);
+  background-color: rgba(255,255,255,0.08);
 }
 
 .submenu {
   list-style: none;
   padding: 0;
   margin: 0;
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(0,0,0,0.05);
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -596,6 +604,7 @@ const mapDeviceClassToName = (deviceClass) => {
   padding-left: 40px;
   font-size: 14px;
   border-left: 3px solid transparent;
+  background-color: transparent;
 }
 
 .submenu-item a:hover {
@@ -637,7 +646,7 @@ const mapDeviceClassToName = (deviceClass) => {
   background-color: rgba(255,255,255,0.1);
 }
 
-.nav-item.active a {
+.nav-item.active > a {
   background-color: rgba(255,255,255,0.25);
   border-left-color: #3498db;
   font-weight: 600;

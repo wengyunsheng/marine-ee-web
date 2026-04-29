@@ -1,9 +1,5 @@
 <template>
   <div class="efficiency-level-container">
-    <div class="page-header">
-      <h3>能效等级管理</h3>
-    </div>
-
     <div class="efficiency-level-controls">
       <div class="control-group">
         <button class="btn btn-primary" @click="openAddModal">+ 新增基值</button>
@@ -59,7 +55,7 @@
         </table>
       </div>
       
-      <div v-if="totalPages > 1" class="pagination-container">
+      <div class="pagination-container">
         <div class="pagination-info">
           共 {{ filteredBaseValues.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
         </div>
@@ -251,5 +247,50 @@ const exportBaseValues = () => {
   .search-box { flex: 1; }
   .efficiency-level-table-container { overflow-x: auto; }
   .efficiency-level-table { min-width: 600px; }
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.pagination {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: white;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.pagination-btn.active {
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

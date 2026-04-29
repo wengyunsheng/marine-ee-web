@@ -1,9 +1,5 @@
 <template>
   <div class="device-type-management-container">
-    <div class="page-header">
-      <h3>设备类型管理</h3>
-    </div>
-
     <div class="device-type-controls">
       <div class="control-group">
         <button class="btn btn-primary" @click="openAddModal">+ 新增设备类型</button>
@@ -63,7 +59,7 @@
       </div>
       
       <!-- 分页组件 -->
-      <div v-if="totalPages > 1" class="pagination-container">
+      <div class="pagination-container">
         <div class="pagination-info">
           共 {{ filteredDeviceTypes.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
         </div>

@@ -1,15 +1,16 @@
 <template>
   <div class="visualization-container">
-    <div class="page-header">
-      <h2>船舶设备三维可视化</h2>
-      <div class="header-actions">
-        <button class="btn btn-primary" @click="refreshData">刷新数据</button>
-      </div>
-    </div>
-
     <div class="main-layout">
       <div class="left-panel">
-        <ThreeDModel :modelLabels="modelLabels" :selectedId="selectedEquipment" @select="selectEquipment" />
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>船舶设备三维可视化</h3>
+            <div class="header-actions">
+              <button class="btn btn-primary btn-sm" @click="refreshData">刷新数据</button>
+            </div>
+          </div>
+          <ThreeDModel :modelLabels="modelLabels" :selectedId="selectedEquipment" @select="selectEquipment" />
+        </div>
       </div>
 
       <div class="right-panel">
@@ -269,17 +270,30 @@ ${data.status === 'fail' ? '设备能效未达到最低等级标准，建议进�
   box-sizing: border-box;
 }
 
-.page-header {
+.panel-section {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.page-header h2 {
+.section-header h3 {
   margin: 0;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 600;
+  color: white;
 }
 
 .header-actions {
@@ -304,6 +318,11 @@ ${data.status === 'fail' ? '设备能效未达到最低等级标准，建议进�
 
 .btn-primary:hover {
   background-color: #2563eb;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
 }
 
 .main-layout {
