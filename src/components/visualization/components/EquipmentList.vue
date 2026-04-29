@@ -109,13 +109,14 @@ const getStatusText = (status) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-  padding-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
   border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .section-header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: white;
 }

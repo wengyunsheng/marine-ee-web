@@ -16,7 +16,7 @@
     </div>
 
     <div class="mode-list-section">
-      <h4>运行模式列表</h4>
+      <h3>运行模式列表</h3>
       <div class="mode-table-container">
         <table class="mode-table">
           <thead>
@@ -287,8 +287,10 @@ const handleSaveWeights = (weights) => {
 <style scoped>
 .weight-params-container {
   padding: 20px;
-  height: calc(100vh - 120px);
+  height: 100%;
+  min-height: calc(100vh - 120px);
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -365,9 +367,9 @@ const handleSaveWeights = (weights) => {
   margin-bottom: 32px;
 }
 
-.mode-list-section h4 {
+.mode-list-section h3 {
   margin: 0 0 16px 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
 }

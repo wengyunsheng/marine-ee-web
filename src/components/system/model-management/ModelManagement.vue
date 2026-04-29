@@ -23,7 +23,7 @@
     </div>
 
     <div class="model-list-section">
-      <h4>模型列表</h4>
+      <h3>模型列表</h3>
       <div class="model-table-container">
         <table class="model-table">
           <thead>
@@ -446,8 +446,10 @@ const close3DModel = () => {
 <style scoped>
 .model-management-container {
   padding: 20px;
-  height: calc(100vh - 120px);
+  height: 100%;
+  min-height: calc(100vh - 120px);
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -549,9 +551,9 @@ const close3DModel = () => {
   margin-bottom: 24px;
 }
 
-.model-list-section h4 {
+.model-list-section h3 {
   margin: 0 0 16px 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
 }

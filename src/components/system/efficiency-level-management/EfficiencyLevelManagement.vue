@@ -25,7 +25,7 @@
     </div>
 
     <div class="efficiency-level-list-section">
-      <h4>能效等级和能效基值</h4>
+      <h3>能效等级和能效基值</h3>
       <div class="efficiency-level-table-container">
         <table class="efficiency-level-table">
           <thead>
@@ -203,7 +203,7 @@ const exportBaseValues = () => {
 </script>
 
 <style scoped>
-.efficiency-level-container { padding: 20px; height: calc(100vh - 120px); overflow-y: auto; }
+.efficiency-level-container { padding: 20px; height: 100%; min-height: calc(100vh - 120px); overflow-y: auto; box-sizing: border-box; }
 .page-header { display: flex; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; }
 .page-header h3 { margin: 0; font-size: 18px; font-weight: 600; color: #333; }
 
@@ -219,7 +219,7 @@ const exportBaseValues = () => {
 .filter-select { padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: #fff; cursor: pointer; outline: none; }
 
 .efficiency-level-list-section { margin-bottom: 24px; }
-.efficiency-level-list-section h4 { margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #333; }
+.efficiency-level-list-section h3 { margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: #333; }
 
 .efficiency-level-table-container { background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
 .efficiency-level-table { width: 100%; border-collapse: collapse; }

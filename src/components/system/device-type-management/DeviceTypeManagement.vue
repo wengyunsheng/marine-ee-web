@@ -22,7 +22,7 @@
     </div>
 
     <div class="device-type-list-section">
-      <h4>设备类型列表</h4>
+      <h3>设备类型列表</h3>
       <div class="device-type-table-container">
         <table class="device-type-table">
           <thead>
@@ -360,8 +360,10 @@ const exportDeviceTypes = () => {
 <style scoped>
 .device-type-management-container {
   padding: 20px;
-  height: calc(100vh - 120px);
+  height: 100%;
+  min-height: calc(100vh - 120px);
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -463,9 +465,9 @@ const exportDeviceTypes = () => {
   margin-bottom: 24px;
 }
 
-.device-type-list-section h4 {
+.device-type-list-section h3 {
   margin: 0 0 16px 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
 }

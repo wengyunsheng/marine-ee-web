@@ -45,7 +45,7 @@
     </div>
 
     <div class="history-data-list-section">
-      <h4>能效数据列表</h4>
+      <h3>能效数据列表</h3>
       <div class="history-data-table-container">
         <table class="history-data-table">
           <thead>
@@ -428,8 +428,10 @@ const deleteData = (id) => {
 <style scoped>
 .history-data-management-container {
   padding: 20px;
-  height: calc(100vh - 120px);
+  height: 100%;
+  min-height: calc(100vh - 120px);
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -531,9 +533,9 @@ const deleteData = (id) => {
   margin-bottom: 24px;
 }
 
-.history-data-list-section h4 {
+.history-data-list-section h3 {
   margin: 0 0 16px 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
 }

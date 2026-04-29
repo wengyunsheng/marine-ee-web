@@ -124,14 +124,13 @@ onMounted(() => {
 }
 
 .stats-cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
-  flex-wrap: wrap;
 }
 
 .stat-card {
-  flex: 1;
-  min-width: 200px;
+  min-width: 150px;
   background-color: #f8fafc;
   border-radius: 8px;
   padding: 16px;
@@ -145,8 +144,7 @@ onMounted(() => {
 }
 
 .stat-card.chart-card {
-  min-width: 280px;
-  flex: 1.2;
+  grid-column: span 1;
 }
 
 .stat-header {
@@ -223,13 +221,31 @@ onMounted(() => {
   margin-top: 20px;
 }
 
+@media (max-width: 1366px) {
+  .stats-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .stats-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .stats-cards {
-    flex-direction: column;
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .stat-card {
     min-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-cards {
+    grid-template-columns: 1fr;
   }
 }
 </style>

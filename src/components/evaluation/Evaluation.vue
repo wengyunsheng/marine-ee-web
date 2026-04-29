@@ -101,9 +101,11 @@ const completeEval = (evalData) => {
 <style scoped>
 .energy-evaluation-container {
   padding: 20px;
-  height: calc(100vh - 120px);
+  height: 100%;
+  min-height: calc(100vh - 120px);
   overflow-y: auto;
   display: block;
+  box-sizing: border-box;
 }
 
 .page-header {

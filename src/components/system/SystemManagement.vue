@@ -117,9 +117,11 @@ const getSubModuleTitle = (module) => {
 <style scoped>
 .system-management {
   padding: 20px;
-  height: calc(100vh - 120px);
+  height: 100%;
+  min-height: calc(100vh - 120px);
   overflow-y: auto;
   background-color: #f5f7fa;
+  box-sizing: border-box;
 }
 
 .system-management h1 {

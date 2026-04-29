@@ -1,24 +1,5 @@
 <template>
   <div class="three-d-wrapper">
-    <div class="three-d-header">
-      <div class="header-controls">
-        <button class="btn-icon" @click="zoomIn" title="放大">
-          <span>🔍</span>
-        </button>
-        <button class="btn-icon" @click="rotateModel" title="旋转">
-          <span>🔄</span>
-        </button>
-        <button class="btn-icon" @click="toggleLabels" title="显示/隐藏标签">
-          <span>🏷️</span>
-        </button>
-        <button class="btn-icon" @click="captureScreen" title="截图">
-          <span>📷</span>
-        </button>
-        <button class="btn-icon" @click="toggleFullscreen" title="全屏">
-          <span>⛶</span>
-        </button>
-      </div>
-    </div>
     <div class="three-d-container" ref="threeContainer">
       <div class="three-d-background"></div>
       <div class="three-d-model" ref="modelContainer"></div>
@@ -45,10 +26,7 @@
           </div>
         </div>
       </div>
-      <div class="interaction-hint">
-        <div class="hint-animation"></div>
-        可拖拽旋转 / 滚轮缩放
-      </div>
+      
     </div>
   </div>
 </template>
@@ -69,7 +47,7 @@ defineProps({
   }
 })
 
-defineEmits(['select'])
+const emit = defineEmits(['select'])
 
 const threeContainer = ref(null)
 const modelContainer = ref(null)
@@ -103,6 +81,9 @@ const toggleLabels = () => {
   console.log('显示/隐藏标签')
 }
 
+let resizeTimeout = null
+let isFullscreenTransition = false
+
 const captureScreen = () => {
   console.log('截图')
 }
@@ -110,13 +91,29 @@ const captureScreen = () => {
 const toggleFullscreen = () => {
   const container = threeContainer.value
   if (!container) return
+  isFullscreenTransition = true
   if (!document.fullscreenElement) {
-    container.requestFullscreen().catch(err => {
+    container.requestFullscreen().then(() => {
+      setTimeout(() => {
+        onWindowResize()
+        isFullscreenTransition = false
+      }, 300)
+    }).catch(err => {
       console.error(`Error attempting to enable fullscreen: ${err.message}`)
+      isFullscreenTransition = false
     })
   } else {
     if (document.exitFullscreen) {
-      document.exitFullscreen()
+      document.exitFullscreen().then(() => {
+        setTimeout(() => {
+          onWindowResize()
+          window.dispatchEvent(new Event('resize'))
+          isFullscreenTransition = false
+        }, 300)
+      }).catch(err => {
+        console.error(`Error exiting fullscreen: ${err.message}`)
+        isFullscreenTransition = false
+      })
     }
   }
 }
@@ -124,8 +121,19 @@ const toggleFullscreen = () => {
 const initThreeScene = () => {
   if (!threeContainer.value || !modelContainer.value) return
 
+  const debouncedResize = () => {
+    if (isFullscreenTransition) return
+    if (resizeTimeout) clearTimeout(resizeTimeout)
+    resizeTimeout = setTimeout(() => {
+      onWindowResize()
+    }, 100)
+  }
+
+  const resizeObserver = new ResizeObserver(debouncedResize)
+  resizeObserver.observe(threeContainer.value)
+
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x0f172a)
+  scene.background = new THREE.Color(0x1e3a5f)
 
   camera = new THREE.PerspectiveCamera(75, threeContainer.value.clientWidth / threeContainer.value.clientHeight, 0.1, 1000)
   camera.position.z = 5
@@ -142,61 +150,132 @@ const initThreeScene = () => {
   controls.enableZoom = true
   controls.enablePan = true
 
-  const ambientLight = new THREE.AmbientLight(0x404040, 0.6)
+  const ambientLight = new THREE.AmbientLight(0x666666, 0.8)
   scene.add(ambientLight)
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0)
   directionalLight.position.set(5, 10, 7.5)
+  directionalLight.castShadow = true
   scene.add(directionalLight)
+
+  const fillLight = new THREE.DirectionalLight(0x4fc3f7, 0.4)
+  fillLight.position.set(-5, 5, -5)
+  scene.add(fillLight)
+
+  const rimLight = new THREE.DirectionalLight(0x90caf9, 0.3)
+  rimLight.position.set(0, -5, 10)
+  scene.add(rimLight)
 
   createShipEngineModel()
 
-  const gridHelper = new THREE.GridHelper(20, 20, 0x334155, 0x1e293b)
+  const gridHelper = new THREE.GridHelper(20, 20, 0x4a90d9, 0x2d5a8a)
   scene.add(gridHelper)
 
   animate()
 
   window.addEventListener('resize', onWindowResize)
-  document.addEventListener('fullscreenchange', onFullscreenChange)
 }
 
 const createShipEngineModel = () => {
   if (!scene) return
 
-  const mainGeometry = new THREE.BoxGeometry(3, 1, 1.5)
-  const mainMaterial = new THREE.MeshStandardMaterial({ color: 0x3498db, metalness: 0.8, roughness: 0.2 })
-  const mainMesh = new THREE.Mesh(mainGeometry, mainMaterial)
-  scene.add(mainMesh)
+  const darkGray = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.7, roughness: 0.3 })
+  const lightGray = new THREE.MeshStandardMaterial({ color: 0xa0aec0, metalness: 0.6, roughness: 0.4 })
+  const steelBlue = new THREE.MeshStandardMaterial({ color: 0x63b3ed, metalness: 0.8, roughness: 0.2 })
+  const copper = new THREE.MeshStandardMaterial({ color: 0xed8936, metalness: 0.9, roughness: 0.3 })
+  const black = new THREE.MeshStandardMaterial({ color: 0x2d3748, metalness: 0.5, roughness: 0.5 })
+  const red = new THREE.MeshStandardMaterial({ color: 0xf56565, metalness: 0.7, roughness: 0.3 })
+  const golden = new THREE.MeshStandardMaterial({ color: 0xf6ad55, metalness: 0.9, roughness: 0.2 })
 
-  const frontGeometry = new THREE.CylinderGeometry(0.5, 0.7, 0.8, 32)
-  const frontMaterial = new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.8, roughness: 0.2 })
-  const frontMesh = new THREE.Mesh(frontGeometry, frontMaterial)
-  frontMesh.position.x = 2
-  frontMesh.rotation.z = Math.PI / 2
-  scene.add(frontMesh)
+  const basePlate = new THREE.Mesh(new THREE.BoxGeometry(6, 0.3, 3), lightGray)
+  basePlate.position.y = -1.8
+  basePlate.receiveShadow = true
+  scene.add(basePlate)
 
-  const backGeometry = new THREE.CylinderGeometry(0.4, 0.6, 0.6, 32)
-  const backMaterial = new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.8, roughness: 0.2 })
-  const backMesh = new THREE.Mesh(backGeometry, backMaterial)
-  backMesh.position.x = -1.5
-  backMesh.rotation.z = Math.PI / 2
-  scene.add(backMesh)
+  const frameLeft = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 2.8), darkGray)
+  frameLeft.position.set(-2.4, -0.35, 0)
+  frameLeft.castShadow = true
+  scene.add(frameLeft)
 
-  const pipeGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 32)
-  const pipeMaterial = new THREE.MeshStandardMaterial({ color: 0xe74c3c, metalness: 0.8, roughness: 0.3 })
-  const pipeMesh = new THREE.Mesh(pipeGeometry, pipeMaterial)
-  pipeMesh.position.set(0, 0.6, 0)
-  pipeMesh.rotation.x = Math.PI / 2
-  scene.add(pipeMesh)
+  const frameRight = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 2.8), darkGray)
+  frameRight.position.set(2.4, -0.35, 0)
+  frameRight.castShadow = true
+  scene.add(frameRight)
 
-  const baseGeometry = new THREE.BoxGeometry(4, 0.2, 2)
-  const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, metalness: 0.5, roughness: 0.5 })
-  const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial)
-  baseMesh.position.y = -0.6
-  scene.add(baseMesh)
+  const cylinderCount = 6
+  const cylinderSpacing = 0.8
+  const startX = -((cylinderCount - 1) * cylinderSpacing) / 2
 
-  const glowGeometry = new THREE.BoxGeometry(3.2, 1.2, 1.7)
-  const glowMaterial = new THREE.MeshBasicMaterial({ color: 0x3498db, transparent: true, opacity: 0.3 })
+  for (let i = 0; i < cylinderCount; i++) {
+    const cylinderX = startX + i * cylinderSpacing
+    
+    const cylinderBlock = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 1.8), steelBlue)
+    cylinderBlock.position.set(cylinderX, 0.5, 0)
+    cylinderBlock.castShadow = true
+    scene.add(cylinderBlock)
+
+    const cylinderHead = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.32, 0.3, 32), darkGray)
+    cylinderHead.position.set(cylinderX, 1.2, 0)
+    cylinderHead.castShadow = true
+    scene.add(cylinderHead)
+
+    const exhaustPort = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.25, 16), copper)
+    exhaustPort.position.set(cylinderX, 1.4, 0)
+    exhaustPort.castShadow = true
+    scene.add(exhaustPort)
+
+    const coolingFin = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 1.6), lightGray)
+    coolingFin.position.set(cylinderX, 0.9, 0)
+    scene.add(coolingFin)
+  }
+
+  const crankcase = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1, 2.2), darkGray)
+  crankcase.position.set(0, -0.8, 0)
+  crankcase.castShadow = true
+  scene.add(crankcase)
+
+  const crankshaftCover = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.3, 32), lightGray)
+  crankshaftCover.position.set(2.7, -0.8, 0)
+  crankshaftCover.rotation.z = Math.PI / 2
+  crankshaftCover.castShadow = true
+  scene.add(crankshaftCover)
+
+  const turboHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 0.6, 32), darkGray)
+  turboHousing.position.set(0, 1.8, 1.2)
+  turboHousing.castShadow = true
+  scene.add(turboHousing)
+
+  const turboFan = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 32), copper)
+  turboFan.position.set(0, 1.8, 1.6)
+  turboFan.castShadow = true
+  scene.add(turboFan)
+
+  const exhaustManifold = new THREE.Mesh(new THREE.BoxGeometry(5, 0.25, 0.3), copper)
+  exhaustManifold.position.set(0, 1.55, 1)
+  exhaustManifold.castShadow = true
+  scene.add(exhaustManifold)
+
+  const intakePipe = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1.5, 16), lightGray)
+  intakePipe.position.set(0, 1, 1.3)
+  intakePipe.rotation.x = Math.PI / 2
+  scene.add(intakePipe)
+
+  const fuelInjection = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.05, 0.4, 16), black)
+  fuelInjection.position.set(startX + 2 * cylinderSpacing, 1.35, -0.6)
+  scene.add(fuelInjection)
+
+  const oilPan = new THREE.Mesh(new THREE.BoxGeometry(5, 0.4, 2), darkGray)
+  oilPan.position.set(0, -1.5, 0)
+  oilPan.receiveShadow = true
+  scene.add(oilPan)
+
+  const mountingBracket = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.15, 3.2), black)
+  mountingBracket.position.set(0, -1.95, 0)
+  mountingBracket.receiveShadow = true
+  scene.add(mountingBracket)
+
+  const glowGeometry = new THREE.BoxGeometry(5.5, 3.5, 2.5)
+  const glowMaterial = new THREE.MeshBasicMaterial({ color: 0x2c3e50, transparent: true, opacity: 0.2 })
   const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial)
   scene.add(glowMesh)
 }
@@ -213,14 +292,15 @@ const animate = () => {
 
 const onWindowResize = () => {
   if (!camera || !renderer || !threeContainer.value) return
-  camera.aspect = threeContainer.value.clientWidth / threeContainer.value.clientHeight
-  camera.updateProjectionMatrix()
-  renderer.setSize(threeContainer.value.clientWidth, threeContainer.value.clientHeight)
+  const rect = threeContainer.value.getBoundingClientRect()
+  if (rect.width > 0 && rect.height > 0) {
+    camera.aspect = rect.width / rect.height
+    camera.updateProjectionMatrix()
+    renderer.setSize(rect.width, rect.height)
+  }
 }
 
-const onFullscreenChange = () => {
-  onWindowResize()
-}
+
 
 const cleanThreeScene = () => {
   if (animationId) {
@@ -248,7 +328,7 @@ const cleanThreeScene = () => {
     })
   }
   window.removeEventListener('resize', onWindowResize)
-  document.removeEventListener('fullscreenchange', onFullscreenChange)
+  if (resizeTimeout) clearTimeout(resizeTimeout)
 }
 
 onMounted(() => {
@@ -258,6 +338,14 @@ onMounted(() => {
 onUnmounted(() => {
   cleanThreeScene()
 })
+
+defineExpose({
+  zoomIn,
+  rotateModel,
+  toggleLabels,
+  captureScreen,
+  toggleFullscreen
+})
 </script>
 
 <style scoped>
@@ -265,6 +353,8 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-height: 450px;
 }
 
 .three-d-header {
@@ -297,7 +387,7 @@ onUnmounted(() => {
   flex: 1;
   position: relative;
   border-radius: 0;
-  background-color: #0f172a;
+  background-color: #1e3a5f;
   cursor: grab;
   overflow: hidden;
 }
@@ -332,6 +422,7 @@ onUnmounted(() => {
   background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2), transparent 70%);
   z-index: 3;
   animation: glowPulse 3s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @keyframes glowPulse {
@@ -438,33 +529,4 @@ onUnmounted(() => {
   background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
-.interaction-hint {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(59, 130, 246, 0.5);
-  border-radius: 20px;
-  padding: 10px 20px;
-  color: white;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 5;
-}
-
-.hint-animation {
-  width: 8px;
-  height: 8px;
-  background-color: #3b82f6;
-  border-radius: 50%;
-  animation: hintBounce 2s infinite ease-in-out;
-}
-
-@keyframes hintBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
 </style>

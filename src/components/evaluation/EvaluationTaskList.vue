@@ -238,6 +238,13 @@ defineExpose({
   margin-top: 24px;
 }
 
+.section-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
 .table-controls {
   display: flex;
   gap: 12px;
@@ -398,6 +405,7 @@ defineExpose({
   padding: 12px 16px;
   border-bottom: 1px solid #e2e8f0;
   color: #333;
+  vertical-align: middle;
 }
 
 .data-table tr:hover {
@@ -408,6 +416,7 @@ defineExpose({
   display: flex;
   flex-direction: column;
   gap: 4px;
+  line-height: 1.5;
 }
 
 .task-name {
@@ -502,7 +511,6 @@ defineExpose({
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-top: 1px solid #e2e8f0;
 }
 
 .pagination-info {

@@ -2,15 +2,27 @@
   <div class="visualization-container">
     <div class="main-layout">
       <div class="left-panel">
-        <div class="panel-section">
-          <div class="section-header">
-            <h3>船舶设备三维可视化</h3>
-            <div class="header-actions">
-              <button class="btn btn-primary btn-sm" @click="refreshData">刷新数据</button>
-            </div>
+        <div class="section-header">
+          <h3>船舶设备三维可视化</h3>
+          <div class="header-controls">
+            <button class="btn-icon" @click="zoomIn" title="放大">
+              <span>🔍</span>
+            </button>
+            <button class="btn-icon" @click="rotateModel" title="旋转">
+              <span>🔄</span>
+            </button>
+            <button class="btn-icon" @click="toggleLabels" title="显示/隐藏标签">
+              <span>🏷️</span>
+            </button>
+            <button class="btn-icon" @click="captureScreen" title="截图">
+              <span>📷</span>
+            </button>
+            <button class="btn-icon" @click="toggleFullscreen" title="全屏">
+              <span>⛶</span>
+            </button>
           </div>
-          <ThreeDModel :modelLabels="modelLabels" :selectedId="selectedEquipment" @select="selectEquipment" />
         </div>
+        <ThreeDModel ref="threeDModelRef" :modelLabels="modelLabels" :selectedId="selectedEquipment" @select="selectEquipment" />
       </div>
 
       <div class="right-panel">
@@ -30,6 +42,7 @@ import AnalysisPanel from './components/AnalysisPanel.vue'
 import ValidationPanel from './components/ValidationPanel.vue'
 
 const selectedEquipment = ref('1')
+const threeDModelRef = ref(null)
 
 const equipmentList = ref([
   { id: '1', name: '船用柴油发动机（低速机）', score: 98, level: '1', status: 'pass', source: '台架试验' },
@@ -207,6 +220,36 @@ const refreshData = () => {
   console.log('刷新数据')
 }
 
+const zoomIn = () => {
+  if (threeDModelRef.value) {
+    threeDModelRef.value.zoomIn()
+  }
+}
+
+const rotateModel = () => {
+  if (threeDModelRef.value) {
+    threeDModelRef.value.rotateModel()
+  }
+}
+
+const toggleLabels = () => {
+  if (threeDModelRef.value) {
+    threeDModelRef.value.toggleLabels()
+  }
+}
+
+const captureScreen = () => {
+  if (threeDModelRef.value) {
+    threeDModelRef.value.captureScreen()
+  }
+}
+
+const toggleFullscreen = () => {
+  if (threeDModelRef.value) {
+    threeDModelRef.value.toggleFullscreen()
+  }
+}
+
 const viewDetailReport = () => {
   console.log('查看详细分析报告')
 }
@@ -262,22 +305,14 @@ ${data.status === 'fail' ? '设备能效未达到最低等级标准，建议进�
 
 <style scoped>
 .visualization-container {
-  height: calc(100vh - 120px);
-  overflow-y: auto;
   padding: 20px;
+  height: 100%;
+  min-height: calc(100vh - 120px);
+  overflow-y: auto;
+  display: block;
+  box-sizing: border-box;
   background-color: #0f172a;
   color: white;
-  box-sizing: border-box;
-}
-
-.panel-section {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
-  padding: 16px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 .section-header {
@@ -285,13 +320,44 @@ ${data.status === 'fail' ? '设备能效未达到最低等级标准，建议进�
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-  padding-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
   border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.header-controls {
+  display: flex;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 0;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  margin: 0 2px;
+}
+
+.btn-icon:hover {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
 }
 
 .section-header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: white;
 }
@@ -328,24 +394,23 @@ ${data.status === 'fail' ? '设备能效未达到最低等级标准，建议进�
 .main-layout {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  gap: 20px;
-  height: calc(100% - 60px);
+  gap: 16px;
 }
 
 .left-panel {
-  display: flex;
-  flex-direction: column;
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
   border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 12px;
-  overflow: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
 }
 
 .right-panel {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  overflow-y: auto;
 }
 
 @media (max-width: 1200px) {

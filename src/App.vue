@@ -448,13 +448,16 @@ const mapDeviceClassToName = (deviceClass) => {
   background-color: #4a6b8a;
   color: white;
   transition: width 0.3s ease;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: fixed;
+  left: 0;
+  top: 0;
   margin: 0;
   padding: 0;
   flex-shrink: 0;
+  min-height: 100vh;
+  z-index: 100;
 }
 
 .sidebar.collapsed {
@@ -462,14 +465,17 @@ const mapDeviceClassToName = (deviceClass) => {
   margin: 0;
   padding: 0;
   flex-shrink: 0;
+  box-shadow: none;
 }
 
 .sidebar-header {
-  padding: 20px;
+  padding: 15px 20px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -483,9 +489,9 @@ const mapDeviceClassToName = (deviceClass) => {
 }
 
 .logo h1 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  margin: 0 0 4px 0;
+  margin: 0;
   transition: opacity 0.3s ease;
 }
 
@@ -496,21 +502,13 @@ const mapDeviceClassToName = (deviceClass) => {
 }
 
 .logo-text {
-  font-size: 12px;
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
-}
-
-.logo.collapsed .logo-text {
-  opacity: 0;
-  position: absolute;
-  pointer-events: none;
+  display: none;
 }
 
 .sidebar-toggle {
-  position: absolute;
-  right: -12px;
-  top: 50%;
+  position: fixed;
+  left: 238px;
+  top: 50vh;
   transform: translateY(-50%);
   background: #3498db;
   border: none;
@@ -522,7 +520,7 @@ const mapDeviceClassToName = (deviceClass) => {
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   transition: all 0.3s ease;
-  z-index: 10;
+  z-index: 100;
   width: 24px;
   height: 40px;
   display: flex;
@@ -536,9 +534,7 @@ const mapDeviceClassToName = (deviceClass) => {
 }
 
 .sidebar.collapsed .sidebar-toggle {
-  right: -12px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 48px;
 }
 
 .sidebar-nav {
@@ -737,12 +733,21 @@ const mapDeviceClassToName = (deviceClass) => {
 
 /* 主容器样式 */
 .main-container {
-  flex: 1;
+  position: fixed;
+  left: 250px;
+  top: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  transition: left 0.3s ease;
+}
+
+.sidebar-collapsed.main-container {
+  left: 60px !important;
 }
 
 .top-header {
@@ -750,18 +755,27 @@ const mapDeviceClassToName = (deviceClass) => {
   padding: 15px 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 100%;
 }
 
 .platform-name {
   font-size: 18px;
   font-weight: 600;
   color: white;
+  margin: 0;
+  line-height: 1;
 }
 
 .header-actions {
@@ -774,10 +788,10 @@ const mapDeviceClassToName = (deviceClass) => {
 .content {
   flex: 1;
   padding: 0;
+  margin: 0;
   overflow-y: auto;
   background-color: #f5f5f5;
-  margin: 0;
-  min-height: 100%;
+  position: relative;
 }
 
 /* 移除强制所有子元素高度为100%的规则 */

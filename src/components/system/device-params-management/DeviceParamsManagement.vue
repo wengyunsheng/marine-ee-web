@@ -25,7 +25,7 @@
     </div>
 
     <div class="template-list-section">
-      <h4>设备参数列表</h4>
+      <h3>设备参数列表</h3>
       <div class="template-table-container">
         <table class="template-table">
           <thead>
@@ -470,8 +470,10 @@ const getDeviceParams = (deviceType) => {
 <style scoped>
 .device-params-container {
   padding: 20px;
-  height: calc(100vh - 120px);
+  height: 100%;
+  min-height: calc(100vh - 120px);
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -576,9 +578,9 @@ const getDeviceParams = (deviceType) => {
   margin-bottom: 32px;
 }
 
-.template-list-section h4 {
+.template-list-section h3 {
   margin: 0 0 16px 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
 }
