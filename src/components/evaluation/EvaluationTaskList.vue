@@ -71,8 +71,17 @@
       </table>
     </div>
     <div class="pagination-container">
-      <div class="pagination-info">
-        共 {{ totalTasks }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
+      <div class="pagination-left">
+        <div class="pagination-info">
+          共 {{ totalTasks }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
+        </div>
+        <div class="pagination-page-size">
+          <label>每页</label>
+          <select v-model="pageSize" @change="resetPage" class="page-size-select">
+            <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}</option>
+          </select>
+          <span>条</span>
+        </div>
       </div>
       <div class="pagination">
         <button 
@@ -117,6 +126,8 @@ import EvalComparisonAnalysis from './EvalComparisonAnalysis.vue'
 const searchQuery = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
+const pageSize = ref(10)
+const pageSizes = ref([10, 20, 50])
 
 // 多维度筛选变量
 const shipTypeFilter = ref('')
@@ -133,7 +144,7 @@ const tasks = ref([
 ])
 
 const totalTasks = computed(() => tasks.value.length)
-const totalPages = computed(() => Math.ceil(totalTasks.value / 5))
+const totalPages = computed(() => Math.ceil(totalTasks.value / pageSize.value))
 const filteredTasks = computed(() => {
   let result = tasks.value
   if (statusFilter.value) {
@@ -145,7 +156,7 @@ const filteredTasks = computed(() => {
   if (efficiencyFilter.value) {
     result = result.filter(task => task.levelClass === efficiencyFilter.value)
   }
-  return result.slice((currentPage.value - 1) * 5, currentPage.value * 5)
+  return result.slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
 })
 
 const visiblePages = computed(() => {
@@ -172,6 +183,7 @@ const downloadReport = (task) => alert(`下载报告：${task.name}`)
 const prevPage = () => { if (currentPage.value > 1) currentPage.value-- }
 const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++ }
 const goToPage = (page) => { currentPage.value = page }
+const resetPage = () => { currentPage.value = 1 }
 
 const resetFilters = () => {
   shipTypeFilter.value = ''
@@ -513,9 +525,38 @@ defineExpose({
   padding: 16px;
 }
 
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .pagination-info {
   font-size: 14px;
   color: #666;
+}
+
+.pagination-page-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+}
+
+.page-size-select {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .pagination {

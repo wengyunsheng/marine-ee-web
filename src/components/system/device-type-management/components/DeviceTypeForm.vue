@@ -14,19 +14,25 @@
           <label>类别 <span class="required">*</span></label>
           <select v-model="localFormData.category" class="form-select">
             <option value="">请选择类别</option>
-            <option value="diesel">柴油发动机</option>
-            <option value="lng-diesel">LNG/柴油双燃料发动机</option>
-            <option value="methanol-diesel">甲醇/柴油双燃料发动机</option>
+            <option value="engine">船用发动机</option>
+            <option value="gearbox">船用齿轮箱</option>
+            <option value="waste-heat">船用余热回收发电装置</option>
+            <option value="incinerator">船用焚烧炉</option>
+            <option value="separator">船用碟式分离机</option>
+            <option value="ballast">船用压载水处理设备</option>
+            <option value="windlass">船用锚绞机</option>
+            <option value="crane">船用吊机</option>
+            <option value="generator">船用发电机</option>
+            <option value="air-conditioner">船用组合式空调机组</option>
+            <option value="chiller">船用冷水机组</option>
+            <option value="inert-gas">船用惰性气体系统</option>
+            <option value="co2-capture">船用二氧化碳捕集设备</option>
+            <option value="propeller">船用推进器</option>
           </select>
         </div>
         <div class="form-group">
           <label>描述 <span class="required">*</span></label>
           <textarea v-model="localFormData.description" placeholder="设备类型的业务定义，如：船舶主推进系统，低速柴油发动机" class="form-textarea" rows="3"></textarea>
-        </div>
-        <div class="form-group form-group-secondary">
-          <label>备注</label>
-          <textarea v-model="localFormData.remark" placeholder="内部管理用途，如：已通过Tier III认证、2024年新增标准验证型号" class="form-textarea" rows="2"></textarea>
-          <span class="field-hint">内部管理备注，用于记录认证状态、版本更新等信息</span>
         </div>
       </div>
       <div class="modal-footer">

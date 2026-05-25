@@ -45,8 +45,17 @@
       
       <!-- 分页组件 -->
       <div class="pagination-container">
-        <div class="pagination-info">
-          共 {{ filteredModes.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
+        <div class="pagination-left">
+          <div class="pagination-info">
+            共 {{ filteredModes.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
+          </div>
+          <div class="pagination-page-size">
+            <label>每页</label>
+            <select v-model="pageSize" @change="resetPage" class="page-size-select">
+              <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}</option>
+            </select>
+            <span>条</span>
+          </div>
         </div>
         <div class="pagination">
           <button 
@@ -164,6 +173,7 @@ const filteredModes = computed(() => {
 
 const currentPage = ref(1)
 const pageSize = ref(10)
+const pageSizes = ref([10, 20, 50])
 
 const totalPages = computed(() => {
   return Math.ceil(filteredModes.value.length / pageSize.value)
@@ -510,9 +520,38 @@ const handleSaveWeights = (weights) => {
   border-top: 1px solid #e2e8f0;
 }
 
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .pagination-info {
   font-size: 14px;
   color: #64748b;
+}
+
+.pagination-page-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.page-size-select {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .pagination {

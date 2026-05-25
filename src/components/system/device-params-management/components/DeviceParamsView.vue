@@ -12,12 +12,16 @@
             <span>{{ deviceType }}</span>
           </div>
           <div class="view-item">
-            <label>描述</label>
-            <span>{{ description }}</span>
+            <label>类别</label>
+            <span class="device-category" :class="category">{{ category }}</span>
           </div>
           <div class="view-item">
             <label>参数数量</label>
             <span>{{ params.length }} 个参数</span>
+          </div>
+          <div class="view-item">
+            <label>描述</label>
+            <span>{{ description }}</span>
           </div>
         </div>
         
@@ -126,6 +130,7 @@ interface Param {
 }
 
 interface Props {
+  category: string
   deviceType: string
   description: string
   params: Param[]
@@ -162,7 +167,7 @@ const otherParams = computed(() => {
   )
 })
 
-const toggleGroup = (groupName) => {
+const toggleGroup = (groupName: 'basic' | 'workingCondition' | 'other') => {
   expandedGroups.value[groupName] = !expandedGroups.value[groupName]
 }
 </script>
@@ -270,6 +275,10 @@ const toggleGroup = (groupName) => {
   flex: 1;
   font-size: 14px;
   color: #333;
+}
+
+.view-item span.device-category {
+  flex: none;
 }
 
 .params-section {
@@ -387,5 +396,85 @@ const toggleGroup = (groupName) => {
   .modal-footer button {
     width: 100%;
   }
+}
+
+.device-category {
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  display: inline-block;
+  width: fit-content;
+}
+
+.device-category.船用发动机 {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.device-category.船用齿轮箱 {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.device-category.船用余热回收发电装置 {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.device-category.船用焚烧炉 {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.device-category.船用碟式分离机 {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.device-category.船用压载水处理设备 {
+  background-color: #e0f7fa;
+  color: #00838f;
+}
+
+.device-category.船用锚绞机 {
+  background-color: #fce4ec;
+  color: #880e4f;
+}
+
+.device-category.船用吊机 {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.device-category.船用发电机 {
+  background-color: #fff8e1;
+  color: #f57c00;
+}
+
+.device-category.船用空调机组 {
+  background-color: #e1f5fe;
+  color: #0288d1;
+}
+
+.device-category.船用冷水机组 {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.device-category.船用惰性气体系统 {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.device-category.船用二氧化碳捕集设备 {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.device-category.船用推进器 {
+  background-color: #fff3e0;
+  color: #e65100;
 }
 </style>

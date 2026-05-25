@@ -3,7 +3,7 @@
     <div class="sidebar" :class="{ collapsed: isSidebarCollapsed }">
       <div class="sidebar-header">
         <div class="logo" :class="{ collapsed: isSidebarCollapsed }">
-          <h1 v-if="!isSidebarCollapsed">船用设备能效评估平台</h1>
+          <h1 v-if="!isSidebarCollapsed">船舶设备运行能效智能评估系统验证平台</h1>
         </div>
       </div>
       <button class="sidebar-toggle" @click="toggleSidebar">
@@ -89,7 +89,7 @@
     <div class="main-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
       <header class="top-header">
         <div class="header-content">
-          <div class="platform-name">船用设备能效评估平台 / {{ currentModuleName }}</div>
+          <div class="platform-name">船舶设备运行能效智能评估系统验证平台 / {{ currentModuleName }}</div>
         </div>
       </header>
       <main class="content">
@@ -752,14 +752,14 @@ const mapDeviceClassToName = (deviceClass) => {
 
 .top-header {
   background-color: #4a6b8a;
-  padding: 15px 20px;
+  padding: 20px 24px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   border-bottom: 1px solid rgba(255,255,255,0.1);
   flex-shrink: 0;
   position: sticky;
   top: 0;
   z-index: 10;
-  height: 48px;
+  height: 64px;
   box-sizing: border-box;
 }
 
@@ -775,7 +775,7 @@ const mapDeviceClassToName = (deviceClass) => {
   font-weight: 600;
   color: white;
   margin: 0;
-  line-height: 1;
+  line-height: 1.5;
 }
 
 .header-actions {

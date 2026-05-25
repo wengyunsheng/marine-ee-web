@@ -20,6 +20,25 @@
           <option value="船用LNG/柴油双燃料发动机（中速机）">船用LNG/柴油双燃料发动机（中速机）</option>
           <option value="船用甲醇/柴油双燃料发动机（低速机）">船用甲醇/柴油双燃料发动机（低速机）</option>
           <option value="船用甲醇/柴油双燃料发动机（中速机）">船用甲醇/柴油双燃料发动机（中速机）</option>
+          <option value="单台齿轮箱">单台齿轮箱</option>
+          <option value="两台齿轮箱">两台齿轮箱</option>
+          <option value="船用有机朗肯循环发电装置">船用有机朗肯循环发电装置</option>
+          <option value="船用蒸汽透平发电装置">船用蒸汽透平发电装置</option>
+          <option value="单功能焚烧炉（固体废弃物）">单功能焚烧炉（固体废弃物）</option>
+          <option value="单功能焚烧炉（污油泥）">单功能焚烧炉（污油泥）</option>
+          <option value="双功能焚烧炉">双功能焚烧炉</option>
+          <option value="多功能焚烧炉">多功能焚烧炉</option>
+          <option value="船用碟式分离机">船用碟式分离机</option>
+          <option value="船用压载水处理设备">船用压载水处理设备</option>
+          <option value="船用锚绞机">船用锚绞机</option>
+          <option value="船用吊机">船用吊机</option>
+          <option value="船用低压交流三相同步发电机">船用低压交流三相同步发电机</option>
+          <option value="船用中压交流三相同步发电机">船用中压交流三相同步发电机</option>
+          <option value="船用组合式空调机组">船用组合式空调机组</option>
+          <option value="船用冷水机组">船用冷水机组</option>
+          <option value="船用惰性气体系统">船用惰性气体系统</option>
+          <option value="船用二氧化碳捕集设备">船用二氧化碳捕集设备</option>
+          <option value="船用推进器">船用推进器</option>
         </select>
       </div>
     </div>
@@ -30,7 +49,8 @@
         <table class="template-table">
           <thead>
             <tr>
-              <th>设备类型</th>
+              <th>设备类型名称</th>
+              <th>类别</th>
               <th>参数数量</th>
               <th>描述</th>
               <th>操作</th>
@@ -39,6 +59,11 @@
           <tbody>
             <tr v-for="template in paginatedTemplates" :key="template.id">
               <td>{{ template.deviceType }}</td>
+              <td>
+                <span class="device-category" :class="template.category">
+                  {{ getCategoryName(template.category) }}
+                </span>
+              </td>
               <td>{{ template.params.length }} 个参数</td>
               <td>{{ template.description }}</td>
               <td class="action-buttons">
@@ -54,8 +79,17 @@
       
       <!-- 分页组件 -->
       <div class="pagination-container">
-        <div class="pagination-info">
-          共 {{ filteredTemplates.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
+        <div class="pagination-left">
+          <div class="pagination-info">
+            共 {{ filteredTemplates.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
+          </div>
+          <div class="pagination-page-size">
+            <label>每页</label>
+            <select v-model="pageSize" @change="resetPage" class="page-size-select">
+              <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}</option>
+            </select>
+            <span>条</span>
+          </div>
         </div>
         <div class="pagination">
           <button 
@@ -88,6 +122,7 @@
     <!-- 查看设备参数弹窗 -->
     <DeviceParamsView
       v-if="showViewModal"
+      :category="getCategoryName(viewTemplate?.category)"
       :device-type="viewTemplate?.deviceType"
       :description="viewTemplate?.description"
       :params="viewTemplate?.params"
@@ -120,10 +155,32 @@ import DeviceParamsForm from './components/DeviceParamsForm.vue'
 import DefaultValueConfig from './components/DefaultValueConfig.vue'
 import DeviceParamsView from './components/DeviceParamsView.vue'
 
+const categoryMap = {
+  engine: '船用发动机',
+  gearbox: '船用齿轮箱',
+  'waste-heat': '船用余热回收发电装置',
+  incinerator: '船用焚烧炉',
+  separator: '船用碟式分离机',
+  ballast: '船用压载水处理设备',
+  windlass: '船用锚绞机',
+  crane: '船用吊机',
+  generator: '船用发电机',
+  'air-conditioner': '船用空调机组',
+  chiller: '船用冷水机组',
+  'inert-gas': '船用惰性气体系统',
+  'co2-capture': '船用二氧化碳捕集设备',
+  propeller: '船用推进器'
+}
+
+const getCategoryName = (category) => {
+  return categoryMap[category] || category
+}
+
 const paramTemplates = ref([
   {
     id: 1,
     deviceType: '船用柴油发动机（低速机）',
+    category: 'engine',
     description: '船用柴油发动机（低速机）设备参数',
     params: [
       { id: 1, name: '额定功率', unit: 'kW', defaultValue: 15000, minValue: 0, maxValue: 30000 },
@@ -138,6 +195,7 @@ const paramTemplates = ref([
   {
     id: 2,
     deviceType: '船用柴油发动机（中速机）',
+    category: 'engine',
     description: '船用柴油发动机（中速机）设备参数',
     params: [
       { id: 8, name: '额定功率', unit: 'kW', defaultValue: 2000, minValue: 500, maxValue: 5000 },
@@ -152,6 +210,7 @@ const paramTemplates = ref([
   {
     id: 3,
     deviceType: '船用LNG/柴油双燃料发动机（低速机）',
+    category: 'engine',
     description: '船用LNG/柴油双燃料发动机（低速机）设备参数',
     params: [
       { id: 15, name: '额定功率', unit: 'kW', defaultValue: 15000, minValue: 0, maxValue: 30000 },
@@ -171,6 +230,7 @@ const paramTemplates = ref([
   {
     id: 4,
     deviceType: '船用LNG/柴油双燃料发动机（中速机）',
+    category: 'engine',
     description: '船用LNG/柴油双燃料发动机（中速机）设备参数',
     params: [
       { id: 27, name: '额定功率', unit: 'kW', defaultValue: 2000, minValue: 500, maxValue: 5000 },
@@ -190,6 +250,7 @@ const paramTemplates = ref([
   {
     id: 5,
     deviceType: '船用甲醇/柴油双燃料发动机（低速机）',
+    category: 'engine',
     description: '船用甲醇/柴油双燃料发动机（低速机）设备参数',
     params: [
       { id: 39, name: '额定功率', unit: 'kW', defaultValue: 15000, minValue: 0, maxValue: 30000 },
@@ -209,6 +270,7 @@ const paramTemplates = ref([
   {
     id: 6,
     deviceType: '船用甲醇/柴油双燃料发动机（中速机）',
+    category: 'engine',
     description: '船用甲醇/柴油双燃料发动机（中速机）设备参数',
     params: [
       { id: 51, name: '额定功率', unit: 'kW', defaultValue: 2000, minValue: 500, maxValue: 5000 },
@@ -232,6 +294,7 @@ const searchQuery = ref('')
 const deviceTypeFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
+const pageSizes = ref([10, 20, 50])
 
 const filteredTemplates = computed(() => {
   let result = paramTemplates.value
@@ -817,9 +880,38 @@ const getDeviceParams = (deviceType) => {
   border-top: 1px solid #e2e8f0;
 }
 
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .pagination-info {
   font-size: 14px;
   color: #64748b;
+}
+
+.pagination-page-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.page-size-select {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .pagination {
@@ -852,5 +944,83 @@ const getDeviceParams = (deviceType) => {
 .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.device-category {
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.device-category.engine {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.device-category.gearbox {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.device-category.waste-heat {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.device-category.incinerator {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.device-category.separator {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.device-category.ballast {
+  background-color: #e0f7fa;
+  color: #00838f;
+}
+
+.device-category.windlass {
+  background-color: #fce4ec;
+  color: #880e4f;
+}
+
+.device-category.crane {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.device-category.generator {
+  background-color: #fff8e1;
+  color: #f57c00;
+}
+
+.device-category.air-conditioner {
+  background-color: #e1f5fe;
+  color: #0288d1;
+}
+
+.device-category.chiller {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.device-category.inert-gas {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.device-category.co2-capture {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.device-category.propeller {
+  background-color: #fff3e0;
+  color: #e65100;
 }
 </style>

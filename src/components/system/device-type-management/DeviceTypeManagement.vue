@@ -14,9 +14,20 @@
         </div>
         <select class="filter-select" v-model="categoryFilter" @change="filterDeviceTypes">
           <option value="">全部类别</option>
-          <option value="diesel">柴油发动机</option>
-          <option value="lng-diesel">LNG/柴油双燃料发动机</option>
-          <option value="methanol-diesel">甲醇/柴油双燃料发动机</option>
+          <option value="engine">船用发动机</option>
+          <option value="gearbox">船用齿轮箱</option>
+          <option value="waste-heat">船用余热回收发电装置</option>
+          <option value="incinerator">船用焚烧炉</option>
+          <option value="separator">船用碟式分离机</option>
+          <option value="ballast">船用压载水处理设备</option>
+          <option value="windlass">船用锚绞机</option>
+          <option value="crane">船用吊机</option>
+          <option value="generator">船用发电机</option>
+          <option value="air-conditioner">船用组合式空调机组</option>
+          <option value="chiller">船用冷水机组</option>
+          <option value="inert-gas">船用惰性气体系统</option>
+          <option value="co2-capture">船用二氧化碳捕集设备</option>
+          <option value="propeller">船用推进器</option>
         </select>
       </div>
     </div>
@@ -30,7 +41,6 @@
               <th>设备类型名称</th>
               <th>类别</th>
               <th>描述</th>
-              <th>备注</th>
               <th>创建时间</th>
               <th>操作</th>
             </tr>
@@ -44,9 +54,6 @@
                 </span>
               </td>
               <td class="description-cell">{{ deviceType.description }}</td>
-              <td>
-                <span class="remark-badge">{{ deviceType.remark }}</span>
-              </td>
               <td>{{ deviceType.createdAt }}</td>
               <td class="action-buttons">
                 <button class="btn btn-sm btn-info" @click="viewDeviceType(deviceType)">查看</button>
@@ -60,10 +67,19 @@
       
       <!-- 分页组件 -->
       <div class="pagination-container">
-        <div class="pagination-info">
-          共 {{ filteredDeviceTypes.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
-        </div>
-        <div class="pagination">
+          <div class="pagination-left">
+            <div class="pagination-info">
+              共 {{ filteredDeviceTypes.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
+            </div>
+            <div class="pagination-page-size">
+              <label>每页</label>
+              <select v-model="pageSize" @change="resetPage" class="page-size-select">
+                <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}</option>
+              </select>
+              <span>条</span>
+            </div>
+          </div>
+          <div class="pagination">
           <button 
             class="pagination-btn" 
             :disabled="currentPage === 1" 
@@ -118,6 +134,7 @@ const searchQuery = ref('')
 const categoryFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
+const pageSizes = ref([10, 20, 50])
 
 const showFormModal = ref(false)
 const showViewModal = ref(false)
@@ -134,10 +151,11 @@ const defaultFormData = {
 const formData = ref({ ...defaultFormData })
 
 const deviceTypes = ref([
+  // 发动机类型
   {
     id: 1,
     name: '船用柴油发动机（低速机）',
-    category: 'diesel',
+    category: 'engine',
     description: '船舶主推进系统，低速柴油发动机',
     standard: 'ISO 15550:2016',
     remark: '已通过Tier III认证',
@@ -146,7 +164,7 @@ const deviceTypes = ref([
   {
     id: 2,
     name: '船用柴油发动机（中速机）',
-    category: 'diesel',
+    category: 'engine',
     description: '船舶辅助发电系统，中速柴油发动机',
     standard: 'GB/T 38999-2020',
     remark: '2024年新增标准验证型号',
@@ -155,7 +173,7 @@ const deviceTypes = ref([
   {
     id: 3,
     name: '船用LNG/柴油双燃料发动机（低速机）',
-    category: 'lng-diesel',
+    category: 'engine',
     description: '船舶主推进系统，LNG/柴油双燃料低速发动机',
     standard: 'TSG G0003-2010',
     remark: '主推节能型号',
@@ -164,7 +182,7 @@ const deviceTypes = ref([
   {
     id: 4,
     name: '船用LNG/柴油双燃料发动机（中速机）',
-    category: 'lng-diesel',
+    category: 'engine',
     description: '船舶辅助发电系统，LNG/柴油双燃料中速发动机',
     standard: 'GB/T 13006-2013',
     remark: '待更新技术手册',
@@ -173,7 +191,7 @@ const deviceTypes = ref([
   {
     id: 5,
     name: '船用甲醇/柴油双燃料发动机（低速机）',
-    category: 'methanol-diesel',
+    category: 'engine',
     description: '船舶主推进系统，甲醇/柴油双燃料低速发动机',
     standard: 'IMO EEXI标准',
     remark: '环保优先推荐',
@@ -182,11 +200,195 @@ const deviceTypes = ref([
   {
     id: 6,
     name: '船用甲醇/柴油双燃料发动机（中速机）',
-    category: 'methanol-diesel',
+    category: 'engine',
     description: '船舶辅助发电系统，甲醇/柴油双燃料中速发动机',
     standard: 'ISO 7547:2017',
     remark: '研发阶段验证中',
     createdAt: '2024-04-06'
+  },
+  // 齿轮箱类型
+  {
+    id: 7,
+    name: '单台齿轮箱',
+    category: 'gearbox',
+    description: '船舶单输入单输出齿轮传动装置',
+    standard: 'GB/T 14073-2016',
+    remark: '常规型齿轮箱',
+    createdAt: '2024-04-07'
+  },
+  {
+    id: 8,
+    name: '两台齿轮箱',
+    category: 'gearbox',
+    description: '船舶两台齿轮箱并联传动系统',
+    standard: 'GB/T 13306-2011',
+    remark: '冗余设计',
+    createdAt: '2024-04-08'
+  },
+  // 余热回收发电装置
+  {
+    id: 10,
+    name: '船用有机朗肯循环发电装置',
+    category: 'waste-heat',
+    description: '基于有机朗肯循环的船舶余热回收发电系统',
+    standard: 'GB/T 34657-2017',
+    remark: '利用废气余热发电',
+    createdAt: '2024-04-10'
+  },
+  {
+    id: 11,
+    name: '船用蒸汽透平发电装置',
+    category: 'waste-heat',
+    description: '基于蒸汽透平的船舶余热回收发电系统',
+    standard: 'ISO 10816-1:2016',
+    remark: '高效率余热利用',
+    createdAt: '2024-04-11'
+  },
+  // 焚烧炉类型
+  {
+    id: 12,
+    name: '单功能焚烧炉（固体废弃物）',
+    category: 'incinerator',
+    description: '仅具备固体废弃物焚烧功能的船用焚烧设备',
+    standard: 'IMO MEPC.107(49)',
+    remark: '基础型焚烧设备',
+    createdAt: '2024-04-12'
+  },
+  {
+    id: 13,
+    name: '单功能焚烧炉（污油泥）',
+    category: 'incinerator',
+    description: '仅具备污油泥焚烧功能的船用焚烧设备',
+    standard: 'IMO MEPC.107(49)',
+    remark: '油泥专用',
+    createdAt: '2024-04-13'
+  },
+  {
+    id: 14,
+    name: '双功能焚烧炉',
+    category: 'incinerator',
+    description: '具备垃圾焚烧和油泥处理功能的船用焚烧设备',
+    standard: 'GB/T 10834-2011',
+    remark: '多功能处理',
+    createdAt: '2024-04-14'
+  },
+  {
+    id: 15,
+    name: '多功能焚烧炉',
+    category: 'incinerator',
+    description: '具备多种废物处理功能的船用焚烧设备',
+    standard: 'ISO 15850:2017',
+    remark: '综合废物处理',
+    createdAt: '2024-04-15'
+  },
+  // 碟式分离机
+  {
+    id: 16,
+    name: '船用碟式分离机',
+    category: 'separator',
+    description: '船舶燃油/滑油分离净化设备',
+    standard: 'GB/T 5745-2002',
+    remark: '离心式分离',
+    createdAt: '2024-04-16'
+  },
+  // 压载水处理设备
+  {
+    id: 17,
+    name: '船用压载水处理设备',
+    category: 'ballast',
+    description: '船舶压载水净化处理系统',
+    standard: 'IMO D-2标准',
+    remark: '满足国际压载水管理公约',
+    createdAt: '2024-04-17'
+  },
+  // 锚绞机
+  {
+    id: 18,
+    name: '船用锚绞机',
+    category: 'windlass',
+    description: '船舶锚泊设备，负责锚的收放',
+    standard: 'GB/T 1854-2018',
+    remark: '锚泊专用',
+    createdAt: '2024-04-18'
+  },
+  // 吊机
+  {
+    id: 20,
+    name: '船用吊机',
+    category: 'crane',
+    description: '船舶货物装卸起重机',
+    standard: 'GB/T 14738-2013',
+    remark: '货物装卸专用',
+    createdAt: '2024-04-20'
+  },
+  // 发电机
+  {
+    id: 21,
+    name: '船用低压交流三相同步发电机',
+    category: 'generator',
+    description: '船舶低压电力系统发电机',
+    standard: 'GB/T 7064-2017',
+    remark: '380V系统',
+    createdAt: '2024-04-21'
+  },
+  {
+    id: 22,
+    name: '船用中压交流三相同步发电机',
+    category: 'generator',
+    description: '船舶中压电力系统发电机',
+    standard: 'IEC 60034-1',
+    remark: '6.6kV/10kV系统',
+    createdAt: '2024-04-22'
+  },
+  // 空调机组
+  {
+    id: 23,
+    name: '船用组合式空调机组',
+    category: 'air-conditioner',
+    description: '船舶舱室空气调节系统',
+    standard: 'GB/T 14295-2008',
+    remark: '温湿度控制',
+    createdAt: '2024-04-23'
+  },
+  // 冷水机组
+  {
+    id: 24,
+    name: '船用冷水机组',
+    category: 'chiller',
+    description: '船舶制冷系统冷水机组',
+    standard: 'GB/T 18430.1-2017',
+    remark: '水冷式',
+    createdAt: '2024-04-24'
+  },
+  // 惰性气体系统
+  {
+    id: 25,
+    name: '船用惰性气体系统',
+    category: 'inert-gas',
+    description: '船舶货舱惰化保护系统',
+    standard: 'IMO SOLAS II-2/15',
+    remark: '油船专用',
+    createdAt: '2024-04-25'
+  },
+  // 二氧化碳捕集设备
+  {
+    id: 26,
+    name: '船用二氧化碳捕集设备',
+    category: 'co2-capture',
+    description: '船舶碳排放控制与捕集系统',
+    standard: 'IMO MEPC.346(77)',
+    remark: '减排设备',
+    createdAt: '2024-04-26'
+  },
+  // 推进器
+  {
+    id: 27,
+    name: '船用推进器',
+    category: 'propeller',
+    description: '船舶螺旋桨推进系统',
+    standard: 'ISO 484-1:2017',
+    remark: '主推进装置',
+    createdAt: '2024-04-26'
   }
 ])
 
@@ -226,9 +428,20 @@ const resetPage = () => {
 
 const getCategoryName = (category) => {
   const categoryMap = {
-    'diesel': '柴油发动机',
-    'lng-diesel': 'LNG/柴油双燃料发动机',
-    'methanol-diesel': '甲醇/柴油双燃料发动机'
+    'engine': '船用发动机',
+    'gearbox': '船用齿轮箱',
+    'waste-heat': '船用余热回收发电装置',
+    'incinerator': '船用焚烧炉',
+    'separator': '船用碟式分离机',
+    'ballast': '船用压载水处理设备',
+    'windlass': '船用锚绞机',
+    'crane': '船用吊机',
+    'generator': '船用发电机',
+    'air-conditioner': '船用组合式空调机组',
+    'chiller': '船用冷水机组',
+    'inert-gas': '船用惰性气体系统',
+    'co2-capture': '船用二氧化碳捕集设备',
+    'propeller': '船用推进器'
   }
   return categoryMap[category] || category
 }
@@ -514,29 +727,74 @@ const exportDeviceTypes = () => {
   white-space: nowrap;
 }
 
-.device-category.main {
+.device-category.engine {
   background-color: #e3f2fd;
   color: #1976d2;
 }
 
-.device-category.aux {
+.device-category.gearbox {
   background-color: #e8f5e8;
   color: #2e7d32;
 }
 
-.device-category.boiler {
+.device-category.waste-heat {
   background-color: #fff3e0;
   color: #ef6c00;
 }
 
-.device-category.pump {
+.device-category.incinerator {
   background-color: #ffebee;
   color: #c62828;
 }
 
-.device-category.cooling {
+.device-category.separator {
   background-color: #f3e5f5;
   color: #7b1fa2;
+}
+
+.device-category.ballast {
+  background-color: #e0f7fa;
+  color: #00838f;
+}
+
+.device-category.windlass {
+  background-color: #fce4ec;
+  color: #880e4f;
+}
+
+.device-category.crane {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.device-category.generator {
+  background-color: #fff8e1;
+  color: #f57c00;
+}
+
+.device-category.air-conditioner {
+  background-color: #e1f5fe;
+  color: #0288d1;
+}
+
+.device-category.chiller {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.device-category.inert-gas {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.device-category.co2-capture {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.device-category.propeller {
+  background-color: #fff3e0;
+  color: #e65100;
 }
 
 .description-cell {
@@ -630,9 +888,38 @@ const exportDeviceTypes = () => {
   border-top: 1px solid #e2e8f0;
 }
 
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .pagination-info {
   font-size: 14px;
   color: #64748b;
+}
+
+.pagination-page-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.page-size-select {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .pagination {
