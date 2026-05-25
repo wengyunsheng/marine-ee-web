@@ -12,6 +12,23 @@
           <input type="text" v-model="searchQuery" placeholder="搜索设备类型名称" @keyup.enter="filterTemplates">
           <button class="search-btn" @click="filterTemplates">🔍</button>
         </div>
+        <select class="filter-select" v-model="categoryFilter" @change="filterTemplates">
+          <option value="">全部类别</option>
+          <option value="engine">船用发动机</option>
+          <option value="gearbox">船用齿轮箱</option>
+          <option value="waste-heat">船用余热回收发电装置</option>
+          <option value="incinerator">船用焚烧炉</option>
+          <option value="separator">船用碟式分离机</option>
+          <option value="ballast">船用压载水处理设备</option>
+          <option value="windlass">船用锚绞机</option>
+          <option value="crane">船用吊机</option>
+          <option value="generator">船用发电机</option>
+          <option value="air-conditioner">船用空调机组</option>
+          <option value="chiller">船用冷水机组</option>
+          <option value="inert-gas">船用惰性气体系统</option>
+          <option value="co2-capture">船用二氧化碳捕集设备</option>
+          <option value="propeller">船用推进器</option>
+        </select>
         <select class="filter-select" v-model="deviceTypeFilter" @change="filterTemplates">
           <option value="">全部设备类型</option>
           <option value="船用柴油发动机（低速机）">船用柴油发动机（低速机）</option>
@@ -291,6 +308,7 @@ const paramTemplates = ref([
 
 // 搜索和过滤相关
 const searchQuery = ref('')
+const categoryFilter = ref('')
 const deviceTypeFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -303,6 +321,9 @@ const filteredTemplates = computed(() => {
       template.deviceType.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       template.description.toLowerCase().includes(searchQuery.value.toLowerCase())
     )
+  }
+  if (categoryFilter.value) {
+    result = result.filter(template => template.category === categoryFilter.value)
   }
   if (deviceTypeFilter.value) {
     result = result.filter(template => template.deviceType === deviceTypeFilter.value)

@@ -8,16 +8,20 @@
       <div class="modal-body">
         <div class="info-section">
           <div class="info-item">
-            <label>发动机类型：</label>
+            <label>设备类型名称：</label>
             <span>{{ baseValue.engineType }}</span>
           </div>
           <div class="info-item">
-            <label>排放等级：</label>
-            <span>{{ baseValue.emissionLevel }}</span>
+            <label>类别：</label>
+            <span class="device-category" :class="baseValue.category">{{ getCategoryName(baseValue.category) }}</span>
           </div>
           <div class="info-item">
-            <label>单缸功率区间：</label>
-            <span>{{ baseValue.powerRange }} kW</span>
+            <label>排放等级：</label>
+            <span>{{ baseValue.emissionLevel || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <label>功率区间：</label>
+            <span>{{ baseValue.powerRange ? baseValue.powerRange + ' kW' : '-' }}</span>
           </div>
           <div class="info-item">
             <label>能效等级：</label>
@@ -25,7 +29,7 @@
           </div>
           <div class="info-item">
             <label>能效基值：</label>
-            <span>{{ baseValue.baseValue }}%</span>
+            <span>{{ baseValue.baseValue }}{{ baseValue.unit || '%' }}</span>
           </div>
         </div>
       </div>
@@ -45,6 +49,27 @@ defineProps({
 })
 
 defineEmits(['close'])
+
+const categoryMap = {
+  engine: '船用发动机',
+  gearbox: '船用齿轮箱',
+  'waste-heat': '船用余热回收发电装置',
+  incinerator: '船用焚烧炉',
+  separator: '船用碟式分离机',
+  ballast: '船用压载水处理设备',
+  windlass: '船用锚绞机',
+  crane: '船用吊机',
+  generator: '船用发电机',
+  'air-conditioner': '船用空调机组',
+  chiller: '船用冷水机组',
+  'inert-gas': '船用惰性气体系统',
+  'co2-capture': '船用二氧化碳捕集设备',
+  propeller: '船用推进器'
+}
+
+const getCategoryName = (category) => {
+  return categoryMap[category] || category
+}
 </script>
 
 <style scoped>
@@ -155,4 +180,33 @@ defineEmits(['close'])
 .btn-primary:hover {
   background-color: #1d4ed8;
 }
+
+.device-category {
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  display: inline-block;
+  width: fit-content;
+}
+
+.info-item span.device-category {
+  color: #666;
+}
+
+.device-category.engine { background-color: #dbeafe; color: #1e40af; }
+.device-category.gearbox { background-color: #dcfce7; color: #166534; }
+.device-category.waste-heat { background-color: #ffedd5; color: #c2410c; }
+.device-category.incinerator { background-color: #fee2e2; color: #991b1b; }
+.device-category.separator { background-color: #f3e8ff; color: #6b21a8; }
+.device-category.ballast { background-color: #cffafe; color: #0e7490; }
+.device-category.windlass { background-color: #fce7f3; color: #be185d; }
+.device-category.crane { background-color: #e0e7ff; color: #3730a3; }
+.device-category.generator { background-color: #fef3c7; color: #b45309; }
+.device-category.air-conditioner { background-color: #dbeafe; color: #1e40af; }
+.device-category.chiller { background-color: #e0e7ff; color: #3730a3; }
+.device-category.inert-gas { background-color: #ede9fe; color: #5b21b6; }
+.device-category.co2-capture { background-color: #dcfce7; color: #166534; }
+.device-category.propeller { background-color: #ffedd5; color: #c2410c; }
 </style>

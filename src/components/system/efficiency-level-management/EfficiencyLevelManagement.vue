@@ -12,6 +12,23 @@
           <input type="text" v-model="searchQuery" placeholder="搜索设备类型" @keyup.enter="filterBaseValues">
           <button class="search-btn" @click="filterBaseValues">🔍</button>
         </div>
+        <select class="filter-select" v-model="categoryFilter" @change="filterBaseValues">
+          <option value="">全部类别</option>
+          <option value="engine">船用发动机</option>
+          <option value="gearbox">船用齿轮箱</option>
+          <option value="waste-heat">船用余热回收发电装置</option>
+          <option value="incinerator">船用焚烧炉</option>
+          <option value="separator">船用碟式分离机</option>
+          <option value="ballast">船用压载水处理设备</option>
+          <option value="windlass">船用锚绞机</option>
+          <option value="crane">船用吊机</option>
+          <option value="generator">船用发电机</option>
+          <option value="air-conditioner">船用空调机组</option>
+          <option value="chiller">船用冷水机组</option>
+          <option value="inert-gas">船用惰性气体系统</option>
+          <option value="co2-capture">船用二氧化碳捕集设备</option>
+          <option value="propeller">船用推进器</option>
+        </select>
         <select class="filter-select" v-model="engineTypeFilter" @change="filterBaseValues">
           <option value="">全部设备类型</option>
           <option value="船用柴油发动机（低速机）">船用柴油发动机（低速机）</option>
@@ -20,6 +37,25 @@
           <option value="船用LNG/柴油双燃料发动机（中速机）">船用LNG/柴油双燃料发动机（中速机）</option>
           <option value="船用甲醇/柴油双燃料发动机（低速机）">船用甲醇/柴油双燃料发动机（低速机）</option>
           <option value="船用甲醇/柴油双燃料发动机（中速机）">船用甲醇/柴油双燃料发动机（中速机）</option>
+          <option value="单台齿轮箱">单台齿轮箱</option>
+          <option value="两台齿轮箱">两台齿轮箱</option>
+          <option value="船用有机朗肯循环发电装置">船用有机朗肯循环发电装置</option>
+          <option value="船用蒸汽透平发电装置">船用蒸汽透平发电装置</option>
+          <option value="单功能焚烧炉（固体废弃物）">单功能焚烧炉（固体废弃物）</option>
+          <option value="单功能焚烧炉（污油泥）">单功能焚烧炉（污油泥）</option>
+          <option value="双功能焚烧炉">双功能焚烧炉</option>
+          <option value="多功能焚烧炉">多功能焚烧炉</option>
+          <option value="船用碟式分离机">船用碟式分离机</option>
+          <option value="船用压载水处理设备">船用压载水处理设备</option>
+          <option value="船用锚绞机">船用锚绞机</option>
+          <option value="船用吊机">船用吊机</option>
+          <option value="船用低压交流三相同步发电机">船用低压交流三相同步发电机</option>
+          <option value="船用中压交流三相同步发电机">船用中压交流三相同步发电机</option>
+          <option value="船用组合式空调机组">船用组合式空调机组</option>
+          <option value="船用冷水机组">船用冷水机组</option>
+          <option value="船用惰性气体系统">船用惰性气体系统</option>
+          <option value="船用二氧化碳捕集设备">船用二氧化碳捕集设备</option>
+          <option value="船用推进器">船用推进器</option>
         </select>
       </div>
     </div>
@@ -30,7 +66,8 @@
         <table class="efficiency-level-table">
           <thead>
             <tr>
-              <th>设备类型</th>
+              <th>设备类型名称</th>
+              <th>类别</th>
               <th>排放等级</th>
               <th>单缸功率区间 P/kW</th>
               <th>能效等级</th>
@@ -41,10 +78,15 @@
           <tbody>
             <tr v-for="baseValue in paginatedBaseValues" :key="baseValue.id">
               <td>{{ baseValue.engineType }}</td>
+              <td>
+                <span class="device-category" :class="baseValue.category">
+                  {{ getCategoryName(baseValue.category) }}
+                </span>
+              </td>
               <td>{{ baseValue.emissionLevel }}</td>
               <td>{{ baseValue.powerRange }}</td>
               <td>{{ baseValue.efficiencyLevel }}</td>
-              <td>{{ baseValue.baseValue }}%</td>
+              <td>{{ baseValue.baseValue }}{{ baseValue.unit || '%' }}</td>
               <td class="action-buttons">
                 <button class="btn btn-sm btn-info" @click="openViewModal(baseValue)">查看</button>
                 <button class="btn btn-sm btn-warning" @click="openEditModal(baseValue)">编辑</button>
@@ -96,42 +138,134 @@
       </div>
     </div>
 
-    <BaseValueView v-if="showViewModal" :base-value="currentBaseValue" @close="closeViewModal" />
-    <BaseValueForm v-if="showFormModal" :is-edit="isEditMode" :form-data="formData" @save="saveBaseValue" @close="closeFormModal" />
+    <EfficiencyLevelView v-if="showViewModal" :base-value="currentBaseValue" @close="closeViewModal" />
+    <EfficiencyLevelForm v-if="showFormModal" :is-edit="isEditMode" :form-data="formData" @save="saveBaseValue" @close="closeFormModal" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import BaseValueForm from './components/BaseValueForm.vue'
-import BaseValueView from './components/BaseValueView.vue'
+import EfficiencyLevelForm from './components/EfficiencyLevelForm.vue'
+import EfficiencyLevelView from './components/EfficiencyLevelView.vue'
 
 const searchQuery = ref('')
 const engineTypeFilter = ref('')
+const categoryFilter = ref('')
 const showFormModal = ref(false)
 const showViewModal = ref(false)
 const isEditMode = ref(false)
 const currentBaseValue = ref(null)
 
-const defaultFormData = { id: null, emissionLevel: '', powerRange: '', efficiencyLevel: '', baseValue: null, engineType: '' }
+const categoryMap = {
+  engine: '船用发动机',
+  gearbox: '船用齿轮箱',
+  'waste-heat': '船用余热回收发电装置',
+  incinerator: '船用焚烧炉',
+  separator: '船用碟式分离机',
+  ballast: '船用压载水处理设备',
+  windlass: '船用锚绞机',
+  crane: '船用吊机',
+  generator: '船用发电机',
+  'air-conditioner': '船用空调机组',
+  chiller: '船用冷水机组',
+  'inert-gas': '船用惰性气体系统',
+  'co2-capture': '船用二氧化碳捕集设备',
+  propeller: '船用推进器'
+}
+
+const getCategoryName = (category) => {
+  return categoryMap[category] || category
+}
+
+const defaultFormData = { id: null, category: '', emissionLevel: '', powerRange: '', efficiencyLevel: '', baseValue: null, engineType: '', unit: '%' }
 const formData = ref({ ...defaultFormData })
 
 const efficiencyBaseValues = ref([
-  { id: 1, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: 'P<360', efficiencyLevel: '1级', baseValue: 45.8 },
-  { id: 2, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: 'P<360', efficiencyLevel: '2级', baseValue: 43.8 },
-  { id: 3, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: 'P<360', efficiencyLevel: '3级', baseValue: 42.4 },
-  { id: 4, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: '500≤P<850', efficiencyLevel: '1级', baseValue: 48.2 },
-  { id: 5, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: '500≤P<850', efficiencyLevel: '2级', baseValue: 45.5 },
-  { id: 6, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: '500≤P<850', efficiencyLevel: '3级', baseValue: 45.7 },
-  { id: 7, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier III', powerRange: '500≤P<850', efficiencyLevel: '1级', baseValue: 47.0 },
-  { id: 8, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier III', powerRange: '500≤P<850', efficiencyLevel: '2级', baseValue: 46.0 },
-  { id: 9, engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier III', powerRange: '500≤P<850', efficiencyLevel: '3级', baseValue: 43.6 }
+  // 船用发动机
+  { id: 1, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: 'P<360', efficiencyLevel: '1级', baseValue: 45.8, unit: '%' },
+  { id: 2, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: 'P<360', efficiencyLevel: '2级', baseValue: 43.8, unit: '%' },
+  { id: 3, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: 'P<360', efficiencyLevel: '3级', baseValue: 42.4, unit: '%' },
+  { id: 4, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: '500≤P<850', efficiencyLevel: '1级', baseValue: 48.2, unit: '%' },
+  { id: 5, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: '500≤P<850', efficiencyLevel: '2级', baseValue: 45.5, unit: '%' },
+  { id: 6, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier II', powerRange: '500≤P<850', efficiencyLevel: '3级', baseValue: 45.7, unit: '%' },
+  { id: 7, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier III', powerRange: '500≤P<850', efficiencyLevel: '1级', baseValue: 47.0, unit: '%' },
+  { id: 8, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier III', powerRange: '500≤P<850', efficiencyLevel: '2级', baseValue: 46.0, unit: '%' },
+  { id: 9, category: 'engine', engineType: '船用柴油发动机（中速机）', emissionLevel: 'Tier III', powerRange: '500≤P<850', efficiencyLevel: '3级', baseValue: 43.6, unit: '%' },
+  // 船用二氧化碳捕集设备
+  { id: 10, category: 'co2-capture', engineType: '船用二氧化碳捕集设备', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 4.2, unit: 'GJ/tCO₂' },
+  { id: 11, category: 'co2-capture', engineType: '船用二氧化碳捕集设备', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 5.1, unit: 'GJ/tCO₂' },
+  { id: 12, category: 'co2-capture', engineType: '船用二氧化碳捕集设备', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 6, unit: 'GJ/tCO₂' },
+  // 船用余热回收发电装置
+  { id: 13, category: 'waste-heat', engineType: '船用有机朗肯循环发电装置', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 25, unit: '%' },
+  { id: 14, category: 'waste-heat', engineType: '船用有机朗肯循环发电装置', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 20, unit: '%' },
+  { id: 15, category: 'waste-heat', engineType: '船用有机朗肯循环发电装置', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 15, unit: '%' },
+  { id: 16, category: 'waste-heat', engineType: '船用蒸汽透平发电装置', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 30, unit: '%' },
+  { id: 17, category: 'waste-heat', engineType: '船用蒸汽透平发电装置', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 25, unit: '%' },
+  { id: 18, category: 'waste-heat', engineType: '船用蒸汽透平发电装置', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 20, unit: '%' },
+  // 船用焚烧炉
+  { id: 19, category: 'incinerator', engineType: '单功能焚烧炉（固体废弃物）', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 95, unit: '%' },
+  { id: 20, category: 'incinerator', engineType: '单功能焚烧炉（固体废弃物）', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 90, unit: '%' },
+  { id: 21, category: 'incinerator', engineType: '单功能焚烧炉（固体废弃物）', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 85, unit: '%' },
+  { id: 22, category: 'incinerator', engineType: '单功能焚烧炉（污油泥）', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 92, unit: '%' },
+  { id: 23, category: 'incinerator', engineType: '单功能焚烧炉（污油泥）', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 88, unit: '%' },
+  { id: 24, category: 'incinerator', engineType: '单功能焚烧炉（污油泥）', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 83, unit: '%' },
+  { id: 25, category: 'incinerator', engineType: '双功能焚烧炉', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 93, unit: '%' },
+  { id: 26, category: 'incinerator', engineType: '双功能焚烧炉', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 89, unit: '%' },
+  { id: 27, category: 'incinerator', engineType: '双功能焚烧炉', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 84, unit: '%' },
+  { id: 28, category: 'incinerator', engineType: '多功能焚烧炉', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 94, unit: '%' },
+  { id: 29, category: 'incinerator', engineType: '多功能焚烧炉', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 90, unit: '%' },
+  { id: 30, category: 'incinerator', engineType: '多功能焚烧炉', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 85, unit: '%' },
+  // 船用碟式分离机
+  { id: 31, category: 'separator', engineType: '船用碟式分离机', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 98, unit: '%' },
+  { id: 32, category: 'separator', engineType: '船用碟式分离机', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 95, unit: '%' },
+  { id: 33, category: 'separator', engineType: '船用碟式分离机', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 92, unit: '%' },
+  // 船用压载水处理设备
+  { id: 34, category: 'ballast', engineType: '船用压载水处理设备', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 99, unit: '%' },
+  { id: 35, category: 'ballast', engineType: '船用压载水处理设备', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 96, unit: '%' },
+  { id: 36, category: 'ballast', engineType: '船用压载水处理设备', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 93, unit: '%' },
+  // 船用齿轮箱
+  { id: 37, category: 'gearbox', engineType: '单台齿轮箱', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 98, unit: '%' },
+  { id: 38, category: 'gearbox', engineType: '单台齿轮箱', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 95, unit: '%' },
+  { id: 39, category: 'gearbox', engineType: '单台齿轮箱', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 92, unit: '%' },
+  { id: 40, category: 'gearbox', engineType: '两台齿轮箱', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 97, unit: '%' },
+  { id: 41, category: 'gearbox', engineType: '两台齿轮箱', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 94, unit: '%' },
+  { id: 42, category: 'gearbox', engineType: '两台齿轮箱', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 91, unit: '%' },
+  // 船用锚绞机
+  { id: 43, category: 'windlass', engineType: '船用锚绞机', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 90, unit: '%' },
+  { id: 44, category: 'windlass', engineType: '船用锚绞机', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 85, unit: '%' },
+  { id: 45, category: 'windlass', engineType: '船用锚绞机', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 80, unit: '%' },
+  // 船用吊机
+  { id: 46, category: 'crane', engineType: '船用吊机', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 88, unit: '%' },
+  { id: 47, category: 'crane', engineType: '船用吊机', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 83, unit: '%' },
+  { id: 48, category: 'crane', engineType: '船用吊机', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 78, unit: '%' },
+  // 船用发电机
+  { id: 49, category: 'generator', engineType: '船用低压交流三相同步发电机', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 97, unit: '%' },
+  { id: 50, category: 'generator', engineType: '船用低压交流三相同步发电机', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 94, unit: '%' },
+  { id: 51, category: 'generator', engineType: '船用低压交流三相同步发电机', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 91, unit: '%' },
+  { id: 52, category: 'generator', engineType: '船用中压交流三相同步发电机', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 96, unit: '%' },
+  { id: 53, category: 'generator', engineType: '船用中压交流三相同步发电机', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 93, unit: '%' },
+  { id: 54, category: 'generator', engineType: '船用中压交流三相同步发电机', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 90, unit: '%' },
+  // 船用空调机组
+  { id: 55, category: 'air-conditioner', engineType: '船用组合式空调机组', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 85, unit: '%' },
+  { id: 56, category: 'air-conditioner', engineType: '船用组合式空调机组', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 80, unit: '%' },
+  { id: 57, category: 'air-conditioner', engineType: '船用组合式空调机组', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 75, unit: '%' },
+  // 船用冷水机组
+  { id: 58, category: 'chiller', engineType: '船用冷水机组', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 82, unit: '%' },
+  { id: 59, category: 'chiller', engineType: '船用冷水机组', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 77, unit: '%' },
+  { id: 60, category: 'chiller', engineType: '船用冷水机组', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 72, unit: '%' },
+  // 船用惰性气体系统
+  { id: 61, category: 'inert-gas', engineType: '船用惰性气体系统', emissionLevel: '', powerRange: '', efficiencyLevel: '1级', baseValue: 95, unit: '%' },
+  { id: 62, category: 'inert-gas', engineType: '船用惰性气体系统', emissionLevel: '', powerRange: '', efficiencyLevel: '2级', baseValue: 90, unit: '%' },
+  { id: 63, category: 'inert-gas', engineType: '船用惰性气体系统', emissionLevel: '', powerRange: '', efficiencyLevel: '3级', baseValue: 85, unit: '%' }
 ])
 
 const filteredBaseValues = computed(() => {
   let result = efficiencyBaseValues.value
   if (searchQuery.value) {
     result = result.filter(bv => bv.engineType.toLowerCase().includes(searchQuery.value.toLowerCase()) || bv.emissionLevel.toLowerCase().includes(searchQuery.value.toLowerCase()))
+  }
+  if (categoryFilter.value) {
+    result = result.filter(bv => bv.category === categoryFilter.value)
   }
   if (engineTypeFilter.value) {
     result = result.filter(bv => bv.engineType.includes(engineTypeFilter.value))
@@ -332,4 +466,29 @@ const exportBaseValues = () => {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.device-category {
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  display: inline-block;
+  width: fit-content;
+}
+
+.device-category.engine { background-color: #dbeafe; color: #1e40af; }
+.device-category.gearbox { background-color: #dcfce7; color: #166534; }
+.device-category.waste-heat { background-color: #ffedd5; color: #c2410c; }
+.device-category.incinerator { background-color: #fee2e2; color: #991b1b; }
+.device-category.separator { background-color: #f3e8ff; color: #6b21a8; }
+.device-category.ballast { background-color: #cffafe; color: #0e7490; }
+.device-category.windlass { background-color: #fce7f3; color: #be185d; }
+.device-category.crane { background-color: #e0e7ff; color: #3730a3; }
+.device-category.generator { background-color: #fef3c7; color: #b45309; }
+.device-category.air-conditioner { background-color: #dbeafe; color: #1e40af; }
+.device-category.chiller { background-color: #e0e7ff; color: #3730a3; }
+.device-category.inert-gas { background-color: #ede9fe; color: #5b21b6; }
+.device-category.co2-capture { background-color: #dcfce7; color: #166534; }
+.device-category.propeller { background-color: #ffedd5; color: #c2410c; }
 </style>
