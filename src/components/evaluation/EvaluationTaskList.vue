@@ -16,14 +16,34 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="deviceTypeFilter" placeholder="设备类型" clearable style="width: 180px">
+          <el-select v-model="deviceTypeFilter" placeholder="设备类型" clearable style="width: 250px">
             <el-option label="全部" value="" />
-            <el-option label="船用柴油发动机（低速机）" value="diesel-low" />
-            <el-option label="船用柴油发动机（中速机）" value="diesel-medium" />
-            <el-option label="船用LNG/柴油双燃料发动机（低速机）" value="lng-diesel-low" />
-            <el-option label="船用LNG/柴油双燃料发动机（中速机）" value="lng-diesel-medium" />
-            <el-option label="船用甲醇/柴油双燃料发动机（低速机）" value="methanol-diesel-low" />
-            <el-option label="船用甲醇/柴油双燃料发动机（中速机）" value="methanol-diesel-medium" />
+            <el-option label="船用柴油发动机（低速机）" value="船用柴油发动机（低速机）" />
+            <el-option label="船用柴油发动机（中速机）" value="船用柴油发动机（中速机）" />
+            <el-option label="船用LNG/柴油双燃料发动机（低速机）" value="船用LNG/柴油双燃料发动机（低速机）" />
+            <el-option label="船用LNG/柴油双燃料发动机（中速机）" value="船用LNG/柴油双燃料发动机（中速机）" />
+            <el-option label="船用甲醇/柴油双燃料发动机（低速机）" value="船用甲醇/柴油双燃料发动机（低速机）" />
+            <el-option label="船用甲醇/柴油双燃料发动机（中速机）" value="船用甲醇/柴油双燃料发动机（中速机）" />
+            <el-option label="单台齿轮箱" value="单台齿轮箱" />
+            <el-option label="两台齿轮箱" value="两台齿轮箱" />
+            <el-option label="船用有机朗肯循环发电装置" value="船用有机朗肯循环发电装置" />
+            <el-option label="船用蒸汽透平发电装置" value="船用蒸汽透平发电装置" />
+            <el-option label="单功能焚烧炉（固体废弃物）" value="单功能焚烧炉（固体废弃物）" />
+            <el-option label="单功能焚烧炉（污油泥）" value="单功能焚烧炉（污油泥）" />
+            <el-option label="双功能焚烧炉" value="双功能焚烧炉" />
+            <el-option label="多功能焚烧炉" value="多功能焚烧炉" />
+            <el-option label="船用碟式分离机" value="船用碟式分离机" />
+            <el-option label="船用压载水处理设备" value="船用压载水处理设备" />
+            <el-option label="船用起锚机" value="船用起锚机" />
+            <el-option label="船用系泊绞车" value="船用系泊绞车" />
+            <el-option label="船用吊机" value="船用吊机" />
+            <el-option label="船用低压交流三相同步发电机" value="船用低压交流三相同步发电机" />
+            <el-option label="船用中压交流三相同步发电机" value="船用中压交流三相同步发电机" />
+            <el-option label="船用组合式空调机组" value="船用组合式空调机组" />
+            <el-option label="船用冷水机组" value="船用冷水机组" />
+            <el-option label="船用惰性气体系统" value="船用惰性气体系统" />
+            <el-option label="船用二氧化碳捕集设备" value="船用二氧化碳捕集设备" />
+            <el-option label="船用推进器" value="船用推进器" />
           </el-select>
           <el-select v-model="efficiencyFilter" placeholder="能效等级" clearable style="width: 140px">
             <el-option label="全部" value="" />
@@ -113,17 +133,16 @@ const pageSize = ref(10)
 const pageSizes = [10, 20, 50, 100, 200, 500]
 
 // 多维度筛选变量
-const shipTypeFilter = ref('')
 const deviceTypeFilter = ref('')
 const efficiencyFilter = ref('')
 const workingConditionFilter = ref('')
 
 const tasks = ref([
-  { id: 'EVAL-20240707-001', name: '船用柴油发动机（低速机）能效评估', device: '船用柴油发动机（低速机）', deviceClass: 'diesel-low', model: 'ISO 15550:2016', score: 89, level: '2级', levelClass: 'level-2', status: '已完成', statusClass: 'success', evalTime: '2024-04-07 13:45' },
-  { id: 'EVAL-20240707-002', name: '船用柴油发动机（中速机）能效评估', device: '船用柴油发动机（中速机）', deviceClass: 'diesel-medium', model: 'GB/T 38999-2020', score: 93, level: '1级', levelClass: 'level-1', status: '已完成', statusClass: 'success', evalTime: '2024-04-07 12:30' },
-  { id: 'EVAL-20240605-003', name: '船用LNG/柴油双燃料发动机（低速机）能效评估', device: '船用LNG/柴油双燃料发动机（低速机）', deviceClass: 'lng-diesel-low', model: 'TSG G0003-2010', score: 76, level: '2级', levelClass: 'level-2', status: '已完成', statusClass: 'success', evalTime: '2024-04-05 15:20' },
-  { id: 'EVAL-20240604-004', name: '船用LNG/柴油双燃料发动机（中速机）能效评估', device: '船用LNG/柴油双燃料发动机（中速机）', deviceClass: 'lng-diesel-medium', model: 'GB/T 13006-2013', score: 65, level: '3级', levelClass: 'level-3', status: '评估中', statusClass: 'running', evalTime: '进行中' },
-  { id: 'EVAL-20240601-005', name: '船用甲醇/柴油双燃料发动机（低速机）能效评估', device: '船用甲醇/柴油双燃料发动机（低速机）', deviceClass: 'methanol-diesel-low', model: 'IMO EEXI标准', score: null, level: '待评估', levelClass: 'pending', status: '待执行', statusClass: 'warning', evalTime: '2024-04-01 16:00' }
+  { id: 'EVAL-20240707-001', name: '船用柴油发动机（低速机）能效评估', device: '船用柴油发动机（低速机）', deviceClass: '船用柴油发动机（低速机）', model: 'ISO 15550:2016', score: 89, level: '2级', levelClass: 'level-2', status: '已完成', statusClass: 'success', evalTime: '2024-04-07 13:45' },
+  { id: 'EVAL-20240707-002', name: '船用柴油发动机（中速机）能效评估', device: '船用柴油发动机（中速机）', deviceClass: '船用柴油发动机（中速机）', model: 'GB/T 38999-2020', score: 93, level: '1级', levelClass: 'level-1', status: '已完成', statusClass: 'success', evalTime: '2024-04-07 12:30' },
+  { id: 'EVAL-20240605-003', name: '船用LNG/柴油双燃料发动机（低速机）能效评估', device: '船用LNG/柴油双燃料发动机（低速机）', deviceClass: '船用LNG/柴油双燃料发动机（低速机）', model: 'TSG G0003-2010', score: 76, level: '2级', levelClass: 'level-2', status: '已完成', statusClass: 'success', evalTime: '2024-04-05 15:20' },
+  { id: 'EVAL-20240604-004', name: '船用LNG/柴油双燃料发动机（中速机）能效评估', device: '船用LNG/柴油双燃料发动机（中速机）', deviceClass: '船用LNG/柴油双燃料发动机（中速机）', model: 'GB/T 13006-2013', score: 65, level: '3级', levelClass: 'level-3', status: '评估中', statusClass: 'running', evalTime: '进行中' },
+  { id: 'EVAL-20240601-005', name: '船用甲醇/柴油双燃料发动机（低速机）能效评估', device: '船用甲醇/柴油双燃料发动机（低速机）', deviceClass: '船用甲醇/柴油双燃料发动机（低速机）', model: 'IMO EEXI标准', score: null, level: '待评估', levelClass: 'pending', status: '待执行', statusClass: 'warning', evalTime: '2024-04-01 16:00' }
 ])
 
 const totalTasks = computed(() => filteredTasks.value.length)
@@ -191,7 +210,6 @@ const resetPage = () => {
 }
 
 const resetFilters = () => {
-  shipTypeFilter.value = ''
   deviceTypeFilter.value = ''
   efficiencyFilter.value = ''
   workingConditionFilter.value = ''

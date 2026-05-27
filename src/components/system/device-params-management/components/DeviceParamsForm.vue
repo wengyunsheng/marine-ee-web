@@ -48,7 +48,7 @@
           <el-option label="船用锚绞机" value="windlass" />
           <el-option label="船用吊机" value="crane" />
           <el-option label="船用发电机" value="generator" />
-          <el-option label="船用空调机组" value="air-conditioner" />
+          <el-option label="船用组合式空调机组" value="air-conditioner" />
           <el-option label="船用冷水机组" value="chiller" />
           <el-option label="船用惰性气体系统" value="inert-gas" />
           <el-option label="船用二氧化碳捕集设备" value="co2-capture" />

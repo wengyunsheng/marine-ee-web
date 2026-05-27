@@ -9,28 +9,19 @@
       <el-descriptions-item label="模型名称">
         {{ model?.name }}
       </el-descriptions-item>
-      <el-descriptions-item label="船型">
-        {{ model?.shipType }}
-      </el-descriptions-item>
-      <el-descriptions-item label="设备类型">
+      <el-descriptions-item label="设备类型名称">
         {{ model?.deviceType }}
       </el-descriptions-item>
-      <el-descriptions-item label="模型版本">
-        {{ model?.version }}
-      </el-descriptions-item>
-      <el-descriptions-item label="状态">
-        <el-tag :type="getStatusTagType(model?.status)">
-          {{ getStatusText(model?.status) }}
-        </el-tag>
-      </el-descriptions-item>
-      <el-descriptions-item label="创建时间">
-        {{ model?.createdAt }}
-      </el-descriptions-item>
-      <el-descriptions-item label="数据连接信息">
-        {{ model?.connectionInfo || '暂无数据连接信息' }}
+      <el-descriptions-item label="类别">
+        <span class="device-category" :class="model?.category">
+          {{ getCategoryName(model?.category) }}
+        </span>
       </el-descriptions-item>
       <el-descriptions-item label="描述">
         {{ model?.description || '暂无描述' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="创建时间">
+        {{ model?.createdAt }}
       </el-descriptions-item>
     </el-descriptions>
     <template #footer>
@@ -51,34 +42,52 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
+const categoryConfig = {
+  engine: '船用发动机',
+  gearbox: '船用齿轮箱',
+  'waste-heat': '船用余热回收发电装置',
+  incinerator: '船用焚烧炉',
+  separator: '船用碟式分离机',
+  ballast: '船用压载水处理设备',
+  windlass: '船用锚绞机',
+  crane: '船用吊机',
+  generator: '船用发电机',
+  'air-conditioner': '船用组合式空调机组',
+  chiller: '船用冷水机组',
+  'inert-gas': '船用惰性气体系统',
+  'co2-capture': '船用二氧化碳捕集设备',
+  propeller: '船用推进器'
+}
+
+const getCategoryName = (category) => categoryConfig[category] || category
+
 const visible = computed({
   get: () => true,
   set: (value) => {
     if (!value) emit('close')
   }
 })
-
-const getStatusText = (status) => {
-  const statusMap = {
-    connected: '已连接',
-    disconnected: '未连接',
-    testing: '测试中',
-    validated: '已验证'
-  }
-  return statusMap[status] || status
-}
-
-const getStatusTagType = (status) => {
-  const typeMap = {
-    connected: 'success',
-    disconnected: 'info',
-    testing: 'warning',
-    validated: ''
-  }
-  return typeMap[status] || ''
-}
 </script>
 
 <style scoped>
-/* Element Plus 组件自带样式，无需额外样式 */
+.device-category {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.device-category.engine { background-color: #e3f2fd; color: #1976d2; }
+.device-category.gearbox { background-color: #e8f5e8; color: #2e7d32; }
+.device-category.waste-heat { background-color: #fff3e0; color: #ef6c00; }
+.device-category.incinerator { background-color: #ffebee; color: #c62828; }
+.device-category.separator { background-color: #f3e5f5; color: #7b1fa2; }
+.device-category.ballast { background-color: #e0f7fa; color: #00838f; }
+.device-category.windlass { background-color: #fce4ec; color: #880e4f; }
+.device-category.crane { background-color: #e3f2fd; color: #0d47a1; }
+.device-category.generator { background-color: #fff8e1; color: #f57c00; }
+.device-category.air-conditioner { background-color: #e1f5fe; color: #0288d1; }
+.device-category.chiller { background-color: #e3f2fd; color: #1565c0; }
+.device-category.inert-gas { background-color: #f3e5f5; color: #6a1b9a; }
+.device-category.co2-capture { background-color: #c8e6c9; color: #2e7d32; }
+.device-category.propeller { background-color: #fff3e0; color: #e65100; }
 </style>

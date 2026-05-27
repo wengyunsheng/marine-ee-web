@@ -158,16 +158,16 @@ const getMetricTypeName = (metricType) => {
 
 .device-category.engine { background-color: #e3f2fd; color: #1976d2; }
 .device-category.gearbox { background-color: #e8f5e8; color: #2e7d32; }
-.device-category.waste_heat { background-color: #fff3e0; color: #ef6c00; }
+.device-category.waste-heat { background-color: #fff3e0; color: #ef6c00; }
 .device-category.incinerator { background-color: #ffebee; color: #c62828; }
 .device-category.separator { background-color: #f3e5f5; color: #7b1fa2; }
-.device-category.boiler { background-color: #e0f2f1; color: #00695c; }
-.device-category.pump { background-color: #fce4ec; color: #ad1457; }
-.device-category.fan { background-color: #f1f8e9; color: #558b2f; }
-.device-category.compressor { background-color: #e8eaf6; color: #283593; }
-.device-category.crane { background-color: #fff8e1; color: #f57f17; }
-.device-category.deck_machinery { background-color: #efebe9; color: #4e342e; }
-.device-category.propeller { background-color: #e1f5fe; color: #0277bd; }
-.device-category.energy_storage { background-color: #f3e5f5; color: #6a1b9a; }
-.device-category.solar { background-color: #fffde7; color: #f9a825; }
+.device-category.ballast { background-color: #e0f7fa; color: #00838f; }
+.device-category.windlass { background-color: #fce4ec; color: #880e4f; }
+.device-category.crane { background-color: #e3f2fd; color: #0d47a1; }
+.device-category.generator { background-color: #fff8e1; color: #f57c00; }
+.device-category.air-conditioner { background-color: #e1f5fe; color: #0288d1; }
+.device-category.chiller { background-color: #e3f2fd; color: #1565c0; }
+.device-category.inert-gas { background-color: #f3e5f5; color: #6a1b9a; }
+.device-category.co2-capture { background-color: #c8e6c9; color: #2e7d32; }
+.device-category.propeller { background-color: #fff3e0; color: #e65100; }
 </style>

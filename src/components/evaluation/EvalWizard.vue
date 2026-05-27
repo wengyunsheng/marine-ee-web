@@ -539,10 +539,10 @@ const calculateEfficiency = () => {
     const bsgc75 = params.find(p => p.name.includes('75%工况下燃气消耗率'))?.value || params.find(p => p.name.includes('75%工况下'))?.value || 165
     const bsgc100 = params.find(p => p.name.includes('100%工况下燃气消耗率'))?.value || params.find(p => p.name.includes('100%工况下'))?.value || 175
     
-    const bsfc25 = params.find(p => p.name.includes('25%工况下引燃燃油消耗率'))?.value || 18
-    const bsfc50 = params.find(p => p.name.includes('50%工况下引燃燃油消耗率'))?.value || 16
-    const bsfc75 = params.find(p => p.name.includes('75%工况下引燃燃油消耗率'))?.value || 14
-    const bsfc100 = params.find(p => p.name.includes('100%工况下引燃燃油消耗率'))?.value || 12
+    const bsfc25 = params.find(p => p.name.includes('25%工况下引燃油消耗率'))?.value || 18
+    const bsfc50 = params.find(p => p.name.includes('50%工况下引燃油消耗率'))?.value || 16
+    const bsfc75 = params.find(p => p.name.includes('75%工况下引燃油消耗率'))?.value || 14
+    const bsfc100 = params.find(p => p.name.includes('100%工况下引燃油消耗率'))?.value || 12
     
     const bsgcValues = [bsgc25, bsgc50, bsgc75, bsgc100]
     const bsfcValues = [bsfc25, bsfc50, bsfc75, bsfc100]
@@ -637,15 +637,15 @@ const paramTemplates = ref([
       { id: 15, name: '额定功率', unit: 'kW', defaultValue: 15000, minValue: 0, maxValue: 30000 },
       { id: 16, name: '额定转速', unit: 'r/min', defaultValue: 100, minValue: 50, maxValue: 150 },
       { id: 17, name: '主燃料低热值', unit: 'kJ/kg', defaultValue: 50000, minValue: 48000, maxValue: 52000 },
-      { id: 18, name: '引燃燃料低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
+      { id: 18, name: '引燃油低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
       { id: 19, name: '25%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 150, minValue: 120, maxValue: 200 },
-      { id: 20, name: '25%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 10, minValue: 5, maxValue: 20 },
+      { id: 20, name: '25%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 10, minValue: 5, maxValue: 20 },
       { id: 21, name: '50%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 140, minValue: 110, maxValue: 190 },
-      { id: 22, name: '50%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 8, minValue: 4, maxValue: 15 },
+      { id: 22, name: '50%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 8, minValue: 4, maxValue: 15 },
       { id: 23, name: '75%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 135, minValue: 105, maxValue: 185 },
-      { id: 24, name: '75%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 7, minValue: 3, maxValue: 12 },
+      { id: 24, name: '75%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 7, minValue: 3, maxValue: 12 },
       { id: 25, name: '100%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 145, minValue: 115, maxValue: 195 },
-      { id: 26, name: '100%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 9, minValue: 4, maxValue: 16 }
+      { id: 26, name: '100%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 9, minValue: 4, maxValue: 16 }
     ]
   },
   {
@@ -656,15 +656,15 @@ const paramTemplates = ref([
       { id: 27, name: '额定功率', unit: 'kW', defaultValue: 2000, minValue: 500, maxValue: 5000 },
       { id: 28, name: '额定转速', unit: 'r/min', defaultValue: 1500, minValue: 1000, maxValue: 2000 },
       { id: 29, name: '主燃料低热值', unit: 'kJ/kg', defaultValue: 50000, minValue: 48000, maxValue: 52000 },
-      { id: 30, name: '引燃燃料低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
+      { id: 30, name: '引燃油低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
       { id: 31, name: '25%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 170, minValue: 130, maxValue: 220 },
-      { id: 32, name: '25%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 12, minValue: 6, maxValue: 24 },
+      { id: 32, name: '25%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 12, minValue: 6, maxValue: 24 },
       { id: 33, name: '50%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 160, minValue: 120, maxValue: 210 },
-      { id: 34, name: '50%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 10, minValue: 5, maxValue: 20 },
+      { id: 34, name: '50%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 10, minValue: 5, maxValue: 20 },
       { id: 35, name: '75%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 155, minValue: 115, maxValue: 205 },
-      { id: 36, name: '75%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 9, minValue: 4, maxValue: 18 },
+      { id: 36, name: '75%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 9, minValue: 4, maxValue: 18 },
       { id: 37, name: '100%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 165, minValue: 125, maxValue: 215 },
-      { id: 38, name: '100%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 11, minValue: 5, maxValue: 22 }
+      { id: 38, name: '100%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 11, minValue: 5, maxValue: 22 }
     ]
   },
   {
@@ -675,15 +675,15 @@ const paramTemplates = ref([
       { id: 39, name: '额定功率', unit: 'kW', defaultValue: 15000, minValue: 0, maxValue: 30000 },
       { id: 40, name: '额定转速', unit: 'r/min', defaultValue: 100, minValue: 50, maxValue: 150 },
       { id: 41, name: '主燃料低热值', unit: 'kJ/kg', defaultValue: 19900, minValue: 19000, maxValue: 21000 },
-      { id: 42, name: '引燃燃料低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
+      { id: 42, name: '引燃油低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
       { id: 43, name: '25%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 350, minValue: 300, maxValue: 400 },
-      { id: 44, name: '25%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 15, minValue: 8, maxValue: 25 },
+      { id: 44, name: '25%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 15, minValue: 8, maxValue: 25 },
       { id: 45, name: '50%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 330, minValue: 280, maxValue: 380 },
-      { id: 46, name: '50%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 12, minValue: 6, maxValue: 20 },
+      { id: 46, name: '50%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 12, minValue: 6, maxValue: 20 },
       { id: 47, name: '75%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 320, minValue: 270, maxValue: 370 },
-      { id: 48, name: '75%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 10, minValue: 5, maxValue: 18 },
+      { id: 48, name: '75%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 10, minValue: 5, maxValue: 18 },
       { id: 49, name: '100%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 340, minValue: 290, maxValue: 390 },
-      { id: 50, name: '100%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 13, minValue: 7, maxValue: 22 }
+      { id: 50, name: '100%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 13, minValue: 7, maxValue: 22 }
     ]
   },
   {
@@ -694,15 +694,15 @@ const paramTemplates = ref([
       { id: 51, name: '额定功率', unit: 'kW', defaultValue: 2000, minValue: 500, maxValue: 5000 },
       { id: 52, name: '额定转速', unit: 'r/min', defaultValue: 1500, minValue: 1000, maxValue: 2000 },
       { id: 53, name: '主燃料低热值', unit: 'kJ/kg', defaultValue: 19900, minValue: 19000, maxValue: 21000 },
-      { id: 54, name: '引燃燃料低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
+      { id: 54, name: '引燃油低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
       { id: 55, name: '25%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 380, minValue: 330, maxValue: 430 },
-      { id: 56, name: '25%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 18, minValue: 9, maxValue: 30 },
+      { id: 56, name: '25%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 18, minValue: 9, maxValue: 30 },
       { id: 57, name: '50%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 360, minValue: 310, maxValue: 410 },
-      { id: 58, name: '50%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 15, minValue: 7, maxValue: 25 },
+      { id: 58, name: '50%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 15, minValue: 7, maxValue: 25 },
       { id: 59, name: '75%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 350, minValue: 300, maxValue: 400 },
-      { id: 60, name: '75%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 13, minValue: 6, maxValue: 22 },
+      { id: 60, name: '75%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 13, minValue: 6, maxValue: 22 },
       { id: 61, name: '100%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 370, minValue: 320, maxValue: 420 },
-      { id: 62, name: '100%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 16, minValue: 8, maxValue: 28 }
+      { id: 62, name: '100%工况下引燃油消耗率', unit: 'g/kWh', defaultValue: 16, minValue: 8, maxValue: 28 }
     ]
   }
 ])

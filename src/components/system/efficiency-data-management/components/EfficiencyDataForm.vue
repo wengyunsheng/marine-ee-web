@@ -18,6 +18,26 @@
           <el-option label="船用LNG/柴油双燃料发动机（中速机）" value="船用LNG/柴油双燃料发动机（中速机）" />
           <el-option label="船用甲醇/柴油双燃料发动机（低速机）" value="船用甲醇/柴油双燃料发动机（低速机）" />
           <el-option label="船用甲醇/柴油双燃料发动机（中速机）" value="船用甲醇/柴油双燃料发动机（中速机）" />
+          <el-option label="单台齿轮箱" value="单台齿轮箱" />
+          <el-option label="两台齿轮箱" value="两台齿轮箱" />
+          <el-option label="船用有机朗肯循环发电装置" value="船用有机朗肯循环发电装置" />
+          <el-option label="船用蒸汽透平发电装置" value="船用蒸汽透平发电装置" />
+          <el-option label="单功能焚烧炉（固体废弃物）" value="单功能焚烧炉（固体废弃物）" />
+          <el-option label="单功能焚烧炉（污油泥）" value="单功能焚烧炉（污油泥）" />
+          <el-option label="双功能焚烧炉" value="双功能焚烧炉" />
+          <el-option label="多功能焚烧炉" value="多功能焚烧炉" />
+          <el-option label="船用碟式分离机" value="船用碟式分离机" />
+          <el-option label="船用压载水处理设备" value="船用压载水处理设备" />
+          <el-option label="船用起锚机" value="船用起锚机" />
+          <el-option label="船用系泊绞车" value="船用系泊绞车" />
+          <el-option label="船用吊机" value="船用吊机" />
+          <el-option label="船用低压交流三相同步发电机" value="船用低压交流三相同步发电机" />
+          <el-option label="船用中压交流三相同步发电机" value="船用中压交流三相同步发电机" />
+          <el-option label="船用组合式空调机组" value="船用组合式空调机组" />
+          <el-option label="船用冷水机组" value="船用冷水机组" />
+          <el-option label="船用惰性气体系统" value="船用惰性气体系统" />
+          <el-option label="船用二氧化碳捕集设备" value="船用二氧化碳捕集设备" />
+          <el-option label="船用推进器" value="船用推进器" />
         </el-select>
       </el-form-item>
 

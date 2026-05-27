@@ -120,9 +120,9 @@ const runModes = ref([
     description: '辅机以恒定转速运行',
     weights: [
       { id: 1, engineSpeed: '100%', powerMode: '100%', weight: 0.05 },
-      { id: 2, engineSpeed: '100%', powerMode: '75%', weight: 0.35 },
+      { id: 2, engineSpeed: '100%', powerMode: '75%', weight: 0.25 },
       { id: 3, engineSpeed: '100%', powerMode: '50%', weight: 0.3 },
-      { id: 4, engineSpeed: '100%', powerMode: '30%', weight: 0.3 },
+      { id: 4, engineSpeed: '100%', powerMode: '25%', weight: 0.3 },
       { id: 5, engineSpeed: '100%', powerMode: '10%', weight: 0.1 }
     ]
   }

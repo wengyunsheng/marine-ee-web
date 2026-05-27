@@ -8,13 +8,9 @@
   >
     <div class="model-info">
       <el-descriptions :column="2" border>
-        <el-descriptions-item label="船型">{{ model?.shipType }}</el-descriptions-item>
-        <el-descriptions-item label="设备类型">{{ model?.deviceType }}</el-descriptions-item>
-        <el-descriptions-item label="模型版本">{{ model?.version }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
-          <el-tag :type="model?.status === 'connected' ? 'success' : 'danger'">
-            {{ model?.status === 'connected' ? '已连接' : '未连接' }}
-          </el-tag>
+        <el-descriptions-item label="设备类型名称" :span="2">{{ model?.deviceType }}</el-descriptions-item>
+        <el-descriptions-item label="类别">
+          <span class="device-category" :class="model?.category">{{ getCategoryName(model?.category) }}</span>
         </el-descriptions-item>
       </el-descriptions>
     </div>
@@ -33,18 +29,6 @@
           <el-button size="small" @click="fullscreenView">全屏</el-button>
         </div>
       </div>
-    </div>
-    
-    <div class="model-metrics">
-      <h5>模型性能指标</h5>
-      <el-row :gutter="16">
-        <el-col :xs="12" :sm="6" v-for="(metric, index) in metricsData" :key="index">
-          <div class="metric-item">
-            <span class="metric-label">{{ metric.label }}</span>
-            <span class="metric-value">{{ metric.value }}</span>
-          </div>
-        </el-col>
-      </el-row>
     </div>
 
     <template #footer>
@@ -68,12 +52,14 @@ const emit = defineEmits(['close'])
 
 const dialogVisible = ref(true)
 
-const metricsData = computed(() => [
-  { label: '能效评分', value: props.model?.metrics?.score || 85 },
-  { label: '仿真精度', value: props.model?.metrics?.accuracy || '92%' },
-  { label: '渲染质量', value: '高' },
-  { label: '加载时间', value: '2.3s' }
-])
+const categoryConfig = {
+  engine: '船用发动机', gearbox: '船用齿轮箱', 'waste-heat': '船用余热回收发电装置',
+  incinerator: '船用焚烧炉', separator: '船用碟式分离机', ballast: '船用压载水处理设备',
+  windlass: '船用锚绞机', crane: '船用吊机', generator: '船用发电机',
+  'air-conditioner': '船用组合式空调机组', chiller: '船用冷水机组',
+  'inert-gas': '船用惰性气体系统', 'co2-capture': '船用二氧化碳捕集设备', propeller: '船用推进器'
+}
+const getCategoryName = (category) => categoryConfig[category] || category
 
 const rotateModel = () => {
   alert('旋转模型')
@@ -139,42 +125,26 @@ const export3DModel = () => {
 }
 
 /* 模型指标样式 */
-.model-metrics {
-  background-color: #f8fafc;
-  border-radius: 8px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
+.device-category {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
 }
-
-.model-metrics h5 {
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-.metric-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  background-color: white;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.metric-label {
-  font-size: 14px;
-  color: #666;
-}
-
-.metric-value {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-}
+.device-category.engine { background-color: #e3f2fd; color: #1976d2; }
+.device-category.gearbox { background-color: #e8f5e8; color: #2e7d32; }
+.device-category.waste-heat { background-color: #fff3e0; color: #ef6c00; }
+.device-category.incinerator { background-color: #ffebee; color: #c62828; }
+.device-category.separator { background-color: #f3e5f5; color: #7b1fa2; }
+.device-category.ballast { background-color: #e0f7fa; color: #00838f; }
+.device-category.windlass { background-color: #fce4ec; color: #880e4f; }
+.device-category.crane { background-color: #e3f2fd; color: #0d47a1; }
+.device-category.generator { background-color: #fff8e1; color: #f57c00; }
+.device-category.air-conditioner { background-color: #e1f5fe; color: #0288d1; }
+.device-category.chiller { background-color: #e3f2fd; color: #1565c0; }
+.device-category.inert-gas { background-color: #f3e5f5; color: #6a1b9a; }
+.device-category.co2-capture { background-color: #c8e6c9; color: #2e7d32; }
+.device-category.propeller { background-color: #fff3e0; color: #e65100; }
 
 /* 响应式布局 */
 @media (max-width: 768px) {

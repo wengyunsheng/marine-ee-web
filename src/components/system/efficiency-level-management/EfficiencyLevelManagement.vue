@@ -263,7 +263,7 @@ const categoryConfig = {
     baseValueType: 'number'
   },
   'air-conditioner': {
-    label: '船用空调机组',
+    label: '船用组合式空调机组',
     engineTypes: ['船用组合式空调机组'],
     dimensions: ['powerRange', 'secondaryRange'],
     dimensionConfig: {
@@ -811,18 +811,18 @@ const exportBaseValues = () => {
   width: fit-content;
 }
 
-.device-category.engine { background-color: #dbeafe; color: #1e40af; }
-.device-category.gearbox { background-color: #dcfce7; color: #166534; }
-.device-category.waste-heat { background-color: #ffedd5; color: #c2410c; }
-.device-category.incinerator { background-color: #fee2e2; color: #991b1b; }
-.device-category.separator { background-color: #f3e8ff; color: #6b21a8; }
-.device-category.ballast { background-color: #cffafe; color: #0e7490; }
-.device-category.windlass { background-color: #fce7f3; color: #be185d; }
-.device-category.crane { background-color: #e0e7ff; color: #3730a3; }
-.device-category.generator { background-color: #fef3c7; color: #b45309; }
-.device-category.air-conditioner { background-color: #dbeafe; color: #1e40af; }
-.device-category.chiller { background-color: #e0e7ff; color: #3730a3; }
-.device-category.inert-gas { background-color: #ede9fe; color: #5b21b6; }
-.device-category.co2-capture { background-color: #dcfce7; color: #166534; }
-.device-category.propeller { background-color: #ffedd5; color: #c2410c; }
+.device-category.engine { background-color: #e3f2fd; color: #1976d2; }
+.device-category.gearbox { background-color: #e8f5e8; color: #2e7d32; }
+.device-category.waste-heat { background-color: #fff3e0; color: #ef6c00; }
+.device-category.incinerator { background-color: #ffebee; color: #c62828; }
+.device-category.separator { background-color: #f3e5f5; color: #7b1fa2; }
+.device-category.ballast { background-color: #e0f7fa; color: #00838f; }
+.device-category.windlass { background-color: #fce4ec; color: #880e4f; }
+.device-category.crane { background-color: #e3f2fd; color: #0d47a1; }
+.device-category.generator { background-color: #fff8e1; color: #f57c00; }
+.device-category.air-conditioner { background-color: #e1f5fe; color: #0288d1; }
+.device-category.chiller { background-color: #e3f2fd; color: #1565c0; }
+.device-category.inert-gas { background-color: #f3e5f5; color: #6a1b9a; }
+.device-category.co2-capture { background-color: #c8e6c9; color: #2e7d32; }
+.device-category.propeller { background-color: #fff3e0; color: #e65100; }
 </style>

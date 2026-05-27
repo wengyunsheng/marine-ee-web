@@ -20,8 +20,8 @@
                   @click="selectMode('A')"
                 >
                   <div class="mode-icon">🔄</div>
-                  <div class="mode-title">模式A：同型号-不同船型</div>
-                  <div class="mode-desc">同一设备型号，在不同船舶类型上的能效对比</div>
+                  <div class="mode-title">模式A：同型号-不同工况</div>
+                  <div class="mode-desc">同一设备型号，在不同运行工况下的能效对比</div>
                 </el-card>
               </el-col>
 
@@ -34,7 +34,7 @@
                 >
                   <div class="mode-icon">⚙️</div>
                   <div class="mode-title">模式B：同设备-不同工况</div>
-                  <div class="mode-desc">同一设备/船型，在不同运行工况下的能效对比</div>
+                  <div class="mode-desc">同一设备，在不同运行工况下的能效对比</div>
                 </el-card>
               </el-col>
 
@@ -73,11 +73,11 @@
           </div>
         </div>
 
-        <!-- 模式A：同型号-不同船型 配置页面 -->
+        <!-- 模式A：同型号-不同工况 配置页面 -->
         <div v-else-if="currentView === 'config-A'" class="config-view">
           <div class="config-header">
             <el-button link @click="backToModeSelect">← 返回模式选择</el-button>
-            <span class="config-title">对比分析 > 同型号-不同船型</span>
+            <span class="config-title">对比分析 > 同型号-不同工况</span>
           </div>
 
           <div class="config-steps">
@@ -148,22 +148,19 @@
             </div>
 
             <div class="step">
-              <h4>步骤3：选择船型（多选）</h4>
+              <h4>步骤3：选择对比工况（多选）</h4>
               <div class="step-content">
-                <div class="ship-type-list">
-                  <el-checkbox-group v-model="configA.shipTypes">
-                    <el-checkbox 
-                      v-for="ship in shipTypes" 
-                      :key="ship.id"
-                      :label="ship.id"
-                      :disabled="ship.dataCount === 0"
-                      class="ship-type-item"
-                    >
-                      <span class="ship-name">{{ ship.name }}</span>
-                      <span class="data-count">数据：{{ ship.dataCount }}条可用</span>
-                    </el-checkbox>
-                  </el-checkbox-group>
-                </div>
+                <el-checkbox-group v-model="configA.selectedConditions" class="condition-list">
+                  <el-checkbox 
+                    v-for="cond in loadConditions" 
+                    :key="cond.value"
+                    :label="cond.value"
+                    class="condition-item"
+                  >
+                    <span class="condition-name">{{ cond.label }}</span>
+                    <span class="condition-weight">加权系数：{{ cond.weight }}</span>
+                  </el-checkbox>
+                </el-checkbox-group>
               </div>
             </div>
           </div>
@@ -206,17 +203,7 @@
                         </el-select>
                       </el-form-item>
                     </el-col>
-                    <el-col :span="8">
-                      <el-form-item label="所属船型（可选）">
-                        <el-select v-model="configB.shipType" placeholder="不限制" style="width: 100%">
-                          <el-option value="" label="不限制" />
-                          <el-option value="VLCC" label="VLCC超大型油轮" />
-                          <el-option value="散货船" label="散货船" />
-                          <el-option value="集装箱船" label="集装箱船" />
-                          <el-option value="液化气船" label="液化气船" />
-                        </el-select>
-                      </el-form-item>
-                    </el-col>
+
                   </el-row>
                 </el-form>
               </div>
@@ -302,17 +289,7 @@
                         </el-select>
                       </el-form-item>
                     </el-col>
-                    <el-col :span="8">
-                      <el-form-item label="所属船型（可选）">
-                        <el-select v-model="configC.shipType" placeholder="不限制" style="width: 100%">
-                          <el-option value="" label="不限制" />
-                          <el-option value="VLCC" label="VLCC超大型油轮" />
-                          <el-option value="散货船" label="散货船" />
-                          <el-option value="集装箱船" label="集装箱船" />
-                          <el-option value="液化气船" label="液化气船" />
-                        </el-select>
-                      </el-form-item>
-                    </el-col>
+
                   </el-row>
                 </el-form>
               </div>
@@ -507,14 +484,13 @@ const configA = ref({
   loadCondition: '',
   testCycle: '',
   dataSource: '',
-  shipTypes: []
+  selectedConditions: []
 })
 
 // 模式B配置
 const configB = ref({
   brand: '',
   model: '',
-  shipType: '',
   conditions: [],
   testCycle: '',
   dataSource: ''
@@ -524,7 +500,6 @@ const configB = ref({
 const configC = ref({
   brand: '',
   model: '',
-  shipType: '',
   loadCondition: '',
   dataSources: []
 })
@@ -551,14 +526,6 @@ const filteredModelsB = computed(() => {
 const filteredModelsC = computed(() => {
   return configC.value.brand ? brandModels[configC.value.brand] || [] : []
 })
-
-// 船型列表
-const shipTypes = ref([
-  { id: 'VLCC', name: 'VLCC超大型油轮', dataCount: 2 },
-  { id: '散货船', name: '散货船', dataCount: 1 },
-  { id: '集装箱船', name: '集装箱船', dataCount: 3 },
-  { id: '液化气船', name: '液化气船', dataCount: 0 }
-])
 
 // 工况列表
 const loadConditions = ref([
@@ -604,7 +571,7 @@ const comparisonConditionText = computed(() => {
 const canStartComparisonA = computed(() => {
   return configA.value.brand && configA.value.model && 
          configA.value.loadCondition && configA.value.testCycle && 
-         configA.value.shipTypes.length >= 2
+         configA.value.selectedConditions.length >= 2
 })
 
 const canStartComparisonB = computed(() => {
@@ -655,13 +622,12 @@ const onBrandChange = () => {
   configA.value.model = ''
 }
 
-const toggleShipTypeA = (ship) => {
-  if (ship.dataCount === 0) return
-  const index = configA.value.shipTypes.indexOf(ship.id)
+const toggleConditionA = (cond) => {
+  const index = configA.value.selectedConditions.indexOf(cond)
   if (index > -1) {
-    configA.value.shipTypes.splice(index, 1)
+    configA.value.selectedConditions.splice(index, 1)
   } else {
-    configA.value.shipTypes.push(ship.id)
+    configA.value.selectedConditions.push(cond)
   }
 }
 
@@ -761,7 +727,7 @@ const getLevelType = (levelClass) => {
   margin-top: 6px;
 }
 
-/* 船型列表 */
+/* 工况列表 */
 
 .ship-name,
 .condition-name {

@@ -9,15 +9,7 @@
       <el-form-item label="模型名称" required>
         <el-input v-model="localFormData.name" placeholder="请输入模型名称" />
       </el-form-item>
-      <el-form-item label="船型" required>
-        <el-select v-model="localFormData.shipType" placeholder="请选择船型" style="width: 100%;">
-          <el-option label="VLCC超大型油轮" value="VLCC超大型油轮" />
-          <el-option label="散货船" value="散货船" />
-          <el-option label="集装箱船" value="集装箱船" />
-          <el-option label="液化气船" value="液化气船" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="设备类型" required>
+      <el-form-item label="设备类型名称" required>
         <el-select v-model="localFormData.deviceType" placeholder="请选择设备类型" style="width: 100%;">
           <el-option label="船用柴油发动机（低速机）" value="船用柴油发动机（低速机）" />
           <el-option label="船用柴油发动机（中速机）" value="船用柴油发动机（中速机）" />
@@ -25,21 +17,45 @@
           <el-option label="船用LNG/柴油双燃料发动机（中速机）" value="船用LNG/柴油双燃料发动机（中速机）" />
           <el-option label="船用甲醇/柴油双燃料发动机（低速机）" value="船用甲醇/柴油双燃料发动机（低速机）" />
           <el-option label="船用甲醇/柴油双燃料发动机（中速机）" value="船用甲醇/柴油双燃料发动机（中速机）" />
+          <el-option label="单台齿轮箱" value="单台齿轮箱" />
+          <el-option label="两台齿轮箱" value="两台齿轮箱" />
+          <el-option label="船用有机朗肯循环发电装置" value="船用有机朗肯循环发电装置" />
+          <el-option label="船用蒸汽透平发电装置" value="船用蒸汽透平发电装置" />
+          <el-option label="单功能焚烧炉（固体废弃物）" value="单功能焚烧炉（固体废弃物）" />
+          <el-option label="单功能焚烧炉（污油泥）" value="单功能焚烧炉（污油泥）" />
+          <el-option label="双功能焚烧炉" value="双功能焚烧炉" />
+          <el-option label="多功能焚烧炉" value="多功能焚烧炉" />
+          <el-option label="船用碟式分离机" value="船用碟式分离机" />
+          <el-option label="船用压载水处理设备" value="船用压载水处理设备" />
+          <el-option label="船用起锚机" value="船用起锚机" />
+          <el-option label="船用系泊绞车" value="船用系泊绞车" />
+          <el-option label="船用吊机" value="船用吊机" />
+          <el-option label="船用低压交流三相同步发电机" value="船用低压交流三相同步发电机" />
+          <el-option label="船用中压交流三相同步发电机" value="船用中压交流三相同步发电机" />
+          <el-option label="船用组合式空调机组" value="船用组合式空调机组" />
+          <el-option label="船用冷水机组" value="船用冷水机组" />
+          <el-option label="船用惰性气体系统" value="船用惰性气体系统" />
+          <el-option label="船用二氧化碳捕集设备" value="船用二氧化碳捕集设备" />
+          <el-option label="船用推进器" value="船用推进器" />
         </el-select>
       </el-form-item>
-      <el-form-item label="模型版本">
-        <el-input v-model="localFormData.version" placeholder="请输入模型版本" />
-      </el-form-item>
-      <el-form-item label="状态">
-        <el-select v-model="localFormData.status" placeholder="请选择状态" style="width: 100%;">
-          <el-option label="已连接" value="connected" />
-          <el-option label="未连接" value="disconnected" />
-          <el-option label="测试中" value="testing" />
-          <el-option label="已验证" value="validated" />
+      <el-form-item label="类别">
+        <el-select v-model="localFormData.category" placeholder="请选择类别" style="width: 100%;">
+          <el-option label="船用发动机" value="engine" />
+          <el-option label="船用齿轮箱" value="gearbox" />
+          <el-option label="船用余热回收发电装置" value="waste-heat" />
+          <el-option label="船用焚烧炉" value="incinerator" />
+          <el-option label="船用碟式分离机" value="separator" />
+          <el-option label="船用压载水处理设备" value="ballast" />
+          <el-option label="船用锚绞机" value="windlass" />
+          <el-option label="船用吊机" value="crane" />
+          <el-option label="船用发电机" value="generator" />
+          <el-option label="船用组合式空调机组" value="air-conditioner" />
+          <el-option label="船用冷水机组" value="chiller" />
+          <el-option label="船用惰性气体系统" value="inert-gas" />
+          <el-option label="船用二氧化碳捕集设备" value="co2-capture" />
+          <el-option label="船用推进器" value="propeller" />
         </el-select>
-      </el-form-item>
-      <el-form-item label="数据连接信息">
-        <el-input v-model="localFormData.connectionInfo" type="textarea" :rows="3" placeholder="请输入数据连接信息，如数据源、连接状态等" />
       </el-form-item>
       <el-form-item label="描述">
         <el-input v-model="localFormData.description" type="textarea" :rows="3" placeholder="请输入模型描述" />

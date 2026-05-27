@@ -17,13 +17,6 @@
       
       <!-- 参数分组表格 -->
       <el-table :data="allParams" style="width: 100%" border stripe>
-        <el-table-column label="参数分组" width="120">
-          <template #default="{ row }">
-            <el-tag :type="getGroupTagType(row.group)" size="small">
-              {{ getGroupName(row.group) }}
-            </el-tag>
-          </template>
-        </el-table-column>
         <el-table-column label="参数名称" min-width="200">
           <template #default="{ row }">
             <el-input v-model="row.name" size="default" placeholder="请输入参数名称" />
@@ -78,43 +71,7 @@ watch(() => props.params, (newParams) => {
   localParams.value = JSON.parse(JSON.stringify(newParams))
 }, { immediate: true })
 
-const basicParamKeywords = ['额定转速', '额定功率', '主燃料低热值', '引燃燃料低热值', '引燃油低热值']
-
-// 合并所有参数并添加分组信息
-const allParams = computed(() => {
-  return localParams.value.map(p => {
-    let group = 'other'
-    if (basicParamKeywords.some(keyword => p.name.includes(keyword))) {
-      group = 'basic'
-    } else if (p.name.includes('工况') || p.name.includes('%')) {
-      group = 'workingCondition'
-    }
-    return {
-      ...p,
-      group
-    }
-  })
-})
-
-// 获取分组名称
-const getGroupName = (group) => {
-  const groupMap = {
-    basic: '基本参数',
-    workingCondition: '工况消耗参数',
-    other: '其他参数'
-  }
-  return groupMap[group] || '其他参数'
-}
-
-// 获取分组标签类型
-const getGroupTagType = (group) => {
-  const typeMap = {
-    basic: 'primary',
-    workingCondition: 'success',
-    other: 'info'
-  }
-  return typeMap[group] || 'info'
-}
+const allParams = computed(() => localParams.value)
 
 const addNewParam = () => {
   const newId = localParams.value.length > 0 

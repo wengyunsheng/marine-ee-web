@@ -22,12 +22,13 @@
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        <el-select v-model="modelStatusFilter" placeholder="全部状态" clearable style="width: 150px;" @change="filterModels">
-          <el-option label="全部状态" value="" />
-          <el-option label="已连接" value="connected" />
-          <el-option label="未连接" value="disconnected" />
-          <el-option label="测试中" value="testing" />
-          <el-option label="已验证" value="validated" />
+        <el-select v-model="categoryFilter" placeholder="全部类别" clearable style="width: 180px;" @change="filterModels">
+          <el-option label="全部类别" value="" />
+          <el-option v-for="opt in categoryOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+        </el-select>
+        <el-select v-model="deviceTypeFilter" placeholder="全部设备类型" clearable style="width: 240px;" @change="filterModels">
+          <el-option label="全部设备类型" value="" />
+          <el-option v-for="opt in deviceTypeOptions" :key="opt" :label="opt" :value="opt" />
         </el-select>
       </div>
     </div>
@@ -35,32 +36,27 @@
     <div class="model-list-section">
       <h3>样机模型列表</h3>
       <el-table :data="paginatedModels" style="width: 100%" border stripe>
-        <el-table-column prop="name" label="模型名称" min-width="150" />
-        <el-table-column prop="shipType" label="船型" min-width="120" />
-        <el-table-column prop="deviceType" label="设备类型" min-width="180" />
-        <el-table-column label="关联数据" width="150">
-          <template #default="scope">
-            <el-link v-if="scope.row.relatedData" type="primary" @click="navigateToData(scope.row.relatedData)">
-              {{ scope.row.relatedData }}
-            </el-link>
-            <span v-else class="text-muted">-</span>
+        <el-table-column prop="name" label="模型名称" min-width="280" max-width="320" />
+        <el-table-column prop="deviceType" label="设备类型名称" min-width="200" max-width="240" />
+        <el-table-column label="类别" width="140">
+          <template #default="{ row }">
+            <span class="device-category" :class="row.category">
+              {{ getCategoryName(row.category) }}
+            </span>
           </template>
         </el-table-column>
-        <el-table-column prop="version" label="模型版本" width="120" />
-        <el-table-column label="状态" width="100">
-          <template #default="scope">
-            <el-tag :type="getStatusTagType(scope.row.status)">
-              {{ getStatusText(scope.row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
+        <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
         <el-table-column prop="createdAt" label="创建时间" width="120" />
-        <el-table-column label="操作" width="350" fixed="right">
+        <el-table-column label="操作" min-width="280" fixed="right">
           <template #default="scope">
-            <el-button type="primary" size="small" @click="viewModel(scope.row)">查看</el-button>
-            <el-button size="small" @click="view3DModel(scope.row)">3D模型</el-button>
-            <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="deleteModel(scope.row.id)">删除</el-button>
+            <div class="operation-buttons">
+              <el-button type="primary" size="small" @click="viewModel(scope.row)">查看</el-button>
+              <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
+              <el-button :type="scope.row.model3D ? 'primary' : 'success'" size="small" @click="handle3DModel(scope.row)">
+                {{ scope.row.model3D ? '查看3D模型' : '上传3D模型' }}
+              </el-button>
+              <el-button type="danger" size="small" @click="deleteModel(scope.row.id)">删除</el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -120,7 +116,8 @@ const props = defineProps({
 const emit = defineEmits(['switch-to-visualization'])
 
 const searchQuery = ref('')
-const modelStatusFilter = ref('')
+const categoryFilter = ref('')
+const deviceTypeFilter = ref('')
 
 const showFormModal = ref(false)
 const showViewModal = ref(false)
@@ -131,95 +128,114 @@ const current3DModel = ref(null)
 
 const defaultFormData = {
   name: '',
-  shipType: '',
   deviceType: '',
-  version: 'v1.0.0',
-  status: 'disconnected',
-  connectionInfo: '',
+  category: '',
   description: ''
 }
 
 const formData = ref({ ...defaultFormData })
+
+// 设备类型→类别映射（与设备类型管理模块统一）
+const deviceTypeToCategoryMap = {
+  '船用柴油发动机（低速机）': 'engine',
+  '船用柴油发动机（中速机）': 'engine',
+  '船用LNG/柴油双燃料发动机（低速机）': 'engine',
+  '船用LNG/柴油双燃料发动机（中速机）': 'engine',
+  '船用甲醇/柴油双燃料发动机（低速机）': 'engine',
+  '船用甲醇/柴油双燃料发动机（中速机）': 'engine',
+  '单台齿轮箱': 'gearbox',
+  '两台齿轮箱': 'gearbox',
+  '船用有机朗肯循环发电装置': 'waste-heat',
+  '船用蒸汽透平发电装置': 'waste-heat',
+  '单功能焚烧炉（固体废弃物）': 'incinerator',
+  '单功能焚烧炉（污油泥）': 'incinerator',
+  '双功能焚烧炉': 'incinerator',
+  '多功能焚烧炉': 'incinerator',
+  '船用碟式分离机': 'separator',
+  '船用压载水处理设备': 'ballast',
+  '船用起锚机': 'windlass',
+  '船用系泊绞车': 'windlass',
+  '船用吊机': 'crane',
+  '船用低压交流三相同步发电机': 'generator',
+  '船用中压交流三相同步发电机': 'generator',
+  '船用组合式空调机组': 'air-conditioner',
+  '船用冷水机组': 'chiller',
+  '船用惰性气体系统': 'inert-gas',
+  '船用二氧化碳捕集设备': 'co2-capture',
+  '船用推进器': 'propeller'
+}
+
+const categoryConfig = {
+  engine: { label: '船用发动机' },
+  gearbox: { label: '船用齿轮箱' },
+  'waste-heat': { label: '船用余热回收发电装置' },
+  incinerator: { label: '船用焚烧炉' },
+  separator: { label: '船用碟式分离机' },
+  ballast: { label: '船用压载水处理设备' },
+  windlass: { label: '船用锚绞机' },
+  crane: { label: '船用吊机' },
+  generator: { label: '船用发电机' },
+  'air-conditioner': { label: '船用组合式空调机组' },
+  chiller: { label: '船用冷水机组' },
+  'inert-gas': { label: '船用惰性气体系统' },
+  'co2-capture': { label: '船用二氧化碳捕集设备' },
+  propeller: { label: '船用推进器' }
+}
+
+const categoryOptions = Object.entries(categoryConfig).map(([value, cfg]) => ({ value, label: cfg.label }))
+const deviceTypeOptions = Object.keys(deviceTypeToCategoryMap)
+const getCategoryName = (category) => categoryConfig[category]?.label || category
+const getDeviceCategory = (deviceType) => deviceTypeToCategoryMap[deviceType] || ''
 
 // 初始化模型数据
 const initialModels = [
   {
     id: 1,
     name: 'VLCC超大型油轮 - 船用柴油发动机（低速机）',
-    shipType: 'VLCC超大型油轮',
     deviceType: '船用柴油发动机（低速机）',
-    relatedData: 'MAN B&W 6S70MC - 2024-04-20台架试验',
-    version: 'v1.0.0',
-    status: 'connected',
-    connectionInfo: '已连接至实船数据采集系统，数据源：船舶AIS系统',
+    category: 'engine',
     description: '用于VLCC超大型油轮低速柴油发动机的能效评估仿真模型',
-    createdAt: '2024-04-01',
-    metrics: { score: 89, accuracy: '94%' }
+    createdAt: '2024-04-01'
   },
   {
     id: 2,
     name: '散货船 - 船用柴油发动机（中速机）',
-    shipType: '散货船',
     deviceType: '船用柴油发动机（中速机）',
-    relatedData: 'Cummins QSK60 - 2024-04-15实船运行',
-    version: 'v1.0.0',
-    status: 'connected',
-    connectionInfo: '已连接至台架测试系统，数据源：实验室台架数据',
+    category: 'engine',
     description: '用于散货船中速柴油发动机的能效评估仿真模型',
-    createdAt: '2024-04-02',
-    metrics: { score: 92, accuracy: '91%' }
+    createdAt: '2024-04-02'
   },
   {
     id: 3,
     name: '集装箱船 - 船用LNG/柴油双燃料发动机（低速机）',
-    shipType: '集装箱船',
     deviceType: '船用LNG/柴油双燃料发动机（低速机）',
-    relatedData: 'Wärtsilä 50DF - 2024-04-10台架试验',
-    version: 'v1.0.0',
-    status: 'testing',
-    connectionInfo: '测试中，连接至模拟数据系统',
+    category: 'engine',
     description: '用于集装箱船LNG/柴油双燃料发动机的能效评估仿真模型',
-    createdAt: '2024-04-03',
-    metrics: { score: 76, accuracy: '88%' }
+    createdAt: '2024-04-03'
   },
   {
     id: 4,
     name: '液化气船 - 船用LNG/柴油双燃料发动机（中速机）',
-    shipType: '液化气船',
     deviceType: '船用LNG/柴油双燃料发动机（中速机）',
-    relatedData: 'Caterpillar 3516E - 2024-04-05实船运行',
-    version: 'v1.0.0',
-    status: 'validated',
-    connectionInfo: '已验证，连接至实船数据与台架数据',
+    category: 'engine',
     description: '用于液化气船LNG/柴油双燃料发动机的能效评估仿真模型',
-    createdAt: '2024-04-04',
-    metrics: { score: 82, accuracy: '90%' }
+    createdAt: '2024-04-04'
   },
   {
     id: 5,
     name: 'VLCC超大型油轮 - 船用甲醇/柴油双燃料发动机（低速机）',
-    shipType: 'VLCC超大型油轮',
     deviceType: '船用甲醇/柴油双燃料发动机（低速机）',
-    relatedData: 'MAN B&W ME-LGIM - 2024-04-01台架试验',
-    version: 'v1.0.0',
-    status: 'disconnected',
-    connectionInfo: '未连接数据源',
+    category: 'engine',
     description: '用于VLCC超大型油轮甲醇/柴油双燃料发动机的能效评估仿真模型',
-    createdAt: '2024-04-05',
-    metrics: { score: 88, accuracy: '93%' }
+    createdAt: '2024-04-05'
   },
   {
     id: 6,
     name: '散货船 - 船用甲醇/柴油双燃料发动机（中速机）',
-    shipType: '散货船',
     deviceType: '船用甲醇/柴油双燃料发动机（中速机）',
-    relatedData: 'Wärtsilä 32 Methanol - 2024-03-25实船运行',
-    version: 'v1.0.0',
-    status: 'testing',
-    connectionInfo: '测试中，连接至台架测试系统',
+    category: 'engine',
     description: '用于散货船甲醇/柴油双燃料发动机的能效评估仿真模型',
-    createdAt: '2024-04-06',
-    metrics: { score: 79, accuracy: '87%' }
+    createdAt: '2024-04-06'
   }
 ]
 
@@ -238,8 +254,11 @@ const filteredModels = computed(() => {
       model.name.toLowerCase().includes(searchQuery.value.toLowerCase())
     )
   }
-  if (modelStatusFilter.value) {
-    result = result.filter(model => model.status === modelStatusFilter.value)
+  if (categoryFilter.value) {
+    result = result.filter(model => model.category === categoryFilter.value)
+  }
+  if (deviceTypeFilter.value) {
+    result = result.filter(model => model.deviceType === deviceTypeFilter.value)
   }
   return result
 })
@@ -268,35 +287,10 @@ const resetPage = () => {
   currentPage.value = 1
 }
 
-const getStatusText = (status) => {
-  const statusMap = {
-    connected: '已连接',
-    disconnected: '未连接',
-    testing: '测试中',
-    validated: '已验证'
-  }
-  return statusMap[status] || status
-}
-
-const getStatusTagType = (status) => {
-  const typeMap = {
-    connected: 'success',
-    disconnected: 'info',
-    testing: 'warning',
-    validated: ''
-  }
-  return typeMap[status] || ''
-}
-
 const filterModels = () => {
   console.log('过滤模型', {
-    searchQuery: searchQuery.value,
-    modelStatusFilter: modelStatusFilter.value
+    searchQuery: searchQuery.value
   })
-}
-
-const navigateToData = (relatedData) => {
-  ElMessage.info(`跳转到能效数据管理，查看数据：${relatedData}`)
 }
 
 const openAddModal = () => {
@@ -317,7 +311,7 @@ const closeFormModal = () => {
 }
 
 const saveModel = (data) => {
-  if (!data.name || !data.shipType || !data.deviceType) {
+  if (!data.name || !data.deviceType) {
     ElMessage.warning('请填写必填项')
     return
   }
@@ -325,12 +319,14 @@ const saveModel = (data) => {
   if (isEditMode.value) {
     const index = models.value.findIndex(m => m.id === data.id)
     if (index !== -1) {
+      data.category = getDeviceCategory(data.deviceType)
       models.value[index] = { ...data }
     }
   } else {
     const newId = Math.max(...models.value.map(m => m.id)) + 1
     models.value.push({
       ...data,
+      category: getDeviceCategory(data.deviceType),
       id: newId,
       createdAt: new Date().toISOString().split('T')[0]
     })
@@ -377,13 +373,14 @@ const importModel = () => {
           if (Array.isArray(importedData)) {
             // 检查数据格式是否正确
             const validData = importedData.filter(item => 
-              item.name && item.shipType && item.deviceType && item.version && item.status
+              item.name && item.deviceType && item.version && item.status
             )
             if (validData.length > 0) {
               // 生成新的ID
               const maxId = Math.max(...models.value.map(m => m.id), 0)
               validData.forEach((item, index) => {
                 item.id = maxId + index + 1
+                item.category = getDeviceCategory(item.deviceType)
                 item.createdAt = item.createdAt || new Date().toISOString().split('T')[0]
               })
               models.value = [...models.value, ...validData]
@@ -407,7 +404,6 @@ const importModel = () => {
 const exportModels = () => {
   const dataToExport = models.value.map(item => ({
     name: item.name,
-    shipType: item.shipType,
     deviceType: item.deviceType,
     version: item.version,
     status: item.status,
@@ -425,6 +421,35 @@ const exportModels = () => {
   a.download = `models-${new Date().toISOString().split('T')[0]}.json`
   a.click()
   URL.revokeObjectURL(url)
+}
+
+const handle3DModel = (model) => {
+  if (model.model3D) {
+    // 已上传，跳转到可视化模块查看
+    if (props.globalState) {
+      props.globalState.selectedModel = model
+      emit('switch-to-visualization')
+    }
+  } else {
+    // 未上传，弹出文件选择器
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.obj,.fbx,.glb,.gltf,.stl,.step,.stp,.iges,.igs,.dae'
+    input.onchange = (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        ElMessage.success(`正在上传 ${file.name} 模型文件到 ${model.name}`)
+        // TODO: 实现实际的文件上传逻辑，上传成功后设置 model.model3D = file.name
+        model.model3D = file.name
+      }
+    }
+    input.click()
+  }
+}
+
+const upload3DModel = (model) => {
+  // 保留旧方法名以防其他地方调用
+  handle3DModel(model)
 }
 
 const view3DModel = (model) => {
@@ -484,8 +509,36 @@ const close3DModel = () => {
   color: #333;
 }
 
-.text-muted {
-  color: #94a3b8;
+.device-category {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+  display: inline-block;
+  width: fit-content;
+}
+
+.device-category.engine { background-color: #e3f2fd; color: #1976d2; }
+.device-category.gearbox { background-color: #e8f5e8; color: #2e7d32; }
+.device-category.waste-heat { background-color: #fff3e0; color: #ef6c00; }
+.device-category.incinerator { background-color: #ffebee; color: #c62828; }
+.device-category.separator { background-color: #f3e5f5; color: #7b1fa2; }
+.device-category.ballast { background-color: #e0f7fa; color: #00838f; }
+.device-category.windlass { background-color: #fce4ec; color: #880e4f; }
+.device-category.crane { background-color: #e3f2fd; color: #0d47a1; }
+.device-category.generator { background-color: #fff8e1; color: #f57c00; }
+.device-category.air-conditioner { background-color: #e1f5fe; color: #0288d1; }
+.device-category.chiller { background-color: #e3f2fd; color: #1565c0; }
+.device-category.inert-gas { background-color: #f3e5f5; color: #6a1b9a; }
+.device-category.co2-capture { background-color: #c8e6c9; color: #2e7d32; }
+.device-category.propeller { background-color: #fff3e0; color: #e65100; }
+
+.operation-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .btn {
