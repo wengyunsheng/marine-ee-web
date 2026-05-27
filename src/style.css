@@ -5,6 +5,91 @@
     box-sizing: border-box;
 }
 
+/* 自定义滚动条样式 - Element Plus风格 */
+/* Webkit浏览器（Chrome, Safari, Edge） */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f5f7fa;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c0c4cc;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #909399;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #606266;
+}
+
+/* 横向滚动条特殊处理 */
+::-webkit-scrollbar-track:horizontal {
+    background: #f5f7fa;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+    background: #c0c4cc;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:horizontal:hover {
+    background: #909399;
+}
+
+/* Firefox浏览器 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #c0c4cc #f5f7fa;
+}
+
+/* 弹窗内容区域滚动条 */
+.el-dialog__body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.el-dialog__body::-webkit-scrollbar-track {
+    background: #f5f7fa;
+    border-radius: 3px;
+}
+
+.el-dialog__body::-webkit-scrollbar-thumb {
+    background: #dcdfe6;
+    border-radius: 3px;
+}
+
+.el-dialog__body::-webkit-scrollbar-thumb:hover {
+    background: #c0c4cc;
+}
+
+/* 列表容器滚动条 */
+.table-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f5f7fa;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #dcdfe6;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #c0c4cc;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;

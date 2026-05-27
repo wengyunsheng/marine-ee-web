@@ -2,137 +2,111 @@
   <div class="device-params-container">
     <div class="device-params-controls">
       <div class="control-group">
-        <button class="btn btn-primary" @click="addParamTemplate">+ 新增设备参数</button>
-        <button class="btn btn-secondary" @click="importParamTemplates">导入设备参数</button>
-        <button class="btn btn-secondary" @click="exportParamTemplates">导出设备参数</button>
+        <el-button type="primary" @click="addParamTemplate">
+          <el-icon><Plus /></el-icon>
+          新增设备参数
+        </el-button>
+        <el-button @click="importParamTemplates">导入设备参数</el-button>
+        <el-button @click="exportParamTemplates">导出设备参数</el-button>
       </div>
 
       <div class="search-filter">
-        <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="搜索设备类型名称" @keyup.enter="filterTemplates">
-          <button class="search-btn" @click="filterTemplates">🔍</button>
-        </div>
-        <select class="filter-select" v-model="categoryFilter" @change="filterTemplates">
-          <option value="">全部类别</option>
-          <option value="engine">船用发动机</option>
-          <option value="gearbox">船用齿轮箱</option>
-          <option value="waste-heat">船用余热回收发电装置</option>
-          <option value="incinerator">船用焚烧炉</option>
-          <option value="separator">船用碟式分离机</option>
-          <option value="ballast">船用压载水处理设备</option>
-          <option value="windlass">船用锚绞机</option>
-          <option value="crane">船用吊机</option>
-          <option value="generator">船用发电机</option>
-          <option value="air-conditioner">船用空调机组</option>
-          <option value="chiller">船用冷水机组</option>
-          <option value="inert-gas">船用惰性气体系统</option>
-          <option value="co2-capture">船用二氧化碳捕集设备</option>
-          <option value="propeller">船用推进器</option>
-        </select>
-        <select class="filter-select" v-model="deviceTypeFilter" @change="filterTemplates">
-          <option value="">全部设备类型</option>
-          <option value="船用柴油发动机（低速机）">船用柴油发动机（低速机）</option>
-          <option value="船用柴油发动机（中速机）">船用柴油发动机（中速机）</option>
-          <option value="船用LNG/柴油双燃料发动机（低速机）">船用LNG/柴油双燃料发动机（低速机）</option>
-          <option value="船用LNG/柴油双燃料发动机（中速机）">船用LNG/柴油双燃料发动机（中速机）</option>
-          <option value="船用甲醇/柴油双燃料发动机（低速机）">船用甲醇/柴油双燃料发动机（低速机）</option>
-          <option value="船用甲醇/柴油双燃料发动机（中速机）">船用甲醇/柴油双燃料发动机（中速机）</option>
-          <option value="单台齿轮箱">单台齿轮箱</option>
-          <option value="两台齿轮箱">两台齿轮箱</option>
-          <option value="船用有机朗肯循环发电装置">船用有机朗肯循环发电装置</option>
-          <option value="船用蒸汽透平发电装置">船用蒸汽透平发电装置</option>
-          <option value="单功能焚烧炉（固体废弃物）">单功能焚烧炉（固体废弃物）</option>
-          <option value="单功能焚烧炉（污油泥）">单功能焚烧炉（污油泥）</option>
-          <option value="双功能焚烧炉">双功能焚烧炉</option>
-          <option value="多功能焚烧炉">多功能焚烧炉</option>
-          <option value="船用碟式分离机">船用碟式分离机</option>
-          <option value="船用压载水处理设备">船用压载水处理设备</option>
-          <option value="船用锚绞机">船用锚绞机</option>
-          <option value="船用吊机">船用吊机</option>
-          <option value="船用低压交流三相同步发电机">船用低压交流三相同步发电机</option>
-          <option value="船用中压交流三相同步发电机">船用中压交流三相同步发电机</option>
-          <option value="船用组合式空调机组">船用组合式空调机组</option>
-          <option value="船用冷水机组">船用冷水机组</option>
-          <option value="船用惰性气体系统">船用惰性气体系统</option>
-          <option value="船用二氧化碳捕集设备">船用二氧化碳捕集设备</option>
-          <option value="船用推进器">船用推进器</option>
-        </select>
+        <el-input 
+          v-model="searchQuery" 
+          placeholder="搜索设备类型名称" 
+          clearable
+          style="width: 200px;"
+          @keyup.enter="filterTemplates"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-select v-model="categoryFilter" placeholder="全部类别" clearable style="width: 150px;" @change="filterTemplates">
+          <el-option label="全部类别" value="" />
+          <el-option label="船用发动机" value="engine" />
+          <el-option label="船用齿轮箱" value="gearbox" />
+          <el-option label="船用余热回收发电装置" value="waste-heat" />
+          <el-option label="船用焚烧炉" value="incinerator" />
+          <el-option label="船用碟式分离机" value="separator" />
+          <el-option label="船用压载水处理设备" value="ballast" />
+          <el-option label="船用锚绞机" value="windlass" />
+          <el-option label="船用吊机" value="crane" />
+          <el-option label="船用发电机" value="generator" />
+          <el-option label="船用空调机组" value="air-conditioner" />
+          <el-option label="船用冷水机组" value="chiller" />
+          <el-option label="船用惰性气体系统" value="inert-gas" />
+          <el-option label="船用二氧化碳捕集设备" value="co2-capture" />
+          <el-option label="船用推进器" value="propeller" />
+        </el-select>
+        <el-select v-model="deviceTypeFilter" placeholder="全部设备类型" clearable style="width: 250px;" @change="filterTemplates">
+          <el-option label="全部设备类型" value="" />
+          <el-option label="船用柴油发动机（低速机）" value="船用柴油发动机（低速机）" />
+          <el-option label="船用柴油发动机（中速机）" value="船用柴油发动机（中速机）" />
+          <el-option label="船用LNG/柴油双燃料发动机（低速机）" value="船用LNG/柴油双燃料发动机（低速机）" />
+          <el-option label="船用LNG/柴油双燃料发动机（中速机）" value="船用LNG/柴油双燃料发动机（中速机）" />
+          <el-option label="船用甲醇/柴油双燃料发动机（低速机）" value="船用甲醇/柴油双燃料发动机（低速机）" />
+          <el-option label="船用甲醇/柴油双燃料发动机（中速机）" value="船用甲醇/柴油双燃料发动机（中速机）" />
+          <el-option label="单台齿轮箱" value="单台齿轮箱" />
+          <el-option label="两台齿轮箱" value="两台齿轮箱" />
+          <el-option label="船用有机朗肯循环发电装置" value="船用有机朗肯循环发电装置" />
+          <el-option label="船用蒸汽透平发电装置" value="船用蒸汽透平发电装置" />
+          <el-option label="单功能焚烧炉（固体废弃物）" value="单功能焚烧炉（固体废弃物）" />
+          <el-option label="单功能焚烧炉（污油泥）" value="单功能焚烧炉（污油泥）" />
+          <el-option label="双功能焚烧炉" value="双功能焚烧炉" />
+          <el-option label="多功能焚烧炉" value="多功能焚烧炉" />
+          <el-option label="船用碟式分离机" value="船用碟式分离机" />
+          <el-option label="船用压载水处理设备" value="船用压载水处理设备" />
+          <el-option label="船用起锚机" value="船用起锚机" />
+          <el-option label="船用系泊绞车" value="船用系泊绞车" />
+          <el-option label="船用吊机" value="船用吊机" />
+          <el-option label="船用低压交流三相同步发电机" value="船用低压交流三相同步发电机" />
+          <el-option label="船用中压交流三相同步发电机" value="船用中压交流三相同步发电机" />
+          <el-option label="船用组合式空调机组" value="船用组合式空调机组" />
+          <el-option label="船用冷水机组" value="船用冷水机组" />
+          <el-option label="船用惰性气体系统" value="船用惰性气体系统" />
+          <el-option label="船用二氧化碳捕集设备" value="船用二氧化碳捕集设备" />
+          <el-option label="船用推进器" value="船用推进器" />
+        </el-select>
       </div>
     </div>
 
     <div class="template-list-section">
       <h3>设备参数列表</h3>
-      <div class="template-table-container">
-        <table class="template-table">
-          <thead>
-            <tr>
-              <th>设备类型名称</th>
-              <th>类别</th>
-              <th>参数数量</th>
-              <th>描述</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="template in paginatedTemplates" :key="template.id">
-              <td>{{ template.deviceType }}</td>
-              <td>
-                <span class="device-category" :class="template.category">
-                  {{ getCategoryName(template.category) }}
-                </span>
-              </td>
-              <td>{{ template.params.length }} 个参数</td>
-              <td>{{ template.description }}</td>
-              <td class="action-buttons">
-                <button class="btn btn-sm btn-info" @click="openViewModal(template)">查看</button>
-                <button class="btn btn-sm btn-warning" @click="editTemplate(template)">编辑</button>
-                <button class="btn btn-sm btn-success" @click="openDefaultValueModal(template)">默认值配置</button>
-                <button class="btn btn-sm btn-danger" @click="deleteTemplate(template.id)">删除</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <el-table :data="paginatedTemplates" style="width: 100%" border stripe>
+        <el-table-column prop="deviceType" label="设备类型名称" min-width="250" />
+        <el-table-column label="类别" min-width="180">
+          <template #default="scope">
+            <span class="device-category" :class="scope.row.category">
+              {{ getCategoryName(scope.row.category) }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="参数数量" width="120">
+          <template #default="scope">
+            {{ scope.row.params.length }} 个参数
+          </template>
+        </el-table-column>
+        <el-table-column prop="description" label="描述" min-width="300" show-overflow-tooltip />
+        <el-table-column label="操作" width="400" fixed="right">
+          <template #default="scope">
+            <el-button type="primary" size="small" @click="openViewModal(scope.row)">查看</el-button>
+            <el-button type="warning" size="small" @click="editTemplate(scope.row)">编辑</el-button>
+            <el-button type="success" size="small" @click="openDefaultValueModal(scope.row)">默认值配置</el-button>
+            <el-button type="danger" size="small" @click="deleteTemplate(scope.row.id)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
       
-      <!-- 分页组件 -->
       <div class="pagination-container">
-        <div class="pagination-left">
-          <div class="pagination-info">
-            共 {{ filteredTemplates.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
-          </div>
-          <div class="pagination-page-size">
-            <label>每页</label>
-            <select v-model="pageSize" @change="resetPage" class="page-size-select">
-              <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}</option>
-            </select>
-            <span>条</span>
-          </div>
-        </div>
-        <div class="pagination">
-          <button 
-            class="pagination-btn" 
-            :disabled="currentPage === 1" 
-            @click="goToPage(currentPage - 1)"
-          >
-            上一页
-          </button>
-          <button 
-            v-for="page in totalPages" 
-            :key="page"
-            class="pagination-btn"
-            :class="{ active: currentPage === page }"
-            @click="goToPage(page)"
-          >
-            {{ page }}
-          </button>
-          <button 
-            class="pagination-btn" 
-            :disabled="currentPage === totalPages" 
-            @click="goToPage(currentPage + 1)"
-          >
-            下一页
-          </button>
-        </div>
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="pageSizes"
+          :total="filteredTemplates.length"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="resetPage"
+        />
       </div>
     </div>
 
@@ -168,6 +142,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search } from '@element-plus/icons-vue'
 import DeviceParamsForm from './components/DeviceParamsForm.vue'
 import DefaultValueConfig from './components/DefaultValueConfig.vue'
 import DeviceParamsView from './components/DeviceParamsView.vue'
@@ -252,8 +228,8 @@ const paramTemplates = ref([
     params: [
       { id: 27, name: '额定功率', unit: 'kW', defaultValue: 2000, minValue: 500, maxValue: 5000 },
       { id: 28, name: '额定转速', unit: 'r/min', defaultValue: 1500, minValue: 1000, maxValue: 2000 },
-      { id: 29, name: '主燃料低热值', unit: 'kJ/kg', defaultValue: 50000, minValue: 48000, maxValue: 52000 },
-      { id: 30, name: '引燃燃料低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
+      { id: 29, name: '主燃料低热引', unit: 'kJ/kg', defaultValue: 50000, minValue: 48000, maxValue: 52000 },
+      { id: 30, name: '引燃燃料低热값', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
       { id: 31, name: '25%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 170, minValue: 130, maxValue: 220 },
       { id: 32, name: '25%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 12, minValue: 6, maxValue: 24 },
       { id: 33, name: '50%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 160, minValue: 120, maxValue: 210 },
@@ -272,8 +248,8 @@ const paramTemplates = ref([
     params: [
       { id: 39, name: '额定功率', unit: 'kW', defaultValue: 15000, minValue: 0, maxValue: 30000 },
       { id: 40, name: '额定转速', unit: 'r/min', defaultValue: 100, minValue: 50, maxValue: 150 },
-      { id: 41, name: '主燃料低热值', unit: 'kJ/kg', defaultValue: 19900, minValue: 19000, maxValue: 21000 },
-      { id: 42, name: '引燃燃料低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
+      { id: 41, name: '主燃料低热引', unit: 'kJ/kg', defaultValue: 19900, minValue: 19000, maxValue: 21000 },
+      { id: 42, name: '引燃燃料低热값', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
       { id: 43, name: '25%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 350, minValue: 300, maxValue: 400 },
       { id: 44, name: '25%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 15, minValue: 8, maxValue: 25 },
       { id: 45, name: '50%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 330, minValue: 280, maxValue: 380 },
@@ -292,8 +268,8 @@ const paramTemplates = ref([
     params: [
       { id: 51, name: '额定功率', unit: 'kW', defaultValue: 2000, minValue: 500, maxValue: 5000 },
       { id: 52, name: '额定转速', unit: 'r/min', defaultValue: 1500, minValue: 1000, maxValue: 2000 },
-      { id: 53, name: '主燃料低热值', unit: 'kJ/kg', defaultValue: 19900, minValue: 19000, maxValue: 21000 },
-      { id: 54, name: '引燃燃料低热值', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
+      { id: 53, name: '主燃料低热引', unit: 'kJ/kg', defaultValue: 19900, minValue: 19000, maxValue: 21000 },
+      { id: 54, name: '引燃燃料低热값', unit: 'kJ/kg', defaultValue: 42700, minValue: 40000, maxValue: 45000 },
       { id: 55, name: '25%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 380, minValue: 330, maxValue: 430 },
       { id: 56, name: '25%工况下引燃燃油消耗率', unit: 'g/kWh', defaultValue: 18, minValue: 9, maxValue: 30 },
       { id: 57, name: '50%工况下燃气消耗率', unit: 'g/kWh', defaultValue: 360, minValue: 310, maxValue: 410 },
@@ -312,7 +288,7 @@ const categoryFilter = ref('')
 const deviceTypeFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
-const pageSizes = ref([10, 20, 50])
+const pageSizes = ref([10, 20, 50, 100, 200, 500])
 
 const filteredTemplates = computed(() => {
   let result = paramTemplates.value
@@ -405,9 +381,17 @@ const editTemplate = (template) => {
   showFormModal.value = true
 }
 
-const deleteTemplate = (id) => {
-  if (confirm('确定要删除这个设备参数吗？')) {
+const deleteTemplate = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这个设备参数吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
     paramTemplates.value = paramTemplates.value.filter(template => template.id !== id)
+    ElMessage.success('删除成功')
+  } catch {
+    // 用户取消删除
   }
 }
 
@@ -436,7 +420,7 @@ const handleSaveDefaultValues = (params) => {
     selectedTemplate.value.params = params
   }
   console.log('保存默认值:', params)
-  alert('默认值保存成功')
+  ElMessage.success('默认值保存成功')
   closeDefaultValueModal()
 }
 
@@ -454,7 +438,7 @@ const saveParamTemplate = (data) => {
     })
   }
   showFormModal.value = false
-  alert('设备参数保存成功')
+  ElMessage.success('设备参数保存成功')
 }
 
 const closeFormModal = () => {
@@ -496,15 +480,15 @@ const importParamTemplates = () => {
                 })
               })
               paramTemplates.value = [...paramTemplates.value, ...validData]
-              alert(`成功导入 ${validData.length} 个设备参数`)
+              ElMessage.success(`成功导入 ${validData.length} 个设备参数`)
             } else {
-              alert('导入的数据格式不正确')
+              ElMessage.error('导入的数据格式不正确')
             }
           } else {
-            alert('导入的数据格式不正确')
+            ElMessage.error('导入的数据格式不正确')
           }
         } catch (error) {
-          alert('导入失败：' + error.message)
+          ElMessage.error('导入失败：' + error.message)
         }
       }
       reader.readAsText(file)
@@ -552,419 +536,51 @@ const getDeviceParams = (deviceType) => {
 </script>
 
 <style scoped>
-.device-params-container {
-  padding: 20px;
-  height: 100%;
-  min-height: calc(100vh - 120px);
-  overflow-y: auto;
-  box-sizing: border-box;
+.device-params-container { 
+  padding: 20px; 
+  height: 100%; 
+  min-height: calc(100vh - 120px); 
+  overflow-y: auto; 
+  box-sizing: border-box; 
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+.device-params-controls { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 24px; 
+  flex-wrap: wrap; 
+  gap: 16px; 
 }
 
-.page-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+.control-group { 
+  display: flex; 
+  gap: 12px; 
+  flex-wrap: wrap; 
 }
 
-.device-params-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
+.search-filter { 
+  display: flex; 
+  gap: 16px; 
+  align-items: center; 
+  flex-wrap: wrap; 
 }
 
-.control-group {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+.template-list-section { 
+  margin-bottom: 24px; 
 }
 
-.search-filter {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.search-box {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 4px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.search-box input {
-  flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  background-color: transparent;
-}
-
-.search-btn {
-  padding: 6px 10px;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-left: 4px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.search-btn:hover {
-  background-color: #1d4ed8;
-}
-
-.filter-select {
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  background-color: white;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  outline: none;
-}
-
-.filter-select:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border-color: #93c5fd;
-}
-
-.filter-select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.template-list-section {
-  margin-bottom: 32px;
-}
-
-.template-list-section h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-}
-
-.template-table-container {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  border: 1px solid #e2e8f0;
-}
-
-.template-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.template-table th {
-  background-color: #f8fafc;
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.template-table td {
-  padding: 12px 16px;
-  font-size: 14px;
-  color: #333;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.template-table tr:hover {
-  background-color: #f8fafc;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-start;
-}
-
-.device-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.device-tab {
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.device-tab.active {
-  background: #2563eb;
-  color: white;
-  border-color: #2563eb;
-}
-
-/* 弹窗样式 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #64748b;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.modal-close:hover {
-  background-color: #e2e8f0;
-}
-
-.modal-body {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 20px;
-  border-top: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background-color: #2563eb;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #1d4ed8;
-}
-
-.btn-secondary {
-  background-color: #e2e8f0;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background-color: #cbd5e1;
-}
-
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: #dc2626;
-}
-
-.btn-info {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.btn-info:hover {
-  background-color: #2563eb;
-}
-
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 14px;
-}
-
-.btn-warning {
-  background-color: #f59e0b;
-  color: white;
-}
-
-.btn-warning:hover {
-  background-color: #d97706;
-}
-
-.btn-success {
-  background-color: #10b981;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #059669;
-}
-
-@media (max-width: 768px) {
-  .template-grid,
-  .default-values-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .device-tabs {
-    flex-direction: column;
-  }
-  
-  .device-tab {
-    width: 100%;
-  }
+.template-list-section h3 { 
+  margin: 0 0 16px 0; 
+  font-size: 18px; 
+  font-weight: 600; 
+  color: #333; 
 }
 
 .pagination-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.pagination-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.pagination-info {
-  font-size: 14px;
-  color: #64748b;
-}
-
-.pagination-page-size {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #64748b;
-}
-
-.page-size-select {
-  padding: 6px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  background-color: white;
-}
-
-.page-size-select:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.pagination {
-  display: flex;
-  gap: 8px;
-}
-
-.pagination-btn {
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background-color: white;
-  color: #333;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background-color: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.pagination-btn.active {
-  background-color: #2563eb;
-  color: white;
-  border-color: #2563eb;
-}
-
-.pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  justify-content: flex-end;
+  padding: 16px 0;
 }
 
 .device-category {
@@ -975,73 +591,18 @@ const getDeviceParams = (deviceType) => {
   white-space: nowrap;
 }
 
-.device-category.engine {
-  background-color: #e3f2fd;
-  color: #1976d2;
-}
-
-.device-category.gearbox {
-  background-color: #e8f5e8;
-  color: #2e7d32;
-}
-
-.device-category.waste-heat {
-  background-color: #fff3e0;
-  color: #ef6c00;
-}
-
-.device-category.incinerator {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-.device-category.separator {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
-}
-
-.device-category.ballast {
-  background-color: #e0f7fa;
-  color: #00838f;
-}
-
-.device-category.windlass {
-  background-color: #fce4ec;
-  color: #880e4f;
-}
-
-.device-category.crane {
-  background-color: #e3f2fd;
-  color: #0d47a1;
-}
-
-.device-category.generator {
-  background-color: #fff8e1;
-  color: #f57c00;
-}
-
-.device-category.air-conditioner {
-  background-color: #e1f5fe;
-  color: #0288d1;
-}
-
-.device-category.chiller {
-  background-color: #e3f2fd;
-  color: #1565c0;
-}
-
-.device-category.inert-gas {
-  background-color: #f3e5f5;
-  color: #6a1b9a;
-}
-
-.device-category.co2-capture {
-  background-color: #c8e6c9;
-  color: #2e7d32;
-}
-
-.device-category.propeller {
-  background-color: #fff3e0;
-  color: #e65100;
-}
+.device-category.engine { background-color: #e3f2fd; color: #1976d2; }
+.device-category.gearbox { background-color: #e8f5e8; color: #2e7d32; }
+.device-category.waste-heat { background-color: #fff3e0; color: #ef6c00; }
+.device-category.incinerator { background-color: #ffebee; color: #c62828; }
+.device-category.separator { background-color: #f3e5f5; color: #7b1fa2; }
+.device-category.ballast { background-color: #e0f7fa; color: #00838f; }
+.device-category.windlass { background-color: #fce4ec; color: #880e4f; }
+.device-category.crane { background-color: #e3f2fd; color: #0d47a1; }
+.device-category.generator { background-color: #fff8e1; color: #f57c00; }
+.device-category.air-conditioner { background-color: #e1f5fe; color: #0288d1; }
+.device-category.chiller { background-color: #e3f2fd; color: #1565c0; }
+.device-category.inert-gas { background-color: #f3e5f5; color: #6a1b9a; }
+.device-category.co2-capture { background-color: #c8e6c9; color: #2e7d32; }
+.device-category.propeller { background-color: #fff3e0; color: #e65100; }
 </style>

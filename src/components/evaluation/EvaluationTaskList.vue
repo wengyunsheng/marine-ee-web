@@ -1,115 +1,97 @@
 <template>
-  <div class="table-section">
-    <div class="section-header">
-      <h3>评估任务列表</h3>
-      <div class="table-controls">
-        <button class="btn btn-success" @click="showComparison = true">对比分析</button>
-        <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="搜索任务名称或ID" @keyup.enter="handleSearch">
-          <button class="search-btn" @click="handleSearch">🔍</button>
+  <el-card class="table-section">
+    <template #header>
+      <div class="section-header">
+        <h3>评估任务列表</h3>
+        <div class="table-controls">
+          <el-button type="success" @click="showComparison = true">对比分析</el-button>
+          <el-input 
+            v-model="searchQuery" 
+            placeholder="搜索任务名称或ID" 
+            clearable
+            style="width: 200px"
+            @keyup.enter="handleSearch"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+          <el-select v-model="deviceTypeFilter" placeholder="设备类型" clearable style="width: 180px">
+            <el-option label="全部" value="" />
+            <el-option label="船用柴油发动机（低速机）" value="diesel-low" />
+            <el-option label="船用柴油发动机（中速机）" value="diesel-medium" />
+            <el-option label="船用LNG/柴油双燃料发动机（低速机）" value="lng-diesel-low" />
+            <el-option label="船用LNG/柴油双燃料发动机（中速机）" value="lng-diesel-medium" />
+            <el-option label="船用甲醇/柴油双燃料发动机（低速机）" value="methanol-diesel-low" />
+            <el-option label="船用甲醇/柴油双燃料发动机（中速机）" value="methanol-diesel-medium" />
+          </el-select>
+          <el-select v-model="efficiencyFilter" placeholder="能效等级" clearable style="width: 140px">
+            <el-option label="全部" value="" />
+            <el-option label="1级" value="1" />
+            <el-option label="2级" value="2" />
+            <el-option label="3级" value="3" />
+          </el-select>
+          <el-select v-model="statusFilter" placeholder="状态" clearable style="width: 120px">
+            <el-option label="全部" value="" />
+            <el-option label="已完成" value="completed" />
+            <el-option label="评估中" value="running" />
+            <el-option label="待执行" value="pending" />
+          </el-select>
+          <el-button @click="resetFilters">重置筛选</el-button>
         </div>
-        <select class="filter-select" v-model="deviceTypeFilter" @change="filterTasks">
-          <option value="">设备：全部</option>
-          <option value="diesel-low">船用柴油发动机（低速机）</option>
-          <option value="diesel-medium">船用柴油发动机（中速机）</option>
-          <option value="lng-diesel-low">船用LNG/柴油双燃料发动机（低速机）</option>
-          <option value="lng-diesel-medium">船用LNG/柴油双燃料发动机（中速机）</option>
-          <option value="methanol-diesel-low">船用甲醇/柴油双燃料发动机（低速机）</option>
-          <option value="methanol-diesel-medium">船用甲醇/柴油双燃料发动机（中速机）</option>
-        </select>
-        <select class="filter-select" v-model="efficiencyFilter" @change="filterTasks">
-          <option value="">能效等级：全部</option>
-          <option value="1">1级</option>
-          <option value="2">2级</option>
-          <option value="3">3级</option>
-        </select>
-        <select class="filter-select" v-model="statusFilter" @change="filterTasks">
-          <option value="">全部状态</option>
-          <option value="completed">已完成</option>
-          <option value="running">评估中</option>
-          <option value="pending">待执行</option>
-        </select>
-        <button class="btn btn-secondary" @click="resetFilters">重置筛选</button>
       </div>
-    </div>
-    <div class="table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>任务名称</th>
-            <th>设备类型</th>
-            <th>评估模型</th>
-            <th>能效得分</th>
-            <th>能效等级</th>
-            <th>状态</th>
-            <th>评估时间</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="task in filteredTasks" :key="task.id">
-            <td>
-              <div class="task-info">
-                <div class="task-name">{{ task.name }}</div>
-                <div class="task-id">{{ task.id }}</div>
-              </div>
-            </td>
-            <td><span class="device-tag" :class="task.deviceClass">{{ task.device }}</span></td>
-            <td>{{ task.model }}</td>
-            <td>
-              <span class="score-text" :class="getScoreClass(task.score)">{{ task.score || '-' }}</span>
-            </td>
-            <td><span class="level-tag" :class="task.levelClass">{{ task.level }}</span></td>
-            <td><span class="status" :class="task.statusClass">{{ task.status }}</span></td>
-            <td>{{ task.evalTime }}</td>
-            <td class="action-buttons">
-              <button class="btn btn-sm btn-info" @click="viewTask(task)">查看</button>
-              <button class="btn btn-sm btn-warning" @click="downloadReport(task)">下载</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    </template>
+
+    <el-table :data="paginatedTasks" style="width: 100%" stripe>
+      <el-table-column label="任务名称" min-width="200">
+        <template #default="{ row }">
+          <div class="task-info">
+            <div class="task-name">{{ row.name }}</div>
+            <div class="task-id">{{ row.id }}</div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="设备类型" min-width="180">
+        <template #default="{ row }">
+          <el-tag :class="row.deviceClass" size="small">{{ row.device }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="model" label="评估模型" min-width="140" />
+      <el-table-column label="能效得分" width="100" align="center">
+        <template #default="{ row }">
+          <span class="score-text" :class="getScoreClass(row.score)">{{ row.score || '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="能效等级" width="100" align="center">
+        <template #default="{ row }">
+          <el-tag :type="getLevelTagType(row.levelClass)" size="small">{{ row.level }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" width="100" align="center">
+        <template #default="{ row }">
+          <el-tag :type="getStatusTagType(row.statusClass)" size="small">{{ row.status }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="evalTime" label="评估时间" width="160" />
+      <el-table-column label="操作" width="150" fixed="right" align="center">
+        <template #default="{ row }">
+          <el-button type="primary" size="small" @click="viewTask(row)">查看</el-button>
+          <el-button type="warning" size="small" @click="downloadReport(row)">下载</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
     <div class="pagination-container">
-      <div class="pagination-left">
-        <div class="pagination-info">
-          共 {{ totalTasks }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
-        </div>
-        <div class="pagination-page-size">
-          <label>每页</label>
-          <select v-model="pageSize" @change="resetPage" class="page-size-select">
-            <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}</option>
-          </select>
-          <span>条</span>
-        </div>
-      </div>
-      <div class="pagination">
-        <button 
-          class="pagination-btn" 
-          :disabled="currentPage === 1" 
-          @click="prevPage"
-        >
-          上一页
-        </button>
-        <button 
-          v-for="page in visiblePages" 
-          :key="page"
-          class="pagination-btn"
-          :class="{ active: currentPage === page }"
-          @click="goToPage(page)"
-        >
-          {{ page }}
-        </button>
-        <button 
-          class="pagination-btn" 
-          :disabled="currentPage === totalPages" 
-          @click="nextPage"
-        >
-          下一页
-        </button>
-      </div>
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="pageSizes"
+        :total="totalTasks"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="resetPage"
+      />
     </div>
-  </div>
+  </el-card>
   
   <!-- 对比分析弹窗 -->
   <EvalComparisonAnalysis 
@@ -121,13 +103,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { Search } from '@element-plus/icons-vue'
 import EvalComparisonAnalysis from './EvalComparisonAnalysis.vue'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
-const pageSizes = ref([10, 20, 50])
+const pageSizes = [10, 20, 50, 100, 200, 500]
 
 // 多维度筛选变量
 const shipTypeFilter = ref('')
@@ -143,8 +126,8 @@ const tasks = ref([
   { id: 'EVAL-20240601-005', name: '船用甲醇/柴油双燃料发动机（低速机）能效评估', device: '船用甲醇/柴油双燃料发动机（低速机）', deviceClass: 'methanol-diesel-low', model: 'IMO EEXI标准', score: null, level: '待评估', levelClass: 'pending', status: '待执行', statusClass: 'warning', evalTime: '2024-04-01 16:00' }
 ])
 
-const totalTasks = computed(() => tasks.value.length)
-const totalPages = computed(() => Math.ceil(totalTasks.value / pageSize.value))
+const totalTasks = computed(() => filteredTasks.value.length)
+
 const filteredTasks = computed(() => {
   let result = tasks.value
   if (statusFilter.value) {
@@ -154,19 +137,20 @@ const filteredTasks = computed(() => {
     result = result.filter(task => task.deviceClass === deviceTypeFilter.value)
   }
   if (efficiencyFilter.value) {
-    result = result.filter(task => task.levelClass === efficiencyFilter.value)
+    result = result.filter(task => task.levelClass === `level-${efficiencyFilter.value}`)
   }
-  return result.slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(task => 
+      task.name.toLowerCase().includes(query) || 
+      task.id.toLowerCase().includes(query)
+    )
+  }
+  return result
 })
 
-const visiblePages = computed(() => {
-  const pages = []
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(totalPages.value, start + 4)
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  return pages
+const paginatedTasks = computed(() => {
+  return filteredTasks.value.slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
 })
 
 const getScoreClass = (score) => {
@@ -176,14 +160,35 @@ const getScoreClass = (score) => {
   return 'poor'
 }
 
-const handleSearch = () => alert(`搜索：${searchQuery.value}`)
-const filterTasks = () => alert(`筛选：${statusFilter.value}`)
-const viewTask = (task) => alert(`查看任务：${task.name}`)
-const downloadReport = (task) => alert(`下载报告：${task.name}`)
-const prevPage = () => { if (currentPage.value > 1) currentPage.value-- }
-const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++ }
-const goToPage = (page) => { currentPage.value = page }
-const resetPage = () => { currentPage.value = 1 }
+const getLevelTagType = (levelClass) => {
+  if (levelClass === 'level-1') return 'success'
+  if (levelClass === 'level-2') return 'warning'
+  if (levelClass === 'level-3') return 'danger'
+  return 'info'
+}
+
+const getStatusTagType = (statusClass) => {
+  if (statusClass === 'success') return 'success'
+  if (statusClass === 'running') return 'primary'
+  if (statusClass === 'warning') return 'warning'
+  return 'info'
+}
+
+const handleSearch = () => {
+  // 搜索功能
+}
+
+const viewTask = (task) => {
+  // 查看任务
+}
+
+const downloadReport = (task) => {
+  // 下载报告
+}
+
+const resetPage = () => { 
+  currentPage.value = 1 
+}
 
 const resetFilters = () => {
   shipTypeFilter.value = ''
@@ -520,20 +525,8 @@ defineExpose({
 
 .pagination-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-}
-
-.pagination-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.pagination-info {
-  font-size: 14px;
-  color: #666;
+  justify-content: flex-end;
+  padding: 16px 0;
 }
 
 .pagination-page-size {

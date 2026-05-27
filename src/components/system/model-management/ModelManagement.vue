@@ -2,110 +2,78 @@
   <div class="model-management-container">
     <div class="model-controls">
       <div class="control-group">
-        <button class="btn btn-primary" @click="openAddModal">+ 新建模型</button>
-        <button class="btn btn-secondary" @click="importModel">导入模型</button>
-        <button class="btn btn-secondary" @click="exportModels">导出模型</button>
+        <el-button type="primary" @click="openAddModal">
+          <el-icon><Plus /></el-icon>
+          新增样机模型
+        </el-button>
+        <el-button @click="importModel">导入样机模型</el-button>
+        <el-button @click="exportModels">导出样机模型</el-button>
       </div>
 
       <div class="search-filter">
-        <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="搜索模型名称" @keyup.enter="filterModels">
-          <button class="search-btn" @click="filterModels">🔍</button>
-        </div>
-        <select class="filter-select" v-model="modelStatusFilter" @change="filterModels">
-          <option value="">全部状态</option>
-          <option value="connected">已连接</option>
-          <option value="disconnected">未连接</option>
-          <option value="testing">测试中</option>
-          <option value="validated">已验证</option>
-        </select>
+        <el-input 
+          v-model="searchQuery" 
+          placeholder="搜索模型名称" 
+          clearable
+          style="width: 200px;"
+          @keyup.enter="filterModels"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-select v-model="modelStatusFilter" placeholder="全部状态" clearable style="width: 150px;" @change="filterModels">
+          <el-option label="全部状态" value="" />
+          <el-option label="已连接" value="connected" />
+          <el-option label="未连接" value="disconnected" />
+          <el-option label="测试中" value="testing" />
+          <el-option label="已验证" value="validated" />
+        </el-select>
       </div>
     </div>
 
     <div class="model-list-section">
-      <h3>模型列表</h3>
-      <div class="model-table-container">
-        <table class="model-table">
-          <thead>
-            <tr>
-              <th>模型名称</th>
-              <th>船型</th>
-              <th>设备类型</th>
-              <th>关联数据</th>
-              <th>模型版本</th>
-              <th>状态</th>
-              <th>创建时间</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="model in paginatedModels" :key="model.id">
-              <td>{{ model.name }}</td>
-              <td>{{ model.shipType }}</td>
-              <td>{{ model.deviceType }}</td>
-              <td>
-                <a v-if="model.relatedData" href="#" class="related-data-link" @click.prevent="navigateToData(model.relatedData)">
-                  {{ model.relatedData }}
-                </a>
-                <span v-else class="text-muted">-</span>
-              </td>
-              <td>{{ model.version }}</td>
-              <td>
-                <span class="model-status" :class="model.status">
-                  {{ getStatusText(model.status) }}
-                </span>
-              </td>
-              <td>{{ model.createdAt }}</td>
-              <td class="action-buttons">
-                <button class="btn btn-sm btn-info" @click="viewModel(model)">查看</button>
-                <button class="btn btn-sm" @click="view3DModel(model)">3D模型</button>
-                <button class="btn btn-sm btn-warning" @click="openEditModal(model)">编辑</button>
-                <button class="btn btn-sm btn-danger" @click="deleteModel(model.id)">删除</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <h3>样机模型列表</h3>
+      <el-table :data="paginatedModels" style="width: 100%" border stripe>
+        <el-table-column prop="name" label="模型名称" min-width="150" />
+        <el-table-column prop="shipType" label="船型" min-width="120" />
+        <el-table-column prop="deviceType" label="设备类型" min-width="180" />
+        <el-table-column label="关联数据" width="150">
+          <template #default="scope">
+            <el-link v-if="scope.row.relatedData" type="primary" @click="navigateToData(scope.row.relatedData)">
+              {{ scope.row.relatedData }}
+            </el-link>
+            <span v-else class="text-muted">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="version" label="模型版本" width="120" />
+        <el-table-column label="状态" width="100">
+          <template #default="scope">
+            <el-tag :type="getStatusTagType(scope.row.status)">
+              {{ getStatusText(scope.row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="创建时间" width="120" />
+        <el-table-column label="操作" width="350" fixed="right">
+          <template #default="scope">
+            <el-button type="primary" size="small" @click="viewModel(scope.row)">查看</el-button>
+            <el-button size="small" @click="view3DModel(scope.row)">3D模型</el-button>
+            <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
+            <el-button type="danger" size="small" @click="deleteModel(scope.row.id)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
       
-      <!-- 分页组件 -->
       <div class="pagination-container">
-        <div class="pagination-left">
-          <div class="pagination-info">
-            共 {{ filteredModels.length }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页
-          </div>
-          <div class="pagination-page-size">
-            <label>每页</label>
-            <select v-model="pageSize" @change="resetPage" class="page-size-select">
-              <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}</option>
-            </select>
-            <span>条</span>
-          </div>
-        </div>
-        <div class="pagination">
-          <button 
-            class="pagination-btn" 
-            :disabled="currentPage === 1" 
-            @click="goToPage(currentPage - 1)"
-          >
-            上一页
-          </button>
-          <button 
-            v-for="page in totalPages" 
-            :key="page"
-            class="pagination-btn"
-            :class="{ active: currentPage === page }"
-            @click="goToPage(page)"
-          >
-            {{ page }}
-          </button>
-          <button 
-            class="pagination-btn" 
-            :disabled="currentPage === totalPages" 
-            @click="goToPage(currentPage + 1)"
-          >
-            下一页
-          </button>
-        </div>
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="pageSizes"
+          :total="filteredModels.length"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="resetPage"
+        />
       </div>
     </div>
 
@@ -136,6 +104,8 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search } from '@element-plus/icons-vue'
 import ModelForm from './components/ModelForm.vue'
 import ModelView from './components/ModelView.vue'
 import Model3DView from './components/Model3DView.vue'
@@ -276,7 +246,7 @@ const filteredModels = computed(() => {
 
 const currentPage = ref(1)
 const pageSize = ref(10)
-const pageSizes = ref([10, 20, 50])
+const pageSizes = ref([10, 20, 50, 100, 200, 500])
 
 const totalPages = computed(() => {
   return Math.ceil(filteredModels.value.length / pageSize.value)
@@ -308,6 +278,16 @@ const getStatusText = (status) => {
   return statusMap[status] || status
 }
 
+const getStatusTagType = (status) => {
+  const typeMap = {
+    connected: 'success',
+    disconnected: 'info',
+    testing: 'warning',
+    validated: ''
+  }
+  return typeMap[status] || ''
+}
+
 const filterModels = () => {
   console.log('过滤模型', {
     searchQuery: searchQuery.value,
@@ -316,7 +296,7 @@ const filterModels = () => {
 }
 
 const navigateToData = (relatedData) => {
-  alert(`跳转到能效数据管理，查看数据：${relatedData}`)
+  ElMessage.info(`跳转到能效数据管理，查看数据：${relatedData}`)
 }
 
 const openAddModal = () => {
@@ -338,7 +318,7 @@ const closeFormModal = () => {
 
 const saveModel = (data) => {
   if (!data.name || !data.shipType || !data.deviceType) {
-    alert('请填写必填项')
+    ElMessage.warning('请填写必填项')
     return
   }
 
@@ -356,6 +336,7 @@ const saveModel = (data) => {
     })
   }
   closeFormModal()
+  ElMessage.success('模型保存成功')
 }
 
 const viewModel = (model) => {
@@ -368,9 +349,17 @@ const closeViewModal = () => {
   currentModel.value = null
 }
 
-const deleteModel = (modelId) => {
-  if (confirm('确定要删除这个模型吗？')) {
+const deleteModel = async (modelId) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这个模型吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
     models.value = models.value.filter(model => model.id !== modelId)
+    ElMessage.success('删除成功')
+  } catch {
+    // 用户取消删除
   }
 }
 
@@ -398,15 +387,15 @@ const importModel = () => {
                 item.createdAt = item.createdAt || new Date().toISOString().split('T')[0]
               })
               models.value = [...models.value, ...validData]
-              alert(`成功导入 ${validData.length} 个模型`)
+              ElMessage.success(`成功导入 ${validData.length} 个模型`)
             } else {
-              alert('导入的数据格式不正确')
+              ElMessage.error('导入的数据格式不正确')
             }
           } else {
-            alert('导入的数据格式不正确')
+            ElMessage.error('导入的数据格式不正确')
           }
         } catch (error) {
-          alert('导入失败：' + error.message)
+          ElMessage.error('导入失败：' + error.message)
         }
       }
       reader.readAsText(file)
@@ -462,21 +451,6 @@ const close3DModel = () => {
   box-sizing: border-box;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.page-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-}
-
 .model-controls {
   display: flex;
   justify-content: space-between;
@@ -499,64 +473,6 @@ const close3DModel = () => {
   flex-wrap: wrap;
 }
 
-.search-box {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 4px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.search-box input {
-  flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  background-color: transparent;
-}
-
-.search-btn {
-  padding: 6px 10px;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-left: 4px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.search-btn:hover {
-  background-color: #1d4ed8;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.filter-select {
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  background-color: white;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  outline: none;
-}
-
-.filter-select:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border-color: #93c5fd;
-}
-
 .model-list-section {
   margin-bottom: 24px;
 }
@@ -566,77 +482,6 @@ const close3DModel = () => {
   font-size: 18px;
   font-weight: 600;
   color: #333;
-}
-
-.model-table-container {
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  overflow: hidden;
-}
-
-.model-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.model-table th {
-  background-color: #f8fafc;
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.model-table td {
-  padding: 12px 16px;
-  font-size: 14px;
-  color: #333;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.model-table tr:hover {
-  background-color: #f8fafc;
-}
-
-.model-status {
-  font-size: 14px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.model-status.connected {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.model-status.disconnected {
-  background-color: #fee2e2;
-  color: #b91c1c;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-start;
-}
-
-.related-data-link {
-  color: #2563eb;
-  text-decoration: none;
-  font-size: 14px;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.related-data-link:hover {
-  color: #1d4ed8;
-  text-decoration: underline;
 }
 
 .text-muted {
@@ -733,10 +578,8 @@ const close3DModel = () => {
 
 .pagination-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-top: 1px solid #e2e8f0;
+  justify-content: flex-end;
+  padding: 16px 0;
 }
 
 .pagination-left {

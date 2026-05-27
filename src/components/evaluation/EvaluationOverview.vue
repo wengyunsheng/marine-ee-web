@@ -1,61 +1,84 @@
 <template>
-  <div class="overview-section">
-    <div class="section-header">
-      <h3>评估概览</h3>
-    </div>
+  <el-card class="overview-section">
+    <template #header>
+      <div class="section-header">
+        <h3>评估概览</h3>
+      </div>
+    </template>
 
-    <div class="overview-grid">
-      <div class="stats-cards">
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-label">总评估任务</span>
-            <span class="stat-icon">📋</span>
+    <el-row :gutter="16" class="overview-grid" align="stretch">
+      <el-col :xs="24" :sm="12" :md="6" :lg="4">
+        <el-card shadow="hover" class="stat-card-modern">
+          <div class="stat-icon-wrapper">
+            <el-icon :size="24" color="#409eff"><Document /></el-icon>
           </div>
-          <div class="stat-value">368</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-label">本月评估任务</span>
-            <span class="stat-icon">📅</span>
+          <div class="stat-info">
+            <div class="stat-label">总评估任务</div>
+            <div class="stat-value">368</div>
           </div>
-          <div class="stat-value">45</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-label">平均能效得分</span>
-            <span class="stat-icon">📊</span>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="6" :lg="4">
+        <el-card shadow="hover" class="stat-card-modern">
+          <div class="stat-icon-wrapper">
+            <el-icon :size="24" color="#67c23a"><Calendar /></el-icon>
           </div>
-          <div class="stat-value">82.6</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-label">进行中任务</span>
-            <span class="stat-icon">⏳</span>
+          <div class="stat-info">
+            <div class="stat-label">本月评估任务</div>
+            <div class="stat-value">45</div>
           </div>
-          <div class="stat-value task-in-progress">12</div>
-          <div class="stat-sub">待执行: 8</div>
-        </div>
-        <div class="stat-card chart-card">
-          <div class="stat-header">
-            <span class="stat-label">能效等级分布</span>
-            <span class="stat-icon">🎯</span>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="6" :lg="4">
+        <el-card shadow="hover" class="stat-card-modern">
+          <div class="stat-icon-wrapper">
+            <el-icon :size="24" color="#e6a23c"><TrendCharts /></el-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">平均能效得分</div>
+            <div class="stat-value">82.6</div>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="6" :lg="4">
+        <el-card shadow="hover" class="stat-card-modern">
+          <div class="stat-icon-wrapper">
+            <el-icon :size="24" color="#f56c6c"><Clock /></el-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">进行中任务</div>
+            <div class="stat-value">12</div>
+            <div class="stat-sub">待执行: 8</div>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="24" :md="12" :lg="8">
+        <el-card shadow="hover" class="chart-card">
+          <div class="chart-header">
+            <span class="chart-title">能效等级分布</span>
+            <el-icon><PieChart /></el-icon>
           </div>
           <div class="chart-container">
             <canvas ref="levelChart"></canvas>
           </div>
           <div class="level-legend">
-            <span class="legend-item"><span class="legend-dot level-1"></span>1级 (45%)</span>
-            <span class="legend-item"><span class="legend-dot level-2"></span>2级 (35%)</span>
-            <span class="legend-item"><span class="legend-dot level-3"></span>3级 (20%)</span>
+            <el-tag type="success" size="small">1级 (45%)</el-tag>
+            <el-tag type="warning" size="small">2级 (35%)</el-tag>
+            <el-tag type="danger" size="small">3级 (20%)</el-tag>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        </el-card>
+      </el-col>
+    </el-row>
+  </el-card>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { Document, Calendar, TrendCharts, PieChart, Clock } from '@element-plus/icons-vue'
 import { Chart, ArcElement, Tooltip, Legend, DoughnutController } from 'chart.js'
 
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController)
@@ -101,18 +124,6 @@ onMounted(() => {
 
 <style scoped>
 .overview-section {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-  border: 1px solid #e2e8f0;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 24px;
 }
 
@@ -123,129 +134,124 @@ onMounted(() => {
   color: #333;
 }
 
-.stats-cards {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-}
-
-.stat-card {
-  min-width: 150px;
-  background-color: #f8fafc;
-  border-radius: 8px;
-  padding: 16px;
-  border: 1px solid #e2e8f0;
+.stat-card-modern {
+  height: 100%;
+  border: none;
+  border-left: 4px solid;
   transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-  transform: translateY(-2px);
-}
-
-.stat-card.chart-card {
-  grid-column: span 1;
-}
-
-.stat-header {
+  cursor: pointer;
+  padding: 20px !important;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.overview-grid .el-col:nth-child(1) .stat-card-modern {
+  border-left-color: #409eff;
+}
+
+.overview-grid .el-col:nth-child(2) .stat-card-modern {
+  border-left-color: #67c23a;
+}
+
+.overview-grid .el-col:nth-child(3) .stat-card-modern {
+  border-left-color: #e6a23c;
+}
+
+.overview-grid .el-col:nth-child(4) .stat-card-modern {
+  border-left-color: #f56c6c;
+}
+
+.stat-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
   align-items: center;
+  justify-content: center;
   margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba(64, 158, 255, 0.1), rgba(64, 158, 255, 0.05));
+}
+
+.overview-grid .el-col:nth-child(2) .stat-icon-wrapper {
+  background: linear-gradient(135deg, rgba(103, 194, 58, 0.1), rgba(103, 194, 58, 0.05));
+}
+
+.overview-grid .el-col:nth-child(3) .stat-icon-wrapper {
+  background: linear-gradient(135deg, rgba(230, 162, 60, 0.1), rgba(230, 162, 60, 0.05));
+}
+
+.overview-grid .el-col:nth-child(4) .stat-icon-wrapper {
+  background: linear-gradient(135deg, rgba(245, 108, 108, 0.1), rgba(245, 108, 108, 0.05));
+}
+
+.stat-info {
+  flex: 1;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 8px;
   font-weight: 500;
 }
 
-.stat-icon {
-  font-size: 16px;
-}
-
 .stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.stat-value.task-in-progress {
-  color: #3b82f6;
+  font-size: 28px;
+  font-weight: 700;
+  color: #303133;
+  line-height: 1;
 }
 
 .stat-sub {
   font-size: 12px;
-  color: #9ca3af;
+  color: #c0c4cc;
+  margin-top: 6px;
+}
+
+.chart-card {
+  height: 100%;
+  border: none;
+  padding: 20px !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
 }
 
 .chart-container {
-  height: 120px;
-  margin-bottom: 12px;
+  height: 180px;
+  margin-bottom: 16px;
+  flex: 1;
 }
 
 .level-legend {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  justify-content: space-around;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  color: #666;
-}
-
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-.legend-dot.level-1 {
-  background-color: #22c55e;
-}
-
-.legend-dot.level-2 {
-  background-color: #eab308;
-}
-
-.legend-dot.level-3 {
-  background-color: #ef4444;
-}
-
-.overview-grid {
-  margin-top: 20px;
-}
-
-@media (max-width: 1366px) {
-  .stats-cards {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 1200px) {
-  .stats-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
+/* 响应式 */
 @media (max-width: 768px) {
-  .stats-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .stat-card {
-    min-width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .stats-cards {
-    grid-template-columns: 1fr;
+  .chart-container {
+    height: 120px;
   }
 }
 </style>

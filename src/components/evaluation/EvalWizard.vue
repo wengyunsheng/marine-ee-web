@@ -1,29 +1,22 @@
 <template>
-  <div class="eval-wizard">
-    <div class="wizard-header">
-      <div class="wizard-title">
-        <h2>能效评估向导</h2>
-        <p>请按照以下步骤完成能效评估配置</p>
-      </div>
-      <button class="btn btn-secondary" @click="closeWizard">× 关闭</button>
-    </div>
+  <el-dialog 
+    v-model="dialogVisible" 
+    title="能效评估向导"
+    width="80%"
+    :close-on-click-modal="false"
+    @close="closeWizard"
+  >
+    <div class="eval-wizard">
+      <!-- 步骤条 -->
+      <el-steps :active="currentStep" finish-status="success" align-center class="wizard-progress">
+        <el-step 
+          v-for="(step, index) in steps" 
+          :key="index"
+          :title="step.label"
+        />
+      </el-steps>
 
-    <div class="wizard-progress">
-      <div 
-        v-for="(step, index) in steps" 
-        :key="index"
-        class="progress-step"
-        :class="{ active: currentStep === index, completed: currentStep > index }"
-      >
-        <div class="step-indicator">
-          <span v-if="currentStep > index">✓</span>
-          <span v-else>{{ index + 1 }}</span>
-        </div>
-        <div class="step-label">{{ step.label }}</div>
-      </div>
-    </div>
-
-    <div class="wizard-content">
+      <div class="wizard-content">
       <div v-show="currentStep === 0" class="step-panel">
         <div class="step-header">
           <h3>第一步：选择设备</h3>
@@ -31,19 +24,32 @@
         </div>
         
         <div class="device-selection">
-          <div class="form-group">
-            <label>设备类型</label>
-            <select v-model="selectedDevice" class="form-control" @change="console.log('selectedDevice changed:', selectedDevice)">
-              <option value="">请选择设备类型</option>
-              <option v-for="device in devices" :key="device.id" :value="device.id">
-                {{ device.name }}
-              </option>
-            </select>
-          </div>
-          <div v-if="selectedDevice" class="device-description">
-            <h4>设备描述</h4>
-            <p>{{ getDeviceDescription(selectedDevice) }}</p>
-          </div>
+          <el-form label-width="100px">
+            <el-form-item label="设备类型">
+              <el-select 
+                v-model="selectedDevice" 
+                placeholder="请选择设备类型"
+                style="width: 100%"
+                @change="console.log('selectedDevice changed:', selectedDevice)"
+              >
+                <el-option 
+                  v-for="device in devices" 
+                  :key="device.id" 
+                  :label="device.name" 
+                  :value="device.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <el-alert
+            v-if="selectedDevice"
+            :title="'设备描述'"
+            :description="getDeviceDescription(selectedDevice)"
+            type="info"
+            :closable="false"
+            show-icon
+            style="margin-top: 16px"
+          />
         </div>
       </div>
 
@@ -56,61 +62,74 @@
         <div class="device-params-container">
           <div v-if="selectedDevice">
             <h4>{{ getDeviceName(selectedDevice) }}</h4>
-            <div class="param-group">
-              <h5>基本信息</h5>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>设备品牌</label>
-                  <input type="text" v-model="currentDeviceParams.brand" placeholder="输入设备品牌">
-                </div>
-                <div class="form-group">
-                  <label>设备型号</label>
-                  <input type="text" v-model="currentDeviceParams.model" placeholder="输入设备型号">
-                </div>
-              </div>
-            </div>
+            
+            <el-form label-width="120px">
+              <el-divider content-position="left">基本信息</el-divider>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="设备品牌">
+                    <el-input v-model="currentDeviceParams.brand" placeholder="输入设备品牌" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="设备型号">
+                    <el-input v-model="currentDeviceParams.model" placeholder="输入设备型号" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
 
-            <div class="param-group">
-              <h5>技术参数</h5>
-              <div class="tech-params-grid">
-                <div v-for="param in getDeviceParams(selectedDevice)" :key="param.id" class="param-item">
-                  <div class="param-label">
-                    <label>{{ param.name }}</label>
-                    <span class="param-unit">{{ param.unit }}</span>
-                  </div>
-                  <input 
-                    type="number" 
-                    :value="getParamValue(selectedDevice, param.id)"
-                    @input="updateParamValue(selectedDevice, param.id, $event.target.value)"
-                    placeholder="输入{{ param.name }}"
-                    :min="param.minValue"
-                    :max="param.maxValue"
-                  >
-                </div>
-                <div v-if="getDeviceParams(selectedDevice).length === 0" class="param-item">
-                  <div class="param-label">
-                    <label>无技术参数</label>
-                  </div>
-                  <div class="param-range">
-                    未找到设备的技术参数模板
-                  </div>
-                </div>
-              </div>
-            </div>
+              <el-divider content-position="left">技术参数</el-divider>
+              <el-row :gutter="20">
+                <el-col 
+                  v-for="param in getDeviceParams(selectedDevice)" 
+                  :key="param.id" 
+                  :span="8"
+                >
+                  <el-form-item :label="param.name">
+                    <el-input-number 
+                      :model-value="getParamValue(selectedDevice, param.id)"
+                      @update:model-value="(val) => updateParamValue(selectedDevice, param.id, val)"
+                      :placeholder="'输入' + param.name"
+                      :min="param.minValue"
+                      :max="param.maxValue"
+                      style="width: 100%"
+                    />
+                    <div class="param-unit-hint">{{ param.unit }}</div>
+                  </el-form-item>
+                </el-col>
+                <el-col v-if="getDeviceParams(selectedDevice).length === 0" :span="24">
+                  <el-empty description="未找到设备的技术参数模板" />
+                </el-col>
+              </el-row>
 
-            <div class="param-group">
-              <h5>运行参数</h5>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>运行负荷 (%)</label>
-                  <input type="number" v-model="currentDeviceParams.load" placeholder="输入运行负荷">
-                </div>
-                <div class="form-group">
-                  <label>运行温度 (°C)</label>
-                  <input type="number" v-model="currentDeviceParams.temperature" placeholder="输入运行温度">
-                </div>
-              </div>
-            </div>
+              <el-divider content-position="left">运行参数</el-divider>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="运行负荷">
+                    <el-input-number 
+                      v-model="currentDeviceParams.load" 
+                      placeholder="输入运行负荷"
+                      :min="0"
+                      :max="100"
+                      style="width: 100%"
+                    >
+                      <template #suffix>%</template>
+                    </el-input-number>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="运行温度">
+                    <el-input-number 
+                      v-model="currentDeviceParams.temperature" 
+                      placeholder="输入运行温度"
+                      style="width: 100%"
+                    >
+                      <template #suffix>°C</template>
+                    </el-input-number>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
           </div>
           <div v-else class="no-device-selected">
             <p>请先选择一个设备进行参数配置</p>
@@ -125,40 +144,32 @@
         </div>
 
         <div class="history-section">
-          <div class="history-data-list">
-            <div class="history-data-header">
-              <div class="header-info">设备信息</div>
-              <div class="header-meta">数据日期</div>
-              <div class="header-checkbox">选择</div>
-            </div>
-            <div 
-              v-for="data in historyData" 
-              :key="data.id"
-              class="history-data-item"
-              :class="{ selected: selectedHistoryData.includes(data.id) }"
-              @click="toggleHistoryData(data.id)"
-            >
-              <div class="data-info">
-                <h4>{{ data.deviceName }}</h4>
-                <p>{{ data.deviceType }} · {{ data.dataSource }} · {{ data.workingCondition }}</p>
-              </div>
-              <div class="data-meta">
-                <span>{{ data.dataDate }}</span>
-              </div>
-              <div class="data-checkbox">
-                <input 
-                  type="checkbox" 
-                  :id="'wizard-history-' + data.id"
-                  :checked="selectedHistoryData.includes(data.id)"
-                  @change="toggleHistoryData(data.id)"
-                >
-                <label :for="'wizard-history-' + data.id"></label>
-              </div>
-            </div>
-          </div>
-          <div v-if="historyData.length === 0" class="no-data">
-            <p>暂无可用的能效数据，请先在系统管理中添加</p>
-          </div>
+          <el-table 
+            :data="historyData" 
+            style="width: 100%"
+            @row-click="(row) => toggleHistoryData(row.id)"
+            highlight-current-row
+          >
+            <el-table-column type="selection" width="55" align="center">
+              <template #default="{ row }">
+                <el-checkbox 
+                  :model-value="selectedHistoryData.includes(row.id)"
+                  @change="toggleHistoryData(row.id)"
+                  @click.stop
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="设备信息" min-width="200">
+              <template #default="{ row }">
+                <div class="device-info-cell">
+                  <div class="device-name">{{ row.deviceName }}</div>
+                  <div class="device-detail">{{ row.deviceType }} · {{ row.dataSource }} · {{ row.workingCondition }}</div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="dataDate" label="数据日期" width="120" align="center" />
+          </el-table>
+          <el-empty v-if="historyData.length === 0" description="暂无可用的能效数据，请先在系统管理中添加" />
         </div>
       </div>
 
@@ -301,13 +312,17 @@
         完成
       </button>
     </div>
-  </div>
+    </div>
+  </el-dialog>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 
 const emit = defineEmits(['close', 'complete'])
+
+// 对话框可见性
+const dialogVisible = ref(true)
 
 const currentStep = ref(0)
 
@@ -828,116 +843,51 @@ const finishWizard = () => {
 
 
 const closeWizard = () => {
+  dialogVisible.value = false
   emit('close')
-  document.body.style.overflow = 'auto' // 恢复背景页面滚动
 }
 </script>
 
 <style scoped>
 .eval-wizard {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  max-height: 90vh;
+  max-height: 80vh;
   display: flex;
   flex-direction: column;
-}
-
-.wizard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
-}
-
-.wizard-title h2 {
-  margin: 0 0 4px 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.wizard-title p {
-  margin: 0;
-  font-size: 14px;
-  color: #64748b;
 }
 
 .wizard-progress {
-  display: flex;
-  justify-content: space-between;
-  padding: 24px 32px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.progress-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  position: relative;
-}
-
-.progress-step:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  top: 16px;
-  left: 50%;
-  width: 100%;
-  height: 2px;
-  background: #e2e8f0;
-}
-
-.progress-step.completed:not(:last-child)::after {
-  background: #2563eb;
-}
-
-.step-indicator {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #e2e8f0;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  z-index: 1;
-  transition: all 0.3s ease;
-}
-
-.progress-step.active .step-indicator {
-  background: #2563eb;
-  color: white;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
-}
-
-.progress-step.completed .step-indicator {
-  background: #2563eb;
-  color: white;
-}
-
-.step-label {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #64748b;
-  text-align: center;
-}
-
-.progress-step.active .step-label {
-  color: #1e293b;
-  font-weight: 500;
+  margin-bottom: 24px;
+  padding: 20px 0;
 }
 
 .wizard-content {
   flex: 1;
-  padding: 24px;
   overflow-y: auto;
+  padding: 0 20px;
+}
+
+/* 设备信息单元格 */
+.device-info-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.device-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.device-detail {
+  font-size: 12px;
+  color: #999;
+}
+
+/* 参数单位提示 */
+.param-unit-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
 }
 
 .step-panel {

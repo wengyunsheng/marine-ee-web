@@ -1,186 +1,152 @@
 <template>
-  <div class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h3>查看能效基值详情</h3>
-        <button class="modal-close" @click="$emit('close')">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="info-section">
-          <div class="info-item">
-            <label>设备类型名称：</label>
-            <span>{{ baseValue.engineType }}</span>
-          </div>
-          <div class="info-item">
-            <label>类别：</label>
-            <span class="device-category" :class="baseValue.category">{{ getCategoryName(baseValue.category) }}</span>
-          </div>
-          <div class="info-item">
-            <label>排放等级：</label>
-            <span>{{ baseValue.emissionLevel || '-' }}</span>
-          </div>
-          <div class="info-item">
-            <label>功率区间：</label>
-            <span>{{ baseValue.powerRange ? baseValue.powerRange + ' kW' : '-' }}</span>
-          </div>
-          <div class="info-item">
-            <label>能效等级：</label>
-            <span>{{ baseValue.efficiencyLevel }}</span>
-          </div>
-          <div class="info-item">
-            <label>能效基值：</label>
-            <span>{{ baseValue.baseValue }}{{ baseValue.unit || '%' }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" @click="$emit('close')">关闭</button>
-      </div>
-    </div>
-  </div>
+  <el-dialog 
+    v-model="visible" 
+    title="查看能效等级和能效基值"
+    width="600px"
+    @close="$emit('close')"
+  >
+    <el-descriptions :column="1" border>
+      <el-descriptions-item label="设备类型名称">
+        {{ baseValue.engineType }}
+      </el-descriptions-item>
+      <el-descriptions-item label="类别">
+        <span class="device-category" :class="baseValue.category">{{ getCategoryName(baseValue.category) }}</span>
+      </el-descriptions-item>
+      <el-descriptions-item v-if="activeDimensions.includes('emissionLevel')" label="排放等级">
+        {{ baseValue.emissionLevel || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item v-if="activeDimensions.includes('capacityRange')" :label="capacityRangeLabel">
+        {{ baseValue.capacityRange || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item v-if="activeDimensions.includes('powerRange')" :label="powerRangeLabel">
+        {{ baseValue.powerRange || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item v-if="activeDimensions.includes('temperatureRange')" :label="temperatureRangeLabel">
+        {{ baseValue.temperatureRange || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item v-if="activeDimensions.includes('steamPressure')" :label="steamPressureLabel">
+        {{ baseValue.steamPressure || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item v-if="activeDimensions.includes('steamType')" :label="steamTypeLabel">
+        {{ baseValue.steamType || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item v-if="activeDimensions.includes('secondaryRange')" :label="secondaryRangeLabel">
+        {{ baseValue.secondaryRange || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item v-if="currentMetricTypes.length > 0" :label="metricTypeLabel">
+        {{ getMetricTypeName(baseValue.metricType) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="能效等级">
+        {{ baseValue.efficiencyLevel }}
+      </el-descriptions-item>
+      <el-descriptions-item label="能效基值">
+        {{ baseValue.baseValue }}
+      </el-descriptions-item>
+      <el-descriptions-item label="单位">
+        {{ baseValue.unit || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="说明">
+        {{ baseValue.remark || '-' }}
+      </el-descriptions-item>
+    </el-descriptions>
+    
+    <template #footer>
+      <el-button @click="$emit('close')">关闭</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   baseValue: {
+    type: Object,
+    required: true
+  },
+  categoryConfig: {
     type: Object,
     required: true
   }
 })
 
-defineEmits(['close'])
+const emit = defineEmits(['close'])
 
-const categoryMap = {
-  engine: '船用发动机',
-  gearbox: '船用齿轮箱',
-  'waste-heat': '船用余热回收发电装置',
-  incinerator: '船用焚烧炉',
-  separator: '船用碟式分离机',
-  ballast: '船用压载水处理设备',
-  windlass: '船用锚绞机',
-  crane: '船用吊机',
-  generator: '船用发电机',
-  'air-conditioner': '船用空调机组',
-  chiller: '船用冷水机组',
-  'inert-gas': '船用惰性气体系统',
-  'co2-capture': '船用二氧化碳捕集设备',
-  propeller: '船用推进器'
+const visible = computed({
+  get: () => true,
+  set: (value) => {
+    if (!value) emit('close')
+  }
+})
+
+const getCategoryName = (category) => props.categoryConfig[category]?.label || category
+
+const currentConfig = computed(() => props.categoryConfig[props.baseValue.category])
+const activeDimensions = computed(() => {
+  const cfg = currentConfig.value
+  if (!cfg) return []
+  
+  // 检查是否有特定发动机的子配置
+  if (props.baseValue.engineType && cfg.subEngineConfig && cfg.subEngineConfig[props.baseValue.engineType]) {
+    return cfg.subEngineConfig[props.baseValue.engineType].dimensions
+  }
+  
+  return cfg.dimensions
+})
+
+// 获取有效配置
+const getEffectiveConfig = () => {
+  const cfg = currentConfig.value
+  if (!cfg) return null
+  
+  if (props.baseValue.engineType && cfg.subEngineConfig && cfg.subEngineConfig[props.baseValue.engineType]) {
+    return cfg.subEngineConfig[props.baseValue.engineType]
+  }
+  
+  return cfg
 }
 
-const getCategoryName = (category) => {
-  return categoryMap[category] || category
+const currentMetricTypes = computed(() => {
+  const effectiveConfig = getEffectiveConfig()
+  return effectiveConfig?.metricTypes || []
+})
+
+const capacityRangeLabel = computed(() => {
+  const effectiveConfig = getEffectiveConfig()
+  return effectiveConfig?.dimensionConfig?.capacityRange?.rangeLabel || '参数区间'
+})
+const powerRangeLabel = computed(() => {
+  const effectiveConfig = getEffectiveConfig()
+  return effectiveConfig?.dimensionConfig?.powerRange?.rangeLabel || '参数区间'
+})
+const temperatureRangeLabel = computed(() => {
+  const effectiveConfig = getEffectiveConfig()
+  return effectiveConfig?.dimensionConfig?.temperatureRange?.rangeLabel || '热源温度'
+})
+const steamPressureLabel = computed(() => {
+  const effectiveConfig = getEffectiveConfig()
+  return effectiveConfig?.dimensionConfig?.steamPressure?.rangeLabel || '蒸汽压力'
+})
+const steamTypeLabel = computed(() => {
+  const effectiveConfig = getEffectiveConfig()
+  return effectiveConfig?.dimensionConfig?.steamType?.rangeLabel || '蒸汽类型'
+})
+const secondaryRangeLabel = computed(() => {
+  const effectiveConfig = getEffectiveConfig()
+  return effectiveConfig?.dimensionConfig?.secondaryRange?.secondaryRangeLabel || '二级参数'
+})
+const metricTypeLabel = computed(() => {
+  const effectiveConfig = getEffectiveConfig()
+  return effectiveConfig?.metricLabel || '能效指标类型'
+})
+
+const getMetricTypeName = (metricType) => {
+  const allMetrics = Object.values(props.categoryConfig).flatMap(cfg => cfg.metricTypes)
+  return allMetrics.find(m => m.value === metricType)?.label || metricType || '-'
 }
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  width: 90%;
-  max-width: 400px;
-  overflow: hidden;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #64748b;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.modal-close:hover {
-  background-color: #e2e8f0;
-}
-
-.modal-body {
-  padding: 20px;
-}
-
-.info-section {
-  margin-bottom: 24px;
-}
-
-.info-item {
-  display: flex;
-  margin-bottom: 16px;
-}
-
-.info-item label {
-  font-weight: 600;
-  color: #333;
-  min-width: 120px;
-}
-
-.info-item span {
-  color: #666;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: 16px 20px;
-  border-top: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background-color: #2563eb;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #1d4ed8;
-}
-
 .device-category {
   font-size: 14px;
   padding: 4px 8px;
@@ -188,25 +154,20 @@ const getCategoryName = (category) => {
   font-weight: 500;
   white-space: nowrap;
   display: inline-block;
-  width: fit-content;
 }
 
-.info-item span.device-category {
-  color: #666;
-}
-
-.device-category.engine { background-color: #dbeafe; color: #1e40af; }
-.device-category.gearbox { background-color: #dcfce7; color: #166534; }
-.device-category.waste-heat { background-color: #ffedd5; color: #c2410c; }
-.device-category.incinerator { background-color: #fee2e2; color: #991b1b; }
-.device-category.separator { background-color: #f3e8ff; color: #6b21a8; }
-.device-category.ballast { background-color: #cffafe; color: #0e7490; }
-.device-category.windlass { background-color: #fce7f3; color: #be185d; }
-.device-category.crane { background-color: #e0e7ff; color: #3730a3; }
-.device-category.generator { background-color: #fef3c7; color: #b45309; }
-.device-category.air-conditioner { background-color: #dbeafe; color: #1e40af; }
-.device-category.chiller { background-color: #e0e7ff; color: #3730a3; }
-.device-category.inert-gas { background-color: #ede9fe; color: #5b21b6; }
-.device-category.co2-capture { background-color: #dcfce7; color: #166534; }
-.device-category.propeller { background-color: #ffedd5; color: #c2410c; }
+.device-category.engine { background-color: #e3f2fd; color: #1976d2; }
+.device-category.gearbox { background-color: #e8f5e8; color: #2e7d32; }
+.device-category.waste_heat { background-color: #fff3e0; color: #ef6c00; }
+.device-category.incinerator { background-color: #ffebee; color: #c62828; }
+.device-category.separator { background-color: #f3e5f5; color: #7b1fa2; }
+.device-category.boiler { background-color: #e0f2f1; color: #00695c; }
+.device-category.pump { background-color: #fce4ec; color: #ad1457; }
+.device-category.fan { background-color: #f1f8e9; color: #558b2f; }
+.device-category.compressor { background-color: #e8eaf6; color: #283593; }
+.device-category.crane { background-color: #fff8e1; color: #f57f17; }
+.device-category.deck_machinery { background-color: #efebe9; color: #4e342e; }
+.device-category.propeller { background-color: #e1f5fe; color: #0277bd; }
+.device-category.energy_storage { background-color: #f3e5f5; color: #6a1b9a; }
+.device-category.solar { background-color: #fffde7; color: #f9a825; }
 </style>

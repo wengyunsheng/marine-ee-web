@@ -1,13 +1,15 @@
 <template>
-  <div class="module">
-    <div class="breadcrumb">
-      <a href="#" @click.prevent>首页</a> > <a href="#" @click.prevent>能效评估</a> > <span>设备选择</span>
-    </div>
+  <div class="device-select-container">
+    <el-breadcrumb separator=">" class="breadcrumb">
+      <el-breadcrumb-item><a href="#" @click.prevent>首页</a></el-breadcrumb-item>
+      <el-breadcrumb-item><a href="#" @click.prevent>能效评估</a></el-breadcrumb-item>
+      <el-breadcrumb-item>设备选择</el-breadcrumb-item>
+    </el-breadcrumb>
     
     <div class="module-header">
       <h2>设备选择</h2>
       <div class="module-actions">
-        <button class="btn btn-secondary" @click="backToOverview">返回概览</button>
+        <el-button @click="backToOverview">返回概览</el-button>
       </div>
     </div>
 
@@ -17,34 +19,33 @@
         <p>请从以下15类船用核心设备中选择需要评估的设备类型</p>
       </div>
       
-      <div class="device-grid">
-        <div 
-          v-for="device in devices" 
-          :key="device.id"
-          class="device-card"
-          :class="{ selected: selectedDevices.includes(device.id) }"
-          @click="toggleDevice(device.id)"
-        >
-          <div class="device-icon">{{ device.icon }}</div>
-          <div class="device-info">
-            <h4>{{ device.name }}</h4>
-            <p>{{ device.description }}</p>
-            <div class="device-specs">
-              <span class="spec-item">标准: {{ device.standard }}</span>
-              <span class="spec-item">模型: {{ device.modelCount }}个</span>
+      <el-row :gutter="16" class="device-grid">
+        <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="device in devices" :key="device.id">
+          <el-card 
+            shadow="hover"
+            class="device-card"
+            :class="{ selected: selectedDevices.includes(device.id) }"
+            @click="toggleDevice(device.id)"
+          >
+            <div class="device-icon">{{ device.icon }}</div>
+            <div class="device-info">
+              <h4>{{ device.name }}</h4>
+              <p>{{ device.description }}</p>
+              <div class="device-specs">
+                <span class="spec-item">标准: {{ device.standard }}</span>
+                <span class="spec-item">模型: {{ device.modelCount }}个</span>
+              </div>
             </div>
-          </div>
-          <div class="device-checkbox">
-            <input 
-              type="checkbox" 
-              :id="'device-' + device.id"
-              :checked="selectedDevices.includes(device.id)"
-              @change="toggleDevice(device.id)"
-            >
-            <label :for="'device-' + device.id"></label>
-          </div>
-        </div>
-      </div>
+            <div class="device-checkbox">
+              <el-checkbox 
+                :model-value="selectedDevices.includes(device.id)"
+                @change="() => toggleDevice(device.id)"
+                @click.stop
+              />
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
 
       <div class="selection-summary">
         <div class="summary-info">
@@ -54,10 +55,10 @@
           </span>
         </div>
         <div class="summary-actions">
-          <button class="btn btn-secondary" @click="clearSelection">清空选择</button>
-          <button class="btn btn-primary" @click="nextStep" :disabled="selectedDevices.length === 0">
+          <el-button @click="clearSelection">清空选择</el-button>
+          <el-button type="primary" @click="nextStep" :disabled="selectedDevices.length === 0">
             下一步: 数据加载
-          </button>
+          </el-button>
         </div>
       </div>
     </div>
@@ -66,21 +67,24 @@
       <div class="section-header">
         <h3>设备分类</h3>
       </div>
-      <div class="category-tabs">
-        <button 
+      <el-space wrap class="category-tabs">
+        <el-button 
           v-for="category in categories" 
           :key="category.id"
-          class="category-tab"
-          :class="{ active: activeCategory === category.id }"
+          :type="activeCategory === category.id ? 'primary' : 'default'"
           @click="filterByCategory(category.id)"
         >
           {{ category.name }}
-        </button>
-      </div>
-      <div class="category-info" v-if="activeCategoryInfo">
-        <h4>{{ activeCategoryInfo.name }}</h4>
-        <p>{{ activeCategoryInfo.description }}</p>
-      </div>
+        </el-button>
+      </el-space>
+      <el-alert 
+        v-if="activeCategoryInfo"
+        :title="activeCategoryInfo.name"
+        :description="activeCategoryInfo.description"
+        type="info"
+        :closable="false"
+        class="category-info"
+      />
     </div>
   </div>
 </template>
@@ -294,6 +298,35 @@ const filterByCategory = (categoryId) => {
 </script>
 
 <style scoped>
+.device-select-container {
+  padding: 20px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.module-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.module-actions {
+  display: flex;
+  gap: 12px;
+}
+
 .device-selection {
   background: white;
   border-radius: 8px;
@@ -302,32 +335,42 @@ const filterByCategory = (categoryId) => {
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.section-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
 .device-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-  margin: 24px 0;
+  margin-top: 24px;
 }
 
 .device-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.device-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  border-color: #2563eb;
+  border: 2px solid transparent;
+  height: 100%;
 }
 
 .device-card.selected {
   border-color: #2563eb;
-  background-color: #eff6ff;
+  background: #eff6ff;
+}
+
+.device-card :deep(.el-card__body) {
+  position: relative;
+  padding: 20px;
 }
 
 .device-icon {
@@ -361,11 +404,6 @@ const filterByCategory = (categoryId) => {
   right: 16px;
 }
 
-.device-checkbox input {
-  width: 18px;
-  height: 18px;
-}
-
 .selection-summary {
   display: flex;
   justify-content: space-between;
@@ -394,57 +432,15 @@ const filterByCategory = (categoryId) => {
 }
 
 .category-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   margin: 20px 0;
-}
-
-.category-tab {
-  padding: 8px 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-}
-
-.category-tab:hover {
-  border-color: #2563eb;
-  color: #2563eb;
-}
-
-.category-tab.active {
-  background-color: #2563eb;
-  color: white;
-  border-color: #2563eb;
 }
 
 .category-info {
   margin-top: 16px;
-  padding: 16px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.category-info h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-}
-
-.category-info p {
-  margin: 0;
-  color: #666;
-  font-size: 14px;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .device-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .selection-summary {
     flex-direction: column;
     align-items: flex-start;
@@ -454,10 +450,6 @@ const filterByCategory = (categoryId) => {
   .summary-actions {
     width: 100%;
     flex-wrap: wrap;
-  }
-  
-  .category-tabs {
-    justify-content: center;
   }
   
   .module-header {

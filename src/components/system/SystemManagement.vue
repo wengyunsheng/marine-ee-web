@@ -1,74 +1,31 @@
 <template>
   <div class="system-management">
-    <h1>系统管理</h1>
+    <el-page-header @back="currentSubModule = null" v-if="currentSubModule">
+      <template #content>
+        <span class="text-large font-600 mr-3">{{ getSubModuleTitle(currentSubModule) }}</span>
+      </template>
+    </el-page-header>
     
-    <div class="module-section">
-      <div class="module-header">
-        <h2>设备类型管理</h2>
-        <button class="btn btn-primary" @click="showSubModule('device-type')">管理</button>
-      </div>
-      <div class="module-description">
-        管理船用设备的类型分类，支持添加、编辑、删除设备类型。
-      </div>
-    </div>
-
-    <div class="module-section">
-      <div class="module-header">
-        <h2>设备参数管理</h2>
-        <button class="btn btn-primary" @click="showSubModule('device-params')">管理</button>
-      </div>
-      <div class="module-description">
-        管理设备的技术参数和性能指标，支持批量导入导出。
-      </div>
-    </div>
-
-    <div class="module-section">
-      <div class="module-header">
-        <h2>加权参数管理</h2>
-        <button class="btn btn-primary" @click="showSubModule('weight-params')">管理</button>
-      </div>
-      <div class="module-description">
-        管理能效评估的加权参数，调整各指标的权重比例。
-      </div>
-    </div>
-
-    <div class="module-section">
-      <div class="module-header">
-        <h2>模型管理</h2>
-        <button class="btn btn-primary" @click="showSubModule('model-management')">管理</button>
-      </div>
-      <div class="module-description">
-        管理能效评估模型，支持自定义评估算法和标准。
-      </div>
-    </div>
-
-    <div class="module-section">
-      <div class="module-header">
-        <h2>能效等级管理</h2>
-        <button class="btn btn-primary" @click="showSubModule('efficiency-level')">管理</button>
-      </div>
-      <div class="module-description">
-        管理设备能效等级标准，设置不同等级的阈值和评估规则。
-      </div>
-    </div>
-
-    <div class="module-section">
-      <div class="module-header">
-        <h2>历史数据管理</h2>
-        <button class="btn btn-primary" @click="showSubModule('history-data')">管理</button>
-      </div>
-      <div class="module-description">
-        管理历史评估数据，支持数据备份、恢复和导出。
-      </div>
-    </div>
+    <h1 v-else>系统管理</h1>
+    
+    <el-row :gutter="20" v-if="!currentSubModule">
+      <el-col :xs="24" :sm="12" :md="8" :lg="8" v-for="module in modules" :key="module.id">
+        <el-card shadow="hover" class="module-section">
+          <template #header>
+            <div class="module-header">
+              <h2>{{ module.title }}</h2>
+              <el-button type="primary" @click="showSubModule(module.id)">管理</el-button>
+            </div>
+          </template>
+          <div class="module-description">
+            {{ module.description }}
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
 
     <!-- 子模块内容 -->
     <div class="sub-module-content" v-if="currentSubModule">
-      <div class="sub-module-header">
-        <h2>{{ getSubModuleTitle(currentSubModule) }}</h2>
-        <button class="btn btn-secondary" @click="currentSubModule = null">返回</button>
-      </div>
-      
       <component :is="currentSubModuleComponent" />
     </div>
   </div>
@@ -84,6 +41,39 @@ import EfficiencyLevelManagement from './efficiency-level-management/EfficiencyL
 import EfficiencyDataManagement from './efficiency-data-management/EfficiencyDataManagement.vue'
 
 const currentSubModule = ref(null)
+
+const modules = [
+  {
+    id: 'device-type',
+    title: '设备类型管理',
+    description: '管理船用设备的类型分类，支持添加、编辑、删除设备类型。'
+  },
+  {
+    id: 'device-params',
+    title: '设备参数管理',
+    description: '管理设备的技术参数和性能指标，支持批量导入导出。'
+  },
+  {
+    id: 'weight-params',
+    title: '发动机运行模式管理',
+    description: '管理发动机的运行模式及能效评估的加权参数，调整各指标的权重比例。'
+  },
+  {
+    id: 'model-management',
+    title: '模型管理',
+    description: '管理能效评估模型，支持自定义评估算法和标准。'
+  },
+  {
+    id: 'efficiency-level',
+    title: '能效等级和能效基值管理',
+    description: '管理设备能效等级标准和能效基值，设置不同等级的阈值和评估规则。'
+  },
+  {
+    id: 'history-data',
+    title: '历史数据管理',
+    description: '管理历史评估数据，支持数据备份、恢复和导出。'
+  }
+]
 
 const currentSubModuleComponent = computed(() => {
   const components = {
@@ -102,15 +92,8 @@ const showSubModule = (module) => {
 }
 
 const getSubModuleTitle = (module) => {
-  const titles = {
-    'device-type': '设备类型管理',
-    'device-params': '设备参数管理',
-    'weight-params': '加权参数管理',
-    'model-management': '模型管理',
-    'efficiency-level': '能效等级管理',
-    'history-data': '能效数据管理'
-  }
-  return titles[module] || '子模块'
+  const found = modules.find(m => m.id === module)
+  return found ? found.title : '子模块'
 }
 </script>
 
@@ -124,6 +107,26 @@ const getSubModuleTitle = (module) => {
   box-sizing: border-box;
 }
 
+/* 系统管理页面滚动条 */
+.system-management::-webkit-scrollbar {
+  width: 8px;
+}
+
+.system-management::-webkit-scrollbar-track {
+  background: #e8eaed;
+  border-radius: 4px;
+}
+
+.system-management::-webkit-scrollbar-thumb {
+  background: #c0c4cc;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.system-management::-webkit-scrollbar-thumb:hover {
+  background: #909399;
+}
+
 .system-management h1 {
   color: #333;
   margin-bottom: 30px;
@@ -132,16 +135,12 @@ const getSubModuleTitle = (module) => {
 }
 
 .module-section {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
   margin-bottom: 20px;
   transition: all 0.3s ease;
+  height: 100%;
 }
 
 .module-section:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 
@@ -149,9 +148,6 @@ const getSubModuleTitle = (module) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e8e8e8;
 }
 
 .module-header h2 {
@@ -159,34 +155,6 @@ const getSubModuleTitle = (module) => {
   margin: 0;
   font-size: 18px;
   font-weight: 500;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background-color: #1890ff;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #40a9ff;
-}
-
-.btn-secondary {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background-color: #e0e0e0;
 }
 
 .module-description {
@@ -197,49 +165,12 @@ const getSubModuleTitle = (module) => {
 
 .sub-module-content {
   margin-top: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-}
-
-.sub-module-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.sub-module-header h2 {
-  color: #333;
-  margin: 0;
-  font-size: 18px;
-  font-weight: 500;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .system-management {
     padding: 10px;
-  }
-  
-  .module-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .btn {
-    width: 100%;
-    text-align: center;
-  }
-  
-  .sub-module-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
   }
 }
 </style>

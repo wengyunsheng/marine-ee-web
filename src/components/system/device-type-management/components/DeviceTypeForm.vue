@@ -1,46 +1,37 @@
 <template>
-  <div class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>{{ isEdit ? '编辑设备类型' : '新增设备类型' }}</h3>
-        <button class="modal-close" @click="$emit('close')">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>设备类型名称 <span class="required">*</span></label>
-          <input type="text" v-model="localFormData.name" placeholder="请输入设备类型名称" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>类别 <span class="required">*</span></label>
-          <select v-model="localFormData.category" class="form-select">
-            <option value="">请选择类别</option>
-            <option value="engine">船用发动机</option>
-            <option value="gearbox">船用齿轮箱</option>
-            <option value="waste-heat">船用余热回收发电装置</option>
-            <option value="incinerator">船用焚烧炉</option>
-            <option value="separator">船用碟式分离机</option>
-            <option value="ballast">船用压载水处理设备</option>
-            <option value="windlass">船用锚绞机</option>
-            <option value="crane">船用吊机</option>
-            <option value="generator">船用发电机</option>
-            <option value="air-conditioner">船用组合式空调机组</option>
-            <option value="chiller">船用冷水机组</option>
-            <option value="inert-gas">船用惰性气体系统</option>
-            <option value="co2-capture">船用二氧化碳捕集设备</option>
-            <option value="propeller">船用推进器</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>描述 <span class="required">*</span></label>
-          <textarea v-model="localFormData.description" placeholder="设备类型的业务定义，如：船舶主推进系统，低速柴油发动机" class="form-textarea" rows="3"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" @click="$emit('close')">取消</button>
-        <button class="btn btn-primary" @click="handleSave">{{ isEdit ? '保存' : '创建' }}</button>
-      </div>
-    </div>
-  </div>
+  <el-form :model="localFormData" label-width="120px">
+    <el-form-item label="设备类型名称" required>
+      <el-input v-model="localFormData.name" placeholder="请输入设备类型名称" />
+    </el-form-item>
+    
+    <el-form-item label="类别" required>
+      <el-select v-model="localFormData.category" placeholder="请选择类别" style="width: 100%;">
+        <el-option label="船用发动机" value="engine" />
+        <el-option label="船用齿轮箱" value="gearbox" />
+        <el-option label="船用余热回收发电装置" value="waste-heat" />
+        <el-option label="船用焚烧炉" value="incinerator" />
+        <el-option label="船用碟式分离机" value="separator" />
+        <el-option label="船用压载水处理设备" value="ballast" />
+        <el-option label="船用锚绞机" value="windlass" />
+        <el-option label="船用吊机" value="crane" />
+        <el-option label="船用发电机" value="generator" />
+        <el-option label="船用组合式空调机组" value="air-conditioner" />
+        <el-option label="船用冷水机组" value="chiller" />
+        <el-option label="船用惰性气体系统" value="inert-gas" />
+        <el-option label="船用二氧化碳捕集设备" value="co2-capture" />
+        <el-option label="船用推进器" value="propeller" />
+      </el-select>
+    </el-form-item>
+    
+    <el-form-item label="描述" required>
+      <el-input
+        v-model="localFormData.description"
+        type="textarea"
+        placeholder="设备类型的业务定义，如：船舶主推进系统，低速柴油发动机"
+        :rows="3"
+      />
+    </el-form-item>
+  </el-form>
 </template>
 
 <script setup>
@@ -71,191 +62,5 @@ const handleSave = () => {
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #64748b;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.modal-close:hover {
-  background-color: #e2e8f0;
-}
-
-.modal-body {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 20px;
-  border-top: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-/* 表单样式 */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.required {
-  color: #ef4444;
-}
-
-.form-input,
-.form-select,
-.form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.form-group-secondary {
-  opacity: 0.85;
-}
-
-.form-group-secondary label {
-  color: #64748b;
-  font-weight: 400;
-}
-
-.field-hint {
-  display: block;
-  font-size: 12px;
-  color: #94a3b8;
-  margin-top: 4px;
-}
-
-.form-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-  background-position: right 12px center;
-  background-repeat: no-repeat;
-  background-size: 16px 16px;
-  padding-right: 40px;
-  cursor: pointer;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background-color: #2563eb;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #1d4ed8;
-}
-
-.btn-secondary {
-  background-color: #e2e8f0;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background-color: #cbd5e1;
-}
-
-/* 响应式布局 */
-@media (max-width: 768px) {
-  .modal-content {
-    width: 95%;
-    margin: 20px;
-  }
-
-  .modal-footer {
-    flex-direction: column;
-  }
-
-  .modal-footer button {
-    width: 100%;
-  }
-}
+/* 表单样式由 Element Plus 提供 */
 </style>

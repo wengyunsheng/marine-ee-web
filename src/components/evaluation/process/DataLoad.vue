@@ -1,13 +1,15 @@
 <template>
-  <div class="module">
-    <div class="breadcrumb">
-      <a href="#" @click.prevent>首页</a> > <a href="#" @click.prevent>能效评估</a> > <span>数据加载</span>
-    </div>
+  <div class="data-load-container">
+    <el-breadcrumb separator=">" class="breadcrumb">
+      <el-breadcrumb-item><a href="#" @click.prevent>首页</a></el-breadcrumb-item>
+      <el-breadcrumb-item><a href="#" @click.prevent>能效评估</a></el-breadcrumb-item>
+      <el-breadcrumb-item>数据加载</el-breadcrumb-item>
+    </el-breadcrumb>
     
     <div class="module-header">
       <h2>数据加载</h2>
       <div class="module-actions">
-        <button class="btn btn-secondary" @click="backToDeviceSelect">返回设备选择</button>
+        <el-button @click="backToDeviceSelect">返回设备选择</el-button>
       </div>
     </div>
 
@@ -17,103 +19,96 @@
         <p>请选择评估数据的来源方式</p>
       </div>
       
-      <div class="data-source-tabs">
-        <button 
-          class="source-tab"
-          :class="{ active: activeSource === 'upload' }"
-          @click="activeSource = 'upload'"
-        >
-          文件上传
-        </button>
-        <button 
-          class="source-tab"
-          :class="{ active: activeSource === 'history' }"
-          @click="activeSource = 'history'"
-        >
-          历史数据
-        </button>
-        <button 
-          class="source-tab"
-          :class="{ active: activeSource === 'real-time' }"
-          @click="activeSource = 'real-time'"
-        >
-          实时数据
-        </button>
-      </div>
+      <el-tabs v-model="activeSource" class="data-source-tabs">
+        <el-tab-pane label="文件上传" name="upload"></el-tab-pane>
+        <el-tab-pane label="历史数据" name="history"></el-tab-pane>
+        <el-tab-pane label="实时数据" name="real-time"></el-tab-pane>
+      </el-tabs>
 
       <!-- 文件上传 -->
       <div v-if="activeSource === 'upload'" class="upload-section">
-        <div class="upload-area" :class="{ active: isDragActive }" 
-             @dragover.prevent @dragenter.prevent @dragleave.prevent @drop.prevent="handleDrop">
-          <div class="upload-icon">📁</div>
-          <h4>拖拽文件到此处上传</h4>
-          <p>或点击选择文件</p>
-          <input type="file" ref="fileInput" multiple @change="handleFileSelect" class="file-input">
-          <button class="btn btn-secondary" @click="triggerFileInput">选择文件</button>
-          <p class="file-types">支持的文件类型: CSV, Excel, JSON, XML</p>
-        </div>
+        <el-upload
+          drag
+          multiple
+          accept=".csv,.xlsx,.xls,.json,.xml"
+          :auto-upload="false"
+          :on-change="handleFileChange"
+          :file-list="uploadedFiles"
+          class="upload-area"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">
+            拖拽文件到此处或<em>点击上传</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip">
+              支持的文件类型: CSV, Excel, JSON, XML
+            </div>
+          </template>
+        </el-upload>
         
         <div class="uploaded-files" v-if="uploadedFiles.length > 0">
           <h4>已上传文件</h4>
-          <div class="file-list">
-            <div v-for="(file, index) in uploadedFiles" :key="index" class="file-item">
-              <div class="file-info">
-                <span class="file-name">{{ file.name }}</span>
-                <span class="file-size">{{ formatFileSize(file.size) }}</span>
-                <span class="file-status">{{ file.status }}</span>
-              </div>
-              <div class="file-actions">
-                <button class="btn btn-sm" @click="previewFile(file)">预览</button>
-                <button class="btn btn-sm btn-danger" @click="removeFile(index)">删除</button>
-              </div>
-            </div>
-          </div>
+          <el-table :data="uploadedFiles" style="width: 100%; margin-top: 16px">
+            <el-table-column prop="name" label="文件名" min-width="200" />
+            <el-table-column label="文件大小" width="120">
+              <template #default="{ row }">
+                {{ formatFileSize(row.size) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="100" />
+            <el-table-column label="操作" width="150" align="center">
+              <template #default="{ row }">
+                <el-button size="small" @click="previewFile(row)">预览</el-button>
+                <el-button size="small" type="danger" @click="removeFile(row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
       </div>
 
       <!-- 历史数据 -->
       <div v-if="activeSource === 'history'" class="history-section">
-        <div class="search-box">
-          <input type="text" v-model="historySearch" placeholder="搜索历史数据" @keyup.enter="searchHistory">
-          <button class="search-btn" @click="searchHistory">🔍</button>
-        </div>
+        <el-input
+          v-model="historySearch"
+          placeholder="搜索历史数据"
+          prefix-icon="Search"
+          clearable
+          @keyup.enter="searchHistory"
+          class="search-box"
+        />
         
-        <div class="history-data-list">
-          <div 
-            v-for="data in filteredHistoryData" 
-            :key="data.id"
-            class="history-data-item"
-            :class="{ selected: selectedHistoryData.includes(data.id) }"
-            @click="toggleHistoryData(data.id)"
-          >
-            <div class="data-info">
-              <h4>{{ data.name }}</h4>
-              <p>{{ data.description }}</p>
-              <div class="data-meta">
-                <span class="meta-item">设备: {{ data.device }}</span>
-                <span class="meta-item">时间: {{ data.date }}</span>
-                <span class="meta-item">大小: {{ data.size }}</span>
-              </div>
-            </div>
-            <div class="data-checkbox">
-              <input 
-                type="checkbox" 
-                :id="'history-' + data.id"
-                :checked="selectedHistoryData.includes(data.id)"
-                @change="toggleHistoryData(data.id)"
-              >
-              <label :for="'history-' + data.id"></label>
-            </div>
-          </div>
-        </div>
+        <el-table
+          :data="filteredHistoryData"
+          style="width: 100%; margin-top: 16px"
+          highlight-current-row
+          @row-click="toggleHistoryData"
+          class="history-data-table"
+        >
+          <el-table-column type="selection" width="55" align="center">
+            <template #default="{ row }">
+              <el-checkbox 
+                :model-value="selectedHistoryData.includes(row.id)"
+                @change="() => toggleHistoryData(row)"
+                @click.stop
+              />
+            </template>
+          </el-table-column>
+          <el-table-column label="名称" prop="name" min-width="200" />
+          <el-table-column label="描述" prop="description" min-width="250" show-overflow-tooltip />
+          <el-table-column label="设备" prop="device" width="120" />
+          <el-table-column label="时间" prop="date" width="120" />
+          <el-table-column label="大小" prop="size" width="100" />
+        </el-table>
         
         <div class="pagination" v-if="totalHistoryPages > 1">
-          <span class="pagination-info">显示 1 到 {{ Math.min(5, filteredHistoryData.length) }} 条，共 {{ filteredHistoryData.length }} 条记录</span>
-          <div class="pagination-buttons">
-            <button class="btn btn-sm" @click="prevHistoryPage" :disabled="currentHistoryPage === 1">上一页</button>
-            <button class="btn btn-sm" v-for="page in visibleHistoryPages" :key="page" :class="{ active: page === currentHistoryPage }" @click="goToHistoryPage(page)">{{ page }}</button>
-            <button class="btn btn-sm" @click="nextHistoryPage" :disabled="currentHistoryPage === totalHistoryPages">下一页</button>
-          </div>
+          <el-pagination
+            v-model:current-page="currentHistoryPage"
+            :page-size="5"
+            :total="filteredHistoryData.length"
+            layout="total, prev, pager, next"
+            @current-change="goToHistoryPage"
+          />
         </div>
       </div>
 
@@ -121,94 +116,83 @@
       <div v-if="activeSource === 'real-time'" class="realtime-section">
         <div class="realtime-devices">
           <h4>可用实时设备</h4>
-          <div class="device-list">
-            <div 
-              v-for="device in realtimeDevices" 
-              :key="device.id"
-              class="device-item"
-              :class="{ connected: device.connected, selected: selectedRealtimeDevices.includes(device.id) }"
-              @click="toggleRealtimeDevice(device.id)"
-            >
-              <div class="device-status">
-                <div class="status-indicator" :class="{ connected: device.connected }"></div>
-                <span>{{ device.connected ? '在线' : '离线' }}</span>
-              </div>
-              <div class="device-info">
-                <h5>{{ device.name }}</h5>
-                <p>{{ device.model }}</p>
-                <div class="device-meta">
-                  <span class="meta-item">IP: {{ device.ip }}</span>
-                  <span class="meta-item">信号: {{ device.signal }}%</span>
-                </div>
-              </div>
-              <div class="device-checkbox">
-                <input 
-                  type="checkbox" 
-                  :id="'realtime-' + device.id"
-                  :checked="selectedRealtimeDevices.includes(device.id)"
-                  :disabled="!device.connected"
-                  @change="toggleRealtimeDevice(device.id)"
-                >
-                <label :for="'realtime-' + device.id"></label>
-              </div>
-            </div>
-          </div>
+          <el-table
+            :data="realtimeDevices"
+            style="width: 100%; margin-top: 16px"
+            highlight-current-row
+            @row-click="toggleRealtimeDevice"
+            class="device-table"
+          >
+            <el-table-column label="状态" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag :type="row.connected ? 'success' : 'danger'" size="small">
+                  {{ row.connected ? '在线' : '离线' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="设备名称" prop="name" min-width="150" />
+            <el-table-column label="型号" prop="model" min-width="180" />
+            <el-table-column label="IP地址" prop="ip" width="140" />
+            <el-table-column label="信号强度" width="120">
+              <template #default="{ row }">
+                <el-progress :percentage="row.signal" :color="getSignalColor(row.signal)" />
+              </template>
+            </el-table-column>
+            <el-table-column label="选择" width="80" align="center">
+              <template #default="{ row }">
+                <el-checkbox 
+                  :model-value="selectedRealtimeDevices.includes(row.id)"
+                  :disabled="!row.connected"
+                  @change="() => toggleRealtimeDevice(row)"
+                  @click.stop
+                />
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
         
         <div class="realtime-settings">
           <h4>实时数据设置</h4>
-          <div class="settings-form">
-            <div class="form-group">
-              <label>数据采集频率</label>
-              <select v-model="dataFrequency">
-                <option value="1s">1秒</option>
-                <option value="5s">5秒</option>
-                <option value="10s">10秒</option>
-                <option value="30s">30秒</option>
-                <option value="1m">1分钟</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>采集时长</label>
-              <input type="number" v-model="collectionDuration" placeholder="输入采集时长（分钟）">
-            </div>
-            <div class="form-group">
-              <label>数据存储</label>
-              <input type="checkbox" v-model="storeData">
-              <span>采集后存储为历史数据</span>
-            </div>
-          </div>
+          <el-form :model="realtimeSettings" label-width="120px" class="settings-form">
+            <el-form-item label="数据采集频率">
+              <el-select v-model="realtimeSettings.dataFrequency" style="width: 100%">
+                <el-option label="1秒" value="1s" />
+                <el-option label="5秒" value="5s" />
+                <el-option label="10秒" value="10s" />
+                <el-option label="30秒" value="30s" />
+                <el-option label="1分钟" value="1m" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="采集时长">
+              <el-input-number v-model="realtimeSettings.collectionDuration" :min="1" :max="120" style="width: 100%">
+                <template #append>分钟</template>
+              </el-input-number>
+            </el-form-item>
+            <el-form-item label="数据存储">
+              <el-checkbox v-model="realtimeSettings.storeData">采集后存储为历史数据</el-checkbox>
+            </el-form-item>
+          </el-form>
         </div>
       </div>
 
       <!-- 数据预览 -->
-      <div class="data-preview" v-if="showPreview">
-        <div class="section-header">
-          <h3>数据预览</h3>
-          <button class="btn btn-sm" @click="closePreview">关闭预览</button>
-        </div>
-        <div class="preview-content">
-          <table class="preview-table">
-            <thead>
-              <tr>
-                <th v-for="(header, index) in previewHeaders" :key="index">{{ header }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, rowIndex) in previewData" :key="rowIndex">
-                <td v-for="(cell, cellIndex) in row" :key="cellIndex">{{ cell }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <el-dialog v-model="showPreview" title="数据预览" width="80%">
+        <el-table :data="previewData" style="width: 100%" border max-height="400">
+          <el-table-column 
+            v-for="(header, index) in previewHeaders" 
+            :key="index"
+            :prop="'col' + index"
+            :label="header"
+          />
+        </el-table>
+      </el-dialog>
 
       <!-- 操作按钮 -->
       <div class="action-buttons">
-        <button class="btn btn-secondary" @click="resetData">重置</button>
-        <button class="btn btn-primary" @click="nextStep" :disabled="!canProceed">
+        <el-button @click="resetData">重置</el-button>
+        <el-button type="primary" @click="nextStep" :disabled="!canProceed">
           下一步: 参数配置
-        </button>
+        </el-button>
       </div>
     </div>
   </div>
@@ -216,20 +200,21 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { UploadFilled, Search } from '@element-plus/icons-vue'
 
 const emit = defineEmits(['navigate'])
 
 const activeSource = ref('upload')
-const isDragActive = ref(false)
 const uploadedFiles = ref([])
-const fileInput = ref(null)
 const historySearch = ref('')
 const currentHistoryPage = ref(1)
 const selectedHistoryData = ref([])
 const selectedRealtimeDevices = ref([])
-const dataFrequency = ref('5s')
-const collectionDuration = ref(10)
-const storeData = ref(true)
+const realtimeSettings = ref({
+  dataFrequency: '5s',
+  collectionDuration: 10,
+  storeData: true
+})
 const showPreview = ref(false)
 const previewHeaders = ref([])
 const previewData = ref([])
@@ -294,39 +279,13 @@ const canProceed = computed(() => {
   return false
 })
 
-const handleDrop = (event) => {
-  isDragActive.value = false
-  const files = event.dataTransfer.files
-  handleFiles(files)
-}
-
-const triggerFileInput = () => {
-  fileInput.value.click()
-}
-
-const handleFileSelect = (event) => {
-  const files = event.target.files
-  handleFiles(files)
-}
-
-const handleFiles = (files) => {
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i]
-    uploadedFiles.value.push({
-      name: file.name,
-      size: file.size,
-      status: '上传中...',
-      file: file
-    })
-    
-    // 模拟上传过程
-    setTimeout(() => {
-      const index = uploadedFiles.value.findIndex(f => f.name === file.name)
-      if (index > -1) {
-        uploadedFiles.value[index].status = '上传完成'
-      }
-    }, 1000)
-  }
+const handleFileChange = (file, fileList) => {
+  uploadedFiles.value = fileList.map(f => ({
+    name: f.name,
+    size: f.size,
+    status: '待上传',
+    raw: f.raw
+  }))
 }
 
 const formatFileSize = (bytes) => {
@@ -335,32 +294,32 @@ const formatFileSize = (bytes) => {
   return (bytes / 1048576).toFixed(2) + ' MB'
 }
 
-const removeFile = (index) => {
-  uploadedFiles.value.splice(index, 1)
+const removeFile = (file) => {
+  const index = uploadedFiles.value.findIndex(f => f.name === file.name)
+  if (index > -1) {
+    uploadedFiles.value.splice(index, 1)
+  }
 }
 
 const previewFile = (file) => {
   // 模拟文件预览
   previewHeaders.value = ['时间', '参数1', '参数2', '参数3', '参数4']
   previewData.value = [
-    ['2024-04-01 00:00', '100', '200', '300', '400'],
-    ['2024-04-01 00:01', '101', '201', '301', '401'],
-    ['2024-04-01 00:02', '102', '202', '302', '402'],
-    ['2024-04-01 00:03', '103', '203', '303', '403'],
-    ['2024-04-01 00:04', '104', '204', '304', '404']
+    { col0: '2024-04-01 00:00', col1: '100', col2: '200', col3: '300', col4: '400' },
+    { col0: '2024-04-01 00:01', col1: '101', col2: '201', col3: '301', col4: '401' },
+    { col0: '2024-04-01 00:02', col1: '102', col2: '202', col3: '302', col4: '402' },
+    { col0: '2024-04-01 00:03', col1: '103', col2: '203', col3: '303', col4: '403' },
+    { col0: '2024-04-01 00:04', col1: '104', col2: '204', col3: '304', col4: '404' }
   ]
   showPreview.value = true
-}
-
-const closePreview = () => {
-  showPreview.value = false
 }
 
 const searchHistory = () => {
   currentHistoryPage.value = 1
 }
 
-const toggleHistoryData = (id) => {
+const toggleHistoryData = (row) => {
+  const id = row.id
   const index = selectedHistoryData.value.indexOf(id)
   if (index > -1) {
     selectedHistoryData.value.splice(index, 1)
@@ -369,32 +328,26 @@ const toggleHistoryData = (id) => {
   }
 }
 
-const prevHistoryPage = () => {
-  if (currentHistoryPage.value > 1) {
-    currentHistoryPage.value--
-  }
-}
-
-const nextHistoryPage = () => {
-  if (currentHistoryPage.value < totalHistoryPages.value) {
-    currentHistoryPage.value++
-  }
-}
-
 const goToHistoryPage = (page) => {
   currentHistoryPage.value = page
 }
 
-const toggleRealtimeDevice = (id) => {
-  const device = realtimeDevices.value.find(d => d.id === id)
-  if (!device || !device.connected) return
+const toggleRealtimeDevice = (row) => {
+  if (!row.connected) return
   
+  const id = row.id
   const index = selectedRealtimeDevices.value.indexOf(id)
   if (index > -1) {
     selectedRealtimeDevices.value.splice(index, 1)
   } else {
     selectedRealtimeDevices.value.push(id)
   }
+}
+
+const getSignalColor = (signal) => {
+  if (signal >= 80) return '#67c23a'
+  if (signal >= 50) return '#e6a23c'
+  return '#f56c6c'
 }
 
 const resetData = () => {
@@ -419,6 +372,35 @@ const backToDeviceSelect = () => {
 </script>
 
 <style scoped>
+.data-load-container {
+  padding: 20px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.module-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.module-actions {
+  display: flex;
+  gap: 12px;
+}
+
 .data-load-section {
   background: white;
   border-radius: 8px;
@@ -426,33 +408,25 @@ const backToDeviceSelect = () => {
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.data-source-tabs {
-  display: flex;
-  gap: 12px;
-  margin: 24px 0;
-  border-bottom: 1px solid #e0e0e0;
+.section-header {
+  margin-bottom: 24px;
 }
 
-.source-tab {
-  padding: 12px 24px;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-bottom: none;
-  border-radius: 8px 8px 0 0;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.section-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.section-header p {
+  margin: 0;
+  color: #64748b;
   font-size: 14px;
-  font-weight: 500;
 }
 
-.source-tab:hover {
-  background-color: #f8f9fa;
-}
-
-.source-tab.active {
-  background-color: #2563eb;
-  color: white;
-  border-color: #2563eb;
+.data-source-tabs {
+  margin: 24px 0;
 }
 
 .upload-section {
@@ -460,87 +434,17 @@ const backToDeviceSelect = () => {
 }
 
 .upload-area {
-  border: 2px dashed #e0e0e0;
-  border-radius: 8px;
-  padding: 48px 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
   margin-bottom: 24px;
-}
-
-.upload-area:hover,
-.upload-area.active {
-  border-color: #2563eb;
-  background-color: #eff6ff;
-}
-
-.upload-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.upload-area h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.upload-area p {
-  margin: 0 0 24px 0;
-  color: #666;
-}
-
-.file-input {
-  display: none;
-}
-
-.file-types {
-  font-size: 12px;
-  color: #999;
-  margin-top: 16px;
 }
 
 .uploaded-files {
   margin-top: 24px;
 }
 
-.file-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.file-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-}
-
-.file-info {
-  flex: 1;
-}
-
-.file-name {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.file-size,
-.file-status {
-  font-size: 12px;
-  color: #666;
-  margin-right: 16px;
-}
-
-.file-actions {
-  display: flex;
-  gap: 8px;
+.uploaded-files h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .history-section {
@@ -548,154 +452,19 @@ const backToDeviceSelect = () => {
 }
 
 .search-box {
-  position: relative;
   margin-bottom: 24px;
 }
 
-.search-box input {
-  width: 100%;
-  padding: 12px 48px 12px 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.search-btn {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.history-data-list {
+.pagination {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.history-data-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.history-data-item:hover {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border-color: #2563eb;
-}
-
-.history-data-item.selected {
-  border-color: #2563eb;
-  background-color: #eff6ff;
-}
-
-.data-info {
-  flex: 1;
-}
-
-.data-info h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.data-info p {
-  margin: 0 0 12px 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.data-meta {
-  display: flex;
-  gap: 16px;
-  font-size: 12px;
-  color: #999;
+  justify-content: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .realtime-section {
   margin-bottom: 24px;
-}
-
-.device-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 24px 0;
-}
-
-.device-item {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.device-item:hover {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border-color: #2563eb;
-}
-
-.device-item.connected {
-  border-left: 4px solid #27ae60;
-}
-
-.device-item.selected {
-  border-color: #2563eb;
-  background-color: #eff6ff;
-}
-
-.device-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-right: 24px;
-}
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #e74c3c;
-}
-
-.status-indicator.connected {
-  background-color: #27ae60;
-}
-
-.device-info {
-  flex: 1;
-}
-
-.device-info h5 {
-  margin: 0 0 4px 0;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.device-info p {
-  margin: 0 0 8px 0;
-  color: #666;
-  font-size: 12px;
-}
-
-.device-meta {
-  display: flex;
-  gap: 16px;
-  font-size: 12px;
-  color: #999;
 }
 
 .realtime-settings {
@@ -706,58 +475,7 @@ const backToDeviceSelect = () => {
 }
 
 .settings-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
   margin-top: 16px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.form-group input,
-.form-group select {
-  padding: 8px 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.data-preview {
-  margin-top: 32px;
-  padding: 24px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.preview-content {
-  overflow-x: auto;
-  margin-top: 16px;
-}
-
-.preview-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.preview-table th,
-.preview-table td {
-  padding: 8px 12px;
-  border: 1px solid #e0e0e0;
-  text-align: left;
-}
-
-.preview-table th {
-  background-color: #e9ecef;
-  font-weight: 600;
 }
 
 .action-buttons {
@@ -769,85 +487,15 @@ const backToDeviceSelect = () => {
   border-top: 1px solid #e0e0e0;
 }
 
-.pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
-}
-
-.pagination-info {
-  font-size: 14px;
-  color: #666;
-}
-
-.pagination-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.pagination-buttons .btn.active {
-  background-color: #2563eb;
-  color: white;
-  border-color: #2563eb;
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .data-source-tabs {
-    flex-wrap: wrap;
-  }
-  
-  .file-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .file-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-  
-  .history-data-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .device-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .device-status {
-    margin-right: 0;
-  }
-  
-  .settings-form {
-    grid-template-columns: 1fr;
-  }
-  
   .action-buttons {
     flex-direction: column;
     gap: 8px;
   }
   
-  .action-buttons .btn {
+  .action-buttons :deep(.el-button) {
     width: 100%;
-  }
-  
-  .pagination {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .pagination-buttons {
-    flex-wrap: wrap;
   }
   
   .module-header {

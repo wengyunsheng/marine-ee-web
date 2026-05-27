@@ -2,26 +2,6 @@
   <div class="visualization-container">
     <div class="main-layout">
       <div class="left-panel">
-        <div class="section-header">
-          <h3>船舶设备三维可视化</h3>
-          <div class="header-controls">
-            <button class="btn-icon" @click="zoomIn" title="放大">
-              <span>🔍</span>
-            </button>
-            <button class="btn-icon" @click="rotateModel" title="旋转">
-              <span>🔄</span>
-            </button>
-            <button class="btn-icon" @click="toggleLabels" title="显示/隐藏标签">
-              <span>🏷️</span>
-            </button>
-            <button class="btn-icon" @click="captureScreen" title="截图">
-              <span>📷</span>
-            </button>
-            <button class="btn-icon" @click="toggleFullscreen" title="全屏">
-              <span>⛶</span>
-            </button>
-          </div>
-        </div>
         <ThreeDModel ref="threeDModelRef" :modelLabels="modelLabels" :selectedId="selectedEquipment" @select="selectEquipment" />
       </div>
 
@@ -40,6 +20,7 @@ import ThreeDModel from './components/ThreeDModel.vue'
 import EquipmentList from './components/EquipmentList.vue'
 import AnalysisPanel from './components/AnalysisPanel.vue'
 import ValidationPanel from './components/ValidationPanel.vue'
+import { ZoomIn, RefreshRight, PriceTag, Camera, FullScreen } from '@element-plus/icons-vue'
 
 const selectedEquipment = ref('1')
 const threeDModelRef = ref(null)
@@ -312,53 +293,6 @@ ${data.status === 'fail' ? '设备能效未达到最低等级标准，建议进�
   display: block;
   box-sizing: border-box;
   background-color: #0f172a;
-  color: white;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-left: 16px;
-  padding-right: 16px;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.header-controls {
-  display: flex;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 10px;
-  padding: 4px;
-  gap: 0;
-}
-
-.btn-icon {
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  margin: 0 2px;
-}
-
-.btn-icon:hover {
-  background: rgba(59, 130, 246, 0.3);
-  color: white;
-}
-
-.section-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
   color: white;
 }
 

@@ -1,98 +1,87 @@
 <template>
-  <div class="app-container">
-    <div class="sidebar" :class="{ collapsed: isSidebarCollapsed }">
+  <el-container class="app-container">
+    <!-- 左侧边栏 -->
+    <el-aside :width="isSidebarCollapsed ? '64px' : '240px'" class="sidebar">
       <div class="sidebar-header">
-        <div class="logo" :class="{ collapsed: isSidebarCollapsed }">
-          <h1 v-if="!isSidebarCollapsed">船舶设备运行能效智能评估系统验证平台</h1>
-        </div>
+        <h1 v-if="!isSidebarCollapsed" class="logo-text">船舶设备运行能效智能评估系统验证平台</h1>
+        <div v-else class="logo-icon">船舶设备</div>
       </div>
-      <button class="sidebar-toggle" @click="toggleSidebar">
-        {{ isSidebarCollapsed ? '>>' : '<<' }}
-      </button>
-      <nav class="sidebar-nav">
-        <ul>
-<!-- 
-          <li class="nav-item" :class="{ active: currentModule === 'data-access' }">
-            <a href="#" @click.prevent="switchModule('data-access')">
-              <span class="nav-icon">📥</span>
-              <span class="nav-text">数据接入</span>
-            </a>
-          </li>
-          -->
-          <li class="nav-item" :class="{ active: currentModule === 'evaluation' }">
-            <a href="#" @click.prevent="switchModule('evaluation')">
-              <span class="nav-icon">📊</span>
-              <span class="nav-text">能效评估</span>
-            </a>
-          </li>
-          <li class="nav-item" :class="{ active: currentModule === 'visualization' }">
-            <a href="#" @click.prevent="switchModule('visualization')">
-              <span class="nav-icon">🔍</span>
-              <span class="nav-text">可视化</span>
-            </a>
-          </li>
-          <li class="nav-item nav-item-with-submenu" :class="{ active: currentModule === 'system-management' && currentSystemSubModule, open: menuState.systemManagement }">
-            <a href="#" @click.prevent="toggleMenu('systemManagement')">
-              <span class="nav-icon">⚙️</span>
-              <span class="nav-text">系统管理</span>
-              <span class="nav-arrow">{{ menuState.systemManagement ? '▼' : '▶' }}</span>
-            </a>
-            <ul class="submenu" v-show="menuState.systemManagement">
-              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'device-type-management' }">
-                <a href="#" @click.prevent="switchSystemSubModule('device-type-management')">
-                  <span class="nav-icon">📋</span>
-                  <span class="nav-text">设备类型管理</span>
-                </a>
-              </li>
-              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'device-params' }">
-                <a href="#" @click.prevent="switchSystemSubModule('device-params')">
-                  <span class="nav-icon">📝</span>
-                  <span class="nav-text">设备参数管理</span>
-                </a>
-              </li>
-              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'weight-params' }">
-                <a href="#" @click.prevent="switchSystemSubModule('weight-params')">
-                  <span class="nav-icon">⚖️</span>
-                  <span class="nav-text">加权参数管理</span>
-                </a>
-              </li>
-              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'efficiency-level-management' }">
-                <a href="#" @click.prevent="switchSystemSubModule('efficiency-level-management')">
-                  <span class="nav-icon">🏆</span>
-                  <span class="nav-text">能效等级管理</span>
-                </a>
-              </li>
-              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'model-management' }">
-                <a href="#" @click.prevent="switchSystemSubModule('model-management')">
-                  <span class="nav-icon">🔧</span>
-                  <span class="nav-text">样机模型管理</span>
-                </a>
-              </li>
-              <li class="submenu-item" :class="{ active: currentModule === 'system-management' && currentSystemSubModule === 'history-data' }">
-                <a href="#" @click.prevent="switchSystemSubModule('history-data')">
-                  <span class="nav-icon">📁</span>
-                  <span class="nav-text">能效数据管理</span>
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar">管</div>
-          <span class="user-name" :class="{ collapsed: isSidebarCollapsed }">管理员</span>
-        </div>
-      </div>
-    </div>
 
-    <div class="main-container" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
-      <header class="top-header">
-        <div class="header-content">
-          <div class="platform-name">船舶设备运行能效智能评估系统验证平台 / {{ currentModuleName }}</div>
+      <div class="sidebar-menu-container">
+        <el-menu
+          :default-active="activeMenu"
+          class="sidebar-menu"
+          background-color="#4a6b8a"
+          text-color="#ffffff"
+          active-text-color="#ffd04b"
+          :collapse="isSidebarCollapsed"
+          @select="handleMenuSelect"
+        >
+          <el-menu-item index="evaluation">
+            <el-icon><DataAnalysis /></el-icon>
+            <template #title>能效评估</template>
+          </el-menu-item>
+
+          <el-menu-item index="visualization">
+            <el-icon><View /></el-icon>
+            <template #title>可视化</template>
+          </el-menu-item>
+
+          <el-sub-menu index="system-management">
+            <template #title>
+              <el-icon><Setting /></el-icon>
+              <span>系统管理</span>
+            </template>
+            <el-menu-item index="device-type-management">
+              <el-icon><Document /></el-icon>
+              <template #title>设备类型管理</template>
+            </el-menu-item>
+            <el-menu-item index="device-params">
+              <el-icon><Edit /></el-icon>
+              <template #title>设备参数管理</template>
+            </el-menu-item>
+            <el-menu-item index="weight-params">
+              <el-icon><ScaleToOriginal /></el-icon>
+              <template #title>发动机运行模式管理</template>
+            </el-menu-item>
+            <el-menu-item index="efficiency-level-management">
+              <el-icon><TrophyBase /></el-icon>
+              <template #title>能效等级和能效基值管理</template>
+            </el-menu-item>
+            <el-menu-item index="model-management">
+              <el-icon><Tools /></el-icon>
+              <template #title>样机模型管理</template>
+            </el-menu-item>
+            <el-menu-item index="history-data">
+              <el-icon><Folder /></el-icon>
+              <template #title>能效数据管理</template>
+            </el-menu-item>
+          </el-sub-menu>
+        </el-menu>
+      </div>
+    </el-aside>
+
+    <!-- 主内容区域 -->
+    <el-container class="main-container">
+      <!-- 顶部导航 -->
+      <el-header class="top-header">
+        <div class="header-left">
+          <el-icon class="collapse-icon" @click="toggleSidebar">
+            <Fold v-if="!isSidebarCollapsed" />
+            <Expand v-else />
+          </el-icon>
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item>船舶设备运行能效智能评估系统验证平台</el-breadcrumb-item>
+            <el-breadcrumb-item v-if="currentModule === 'evaluation'">能效评估</el-breadcrumb-item>
+            <el-breadcrumb-item v-else-if="currentModule === 'visualization'">可视化</el-breadcrumb-item>
+            <el-breadcrumb-item v-else-if="currentModule === 'system-management' && !currentSystemSubModule">系统管理</el-breadcrumb-item>
+            <el-breadcrumb-item v-else-if="currentModule === 'system-management' && currentSystemSubModule">{{ systemSubModuleNames[currentSystemSubModule] }}</el-breadcrumb-item>
+          </el-breadcrumb>
         </div>
-      </header>
-      <main class="content">
+      </el-header>
+
+      <!-- 内容区域 -->
+      <el-main class="content">
         <DataAccess v-if="false" />
         <template v-else-if="currentModule === 'evaluation'">
           <Evaluation v-if="currentEvalPage === 'eval-overview'" @navigate="navigateEvalPage" @evalComplete="handleEvalComplete" />
@@ -107,13 +96,12 @@
           <ModelManagement v-else-if="currentSystemSubModule === 'model-management'" :global-state="globalState" @switch-to-visualization="switchToVisualization" />
           <DeviceTypeManagement v-else-if="currentSystemSubModule === 'device-type-management'" />
           <EfficiencyLevelManagement v-else-if="currentSystemSubModule === 'efficiency-level-management'" />
-
           <EfficiencyDataManagement v-else-if="currentSystemSubModule === 'history-data'" />
           <DeviceParamsManagement v-else-if="currentSystemSubModule === 'device-params'" />
           <WeightParamsManagement v-else-if="currentSystemSubModule === 'weight-params'" />
         </template>
-      </main>
-    </div>
+      </el-main>
+    </el-container>
 
     <!-- 弹窗组件 -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
@@ -130,11 +118,24 @@
         </div>
       </div>
     </div>
-  </div>
+  </el-container>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import {
+  DataAnalysis,
+  View,
+  Setting,
+  Document,
+  Edit,
+  ScaleToOriginal,
+  TrophyBase,
+  Tools,
+  Folder,
+  Fold,
+  Expand
+} from '@element-plus/icons-vue'
 import DataAccess from './components/DataAccess.vue'
 import Evaluation from './components/evaluation/Evaluation.vue'
 import Visualization from './components/visualization/Visualization.vue'
@@ -146,14 +147,11 @@ import EvalResult from './components/evaluation/process/EvalResult.vue'
 import ModelManagement from './components/system/model-management/ModelManagement.vue'
 import DeviceTypeManagement from './components/system/device-type-management/DeviceTypeManagement.vue'
 import EfficiencyLevelManagement from './components/system/efficiency-level-management/EfficiencyLevelManagement.vue'
-
 import EfficiencyDataManagement from './components/system/efficiency-data-management/EfficiencyDataManagement.vue'
 import DeviceParamsManagement from './components/system/device-params-management/DeviceParamsManagement.vue'
 import WeightParamsManagement from './components/system/weight-params-management/WeightParamsManagement.vue'
 
 const currentModule = ref('evaluation')
-const activeSidebarItem = ref('overview')
-const searchQuery = ref('')
 const currentEvalPage = ref('eval-overview')
 const currentSystemSubModule = ref('')
 const showModal = ref(false)
@@ -164,11 +162,6 @@ const isSidebarCollapsed = ref(false)
 const globalState = ref({
   selectedModel: null, // 选中的模型
   models: [] // 模型列表
-})
-
-// 菜单状态
-const menuState = ref({
-  systemManagement: false
 })
 
 // 历史评估数据（全局共享）
@@ -261,8 +254,8 @@ const modalTitles = {
 const systemSubModuleNames = {
   'device-type-management': '设备类型管理',
   'device-params': '设备参数管理',
-  'weight-params': '加权参数管理',
-  'efficiency-level-management': '能效等级管理',
+  'weight-params': '发动机运行模式管理',
+  'efficiency-level-management': '能效等级和能效基值管理',
   'model-management': '样机模型管理',
   'history-data': '能效数据管理'
 }
@@ -274,95 +267,49 @@ const currentModuleName = computed(() => {
   return moduleNames[currentModule.value] || ''
 })
 
-const moduleProgress = computed(() => {
-  const progressMap = {
-    'data-access': 85,
-    'evaluation': 72,
-    'visualization': 60
+// 当前激活的菜单项
+const activeMenu = computed(() => {
+  if (currentModule.value === 'system-management' && currentSystemSubModule.value) {
+    return currentSystemSubModule.value
   }
-  return progressMap[currentModule.value] || 0
+  return currentModule.value
 })
 
-const sidebarItems = computed(() => {
-  if (currentModule.value === 'data-access') {
-    return [
-      { id: 'overview', name: '数据概览', icon: '📊' },
-      { id: 'heterogeneous', name: '数据异构接入', icon: '📥' },
-      { id: 'preprocess', name: '数据预处理', icon: '🔧' },
-      { id: 'storage', name: '数据存储', icon: '💾' },
-      { id: 'api', name: '标准API接口', icon: '🔗' }
-    ]
-  } else if (currentModule.value === 'evaluation') {
-    return [
-      { id: 'eval-overview', name: '评估概览', icon: '📊' },
-      { id: 'device-select', name: '设备选择', icon: '⚙️' },
-      { id: 'data-load', name: '数据加载', icon: '📥' },
-      { id: 'param-config', name: '参数配置', icon: '🔧' },
-      { id: 'eval-result', name: '评估结果', icon: '📊' }
-    ]
-  } else if (currentModule.value === 'visualization') {
-    return [
-      { id: 'vis-overview', name: '可视化概览', icon: '📊' },
-      { id: '3d-model', name: '三维模型', icon: '3️⃣' },
-      { id: 'data-analysis', name: '数据分析', icon: '📈' },
-      { id: 'model-manage', name: '模型管理', icon: '⚙️' }
-    ]
+// 处理菜单选择
+const handleMenuSelect = (index) => {
+  if (index === 'evaluation' || index === 'visualization') {
+    switchModule(index)
+  } else {
+    // 系统管理子模块
+    switchSystemSubModule(index)
   }
-  return []
-})
+}
 
 const switchModule = (module) => {
   currentModule.value = module
   currentSystemSubModule.value = ''
-  activeSidebarItem.value = 'overview'
-  // 关闭所有菜单
-  Object.keys(menuState.value).forEach(key => {
-    menuState.value[key] = false
-  })
 }
 
 // 切换系统子模块
 const switchSystemSubModule = (subModule) => {
-  // 确保当前模块是系统管理
   currentModule.value = 'system-management'
-  // 设置当前子模块
   currentSystemSubModule.value = subModule
-  // 这里可以根据子模块显示不同的内容
-  console.log('切换到系统子模块:', subModule)
-}
-
-// 切换菜单展开/收起
-const toggleMenu = (menuName) => {
-  const wasOpen = menuState.value[menuName]
-  Object.keys(menuState.value).forEach(key => {
-    menuState.value[key] = false
-  })
-  if (!wasOpen) {
-    menuState.value[menuName] = true
-  }
 }
 
 const handleSearch = () => {
-  alert(`搜索：${searchQuery.value}`)
+  // 搜索功能
 }
 
 const handleQuickAction = (action) => {
-  if (action === 'new-task') {
-    alert('新建接入任务')
-  } else if (action === 'import-config') {
-    alert('导入配置')
-  }
+  // 快捷操作
 }
 
 const navigateEvalPage = (page) => {
   if (['device-select', 'data-load', 'param-config', 'eval-result'].includes(page)) {
-    // 打开弹窗
     currentModal.value = page
     showModal.value = true
   } else {
-    // 切换页面
     currentEvalPage.value = page
-    activeSidebarItem.value = page
   }
 }
 
@@ -373,12 +320,9 @@ const closeModal = () => {
 
 const navigateEvalModal = (page) => {
   if (page === 'eval-overview') {
-    // 关闭弹窗，返回评估概览页面
     closeModal()
     currentEvalPage.value = 'eval-overview'
-    activeSidebarItem.value = 'eval-overview'
   } else {
-    // 在弹窗之间切换
     currentModal.value = page
   }
 }
@@ -402,11 +346,6 @@ const toggleSidebar = () => {
 const switchToVisualization = () => {
   currentModule.value = 'visualization'
   currentSystemSubModule.value = ''
-  activeSidebarItem.value = 'overview'
-  // 关闭所有菜单
-  Object.keys(menuState.value).forEach(key => {
-    menuState.value[key] = false
-  })
 }
 
 // 处理评估完成事件，同步到历史数据
@@ -437,366 +376,142 @@ const mapDeviceClassToName = (deviceClass) => {
 
 <style scoped>
 .app-container {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f5f5f5;
+  height: 100vh;
 }
 
 /* 侧边栏样式 */
 .sidebar {
-  width: 250px;
   background-color: #4a6b8a;
-  color: white;
   transition: width 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  left: 0;
-  top: 0;
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-  min-height: 100vh;
-  z-index: 100;
-}
-
-.sidebar.collapsed {
-  width: 60px;
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-  box-shadow: none;
+  overflow-x: hidden;
 }
 
 .sidebar-header {
-  padding: 15px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  height: 60px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 48px;
-  box-sizing: border-box;
-}
-
-.logo {
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
-}
-
-.logo.collapsed {
-  align-items: center;
-}
-
-.logo h1 {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0;
-  transition: opacity 0.3s ease;
-}
-
-.logo.collapsed h1 {
-  opacity: 0;
-  position: absolute;
-  pointer-events: none;
+  justify-content: center;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #3d5a75;
 }
 
 .logo-text {
-  display: none;
-}
-
-.sidebar-toggle {
-  position: fixed;
-  left: 238px;
-  top: 50vh;
-  transform: translateY(-50%);
-  background: #3498db;
-  border: none;
+  font-size: 16px;
+  font-weight: 600;
   color: white;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  padding: 8px 6px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  transition: all 0.3s ease;
-  z-index: 100;
-  width: 24px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar-toggle:hover {
-  background-color: #2980b9;
-  transform: translateY(-50%) scale(1.05);
-}
-
-.sidebar.collapsed .sidebar-toggle {
-  left: 48px;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.sidebar-nav ul {
-  list-style: none;
-  padding: 0;
   margin: 0;
+  text-align: center;
+  line-height: 1.4;
 }
 
-.nav-item {
-  margin-bottom: 4px;
-}
-
-.nav-item a {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  color: white;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border-left: 3px solid transparent;
-}
-
-.nav-item-with-submenu a {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  color: white;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border-left: 3px solid transparent;
-}
-
-.nav-arrow {
-  font-size: 12px;
-  transition: transform 0.3s ease;
-  margin-left: auto;
-  margin-right: 0;
-}
-
-.nav-item-with-submenu.open .nav-arrow {
-  transform: rotate(90deg);
-}
-
-.nav-item-with-submenu.open a {
-  background-color: rgba(255,255,255,0.08);
-}
-
-.submenu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  background-color: rgba(0,0,0,0.05);
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.submenu-item a {
-  padding-left: 40px;
+.logo-icon {
   font-size: 14px;
-  border-left: 3px solid transparent;
-  background-color: transparent;
-}
-
-.submenu-item a:hover {
-  background-color: rgba(255,255,255,0.1);
-  border-left-color: rgba(52,152,219,0.5);
-}
-
-.submenu-item.active a {
-  background-color: rgba(255,255,255,0.25);
-  border-left-color: #3498db;
   font-weight: 600;
-  box-shadow: inset 0 0 0 1px rgba(52,152,219,0.3);
-}
-
-/* 系统子模块样式 */
-.system-submodule {
-  padding: 20px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin: 20px;
-}
-
-.system-submodule h2 {
-  margin-top: 0;
-  color: #2c3e50;
-  font-size: 20px;
-  margin-bottom: 15px;
-}
-
-.system-submodule p {
-  color: #666;
-  line-height: 1.6;
-}
-
-
-
-.nav-item a:hover {
-  background-color: rgba(255,255,255,0.1);
-}
-
-.nav-item.active > a {
-  background-color: rgba(255,255,255,0.25);
-  border-left-color: #3498db;
-  font-weight: 600;
-  box-shadow: inset 0 0 0 1px rgba(52,152,219,0.3);
-}
-
-.nav-item-with-submenu.active > a {
-  background-color: rgba(255,255,255,0.25);
-  border-left-color: #3498db;
-  font-weight: 600;
-  box-shadow: inset 0 0 0 1px rgba(52,152,219,0.3);
-}
-
-.nav-icon {
-  font-size: 18px;
-  margin-right: 12px;
-  width: 20px;
+  color: white;
   text-align: center;
 }
 
-.nav-text {
-  transition: opacity 0.3s ease;
+.sidebar-menu-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.sidebar.collapsed .nav-text {
-  opacity: 0;
-  position: absolute;
-  pointer-events: none;
+/* 侧边栏滚动条样式 */
+.sidebar-menu-container::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* 悬浮显示菜单名称 */
-.sidebar.collapsed .nav-item {
-  position: relative;
+.sidebar-menu-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
 }
 
-.sidebar.collapsed .nav-item:hover .nav-text {
-  opacity: 1;
-  position: absolute;
-  left: 60px;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(74, 107, 138, 0.95);
-  padding: 8px 12px;
-  border-radius: 4px;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+.sidebar-menu-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  transition: background 0.3s;
 }
 
-/* 调整收起状态下的图标位置，避免与展开收起按钮重叠 */
-.sidebar.collapsed .nav-icon {
-  margin-left: 10px;
+.sidebar-menu-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.sidebar-footer {
-  padding: 20px;
-  border-top: 1px solid rgba(255,255,255,0.1);
+.sidebar-menu {
+  border-right: none;
 }
 
-.sidebar-footer .user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+/* 覆盖 Element Plus 菜单样式 */
+:deep(.el-menu) {
+  background-color: #4a6b8a !important;
 }
 
-.sidebar-footer .user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #3498db;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+:deep(.el-menu-item) {
+  color: #ffffff !important;
 }
 
-.user-name {
-  font-size: 14px;
-  transition: opacity 0.3s ease;
+:deep(.el-menu-item:hover) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-.user-name.collapsed {
-  opacity: 0;
-  position: absolute;
-  pointer-events: none;
+:deep(.el-menu-item.is-active) {
+  background-color: rgba(255, 208, 75, 0.15) !important;
+  color: #ffd04b !important;
+}
+
+:deep(.el-sub-menu__title) {
+  color: #ffffff !important;
+}
+
+:deep(.el-sub-menu__title:hover) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* 主容器样式 */
 .main-container {
-  position: fixed;
-  left: 250px;
-  top: 0;
-  right: 0;
-  bottom: 0;
   display: flex;
   flex-direction: column;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  transition: left 0.3s ease;
 }
 
-.sidebar-collapsed.main-container {
-  left: 60px !important;
-}
-
+/* 顶部导航 */
 .top-header {
-  background-color: #4a6b8a;
-  padding: 20px 24px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  height: 64px;
-  box-sizing: border-box;
-}
-
-.header-content {
+  background-color: white;
+  border-bottom: 1px solid #e4e7ed;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 100%;
+  padding: 0 20px;
+  height: 60px;
 }
 
-.platform-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: white;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.header-actions {
+.header-left {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
+  flex: 1;
 }
 
+.collapse-icon {
+  font-size: 20px;
+  cursor: pointer;
+  color: #606266;
+  transition: color 0.3s;
+}
+
+.collapse-icon:hover {
+  color: #409eff;
+}
+
+/* 内容区域 */
 .content {
   flex: 1;
-  padding: 0;
-  margin: 0;
-  overflow-y: auto;
-  background-color: #f5f5f5;
-  position: relative;
+  padding: 20px;
+  background-color: #f5f7fa;
 }
+</style>
 
-/* 移除强制所有子元素高度为100%的规则 */
-
-/* 弹窗样式 */
+<style>
+/* 全局弹窗样式（不使用scoped） */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -807,7 +522,7 @@ const mapDeviceClassToName = (deviceClass) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .modal-content {

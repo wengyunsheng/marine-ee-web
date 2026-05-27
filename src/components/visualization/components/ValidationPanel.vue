@@ -2,85 +2,57 @@
   <div class="panel-section">
     <div class="section-header">
       <h3>标准验证结果</h3>
-      <button class="btn-link" @click="showDetail = !showDetail">
+      <el-button link @click="showDetail = !showDetail">
         {{ showDetail ? '收起' : '详情' }}
-      </button>
+      </el-button>
     </div>
     <div v-if="data" class="validation-panel">
-      <div class="validation-result" :class="getStatusClass(data.status)">
-        <div class="result-icon">{{ getStatusIcon(data.status) }}</div>
-        <div class="result-text">
+      <el-alert 
+        :type="getAlertType(data.status)"
+        :closable="false"
+        show-icon
+        class="validation-result"
+      >
+        <template #title>
           <div class="result-title">{{ getValidationTitle(data.status) }}</div>
+        </template>
+        <template #default>
           <div class="result-subtitle">达到 {{ data.level }}级 能效标准</div>
-        </div>
-      </div>
+        </template>
+      </el-alert>
       <div v-if="showDetail" class="validation-detail">
-        <div class="detail-block">
-          <div class="block-title">适用标准</div>
-          <div class="block-content">
-            <div class="info-row">
-              <span class="info-label">标准编号:</span>
-              <span class="info-value">{{ data.standardNo }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">排放等级:</span>
-              <span class="info-value">{{ data.emissionLevel }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">设备类型:</span>
-              <span class="info-value">{{ data.name }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">功率区间:</span>
-              <span class="info-value">{{ data.powerRange }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">试验循环:</span>
-              <span class="info-value">{{ data.testCycle }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="detail-block">
-          <div class="block-title">验证指标</div>
-          <div class="block-content">
-            <div class="info-row">
-              <span class="info-label">能效指标计算值:</span>
-              <span class="info-value highlight">{{ data.currentValue }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">1级基准值:</span>
-              <span class="info-value">{{ data.baselineLevel1 }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">2级基准值:</span>
-              <span class="info-value">{{ data.baselineLevel2 }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">3级基准值:</span>
-              <span class="info-value">{{ data.baselineLevel3 }}</span>
-            </div>
-          </div>
-        </div>
+        <el-descriptions title="适用标准" :column="2" border class="detail-block">
+          <el-descriptions-item label="标准编号">{{ data.standardNo }}</el-descriptions-item>
+          <el-descriptions-item label="排放等级">{{ data.emissionLevel }}</el-descriptions-item>
+          <el-descriptions-item label="设备类型">{{ data.name }}</el-descriptions-item>
+          <el-descriptions-item label="功率区间">{{ data.powerRange }}</el-descriptions-item>
+          <el-descriptions-item label="试验循环">{{ data.testCycle }}</el-descriptions-item>
+        </el-descriptions>
+        
+        <el-descriptions title="验证指标" :column="2" border class="detail-block">
+          <el-descriptions-item label="能效指标计算值">
+            <el-tag type="primary" effect="dark">{{ data.currentValue }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="1级基准值">{{ data.baselineLevel1 }}</el-descriptions-item>
+          <el-descriptions-item label="2级基准值">{{ data.baselineLevel2 }}</el-descriptions-item>
+          <el-descriptions-item label="3级基准值">{{ data.baselineLevel3 }}</el-descriptions-item>
+        </el-descriptions>
         <div class="detail-block">
           <div class="block-title">验证明细</div>
-          <div class="block-content">
-            <div class="detail-table">
-              <div class="table-header">
-                <span class="th">验证项</span>
-                <span class="th">结果</span>
-                <span class="th">状态</span>
-              </div>
-              <div v-for="(item, index) in data.validationItems" :key="index" class="table-row">
-                <span class="td">{{ item.item }}</span>
-                <span class="td">{{ item.result }}</span>
-                <span class="td" :class="item.status === '通过' ? 'success' : 'fail'">
-                  {{ item.status === '通过' ? '✓' : '✗' }}
-                </span>
-              </div>
-            </div>
-          </div>
+          <el-table :data="data.validationItems" style="width: 100%" border size="small">
+            <el-table-column prop="item" label="验证项" min-width="180" />
+            <el-table-column prop="result" label="结果" width="150" />
+            <el-table-column label="状态" width="80" align="center">
+              <template #default="{ row }">
+                <el-tag :type="row.status === '通过' ? 'success' : 'danger'" size="small">
+                  {{ row.status === '通过' ? '✓' : '✗' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
-        <button class="btn btn-primary" @click="$emit('exportReport')">导出验证报告</button>
+        
+        <el-button type="primary" @click="$emit('exportReport')">导出验证报告</el-button>
       </div>
     </div>
     <div v-else class="empty-state">请从左侧列表选择设备查看标准验证结果</div>
@@ -101,21 +73,12 @@ defineEmits(['exportReport'])
 
 const showDetail = ref(false)
 
-const getStatusClass = (status) => {
+const getAlertType = (status) => {
   switch (status) {
-    case 'pass': return 'status-pass'
-    case 'warning': return 'status-warning'
-    case 'fail': return 'status-fail'
-    default: return ''
-  }
-}
-
-const getStatusIcon = (status) => {
-  switch (status) {
-    case 'pass': return '✓'
-    case 'warning': return '⚠'
-    case 'fail': return '✗'
-    default: return ''
+    case 'pass': return 'success'
+    case 'warning': return 'warning'
+    case 'fail': return 'error'
+    default: return 'info'
   }
 }
 
@@ -176,36 +139,13 @@ const getValidationTitle = (status) => {
   padding: 16px;
 }
 
-.validation-result {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.validation-result.status-pass {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.validation-result.status-warning {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.validation-result.status-fail {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.result-icon {
-  font-size: 36px;
-}
-
-.result-text {
-  flex: 1;
+.btn-link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .result-title {
@@ -219,6 +159,10 @@ const getValidationTitle = (status) => {
   color: rgba(255, 255, 255, 0.7);
 }
 
+.validation-result {
+  margin-bottom: 16px;
+}
+
 .validation-detail {
   display: flex;
   flex-direction: column;
@@ -226,103 +170,13 @@ const getValidationTitle = (status) => {
 }
 
 .detail-block {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 6px;
-  padding: 12px;
+  margin-bottom: 16px;
 }
 
 .block-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 10px;
-}
-
-.block-content {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-}
-
-.info-label {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.info-value {
-  color: white;
-  font-weight: 500;
-}
-
-.info-value.highlight {
-  color: #3b82f6;
-}
-
-.detail-table {
-  margin-bottom: 12px;
-}
-
-.detail-table .table-header {
-  display: grid;
-  grid-template-columns: 1fr 120px 60px;
-  gap: 8px;
-  padding: 6px 10px;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 4px;
-}
-
-.detail-table .table-row {
-  display: grid;
-  grid-template-columns: 1fr 120px 60px;
-  gap: 8px;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 4px;
-  font-size: 12px;
-  color: white;
-  margin-bottom: 4px;
-}
-
-.detail-table .th,
-.detail-table .td {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.detail-table .td.success {
-  color: #22c55e;
-}
-
-.detail-table .td.fail {
-  color: #ef4444;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background-color: #3b82f6;
+  font-weight: 600;
   color: white;
-}
-
-.btn-primary:hover {
-  background-color: #2563eb;
+  margin-bottom: 12px;
 }
 </style>

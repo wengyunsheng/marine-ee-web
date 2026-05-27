@@ -1,5 +1,36 @@
 <template>
   <div class="three-d-wrapper">
+    <div class="three-d-header">
+      <h3>船舶设备三维可视化</h3>
+      <el-space :size="8" class="header-controls">
+        <el-tooltip content="放大" placement="top">
+          <el-button size="small" @click="zoomIn">
+            <el-icon><ZoomIn /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="旋转" placement="top">
+          <el-button size="small" @click="rotateModel">
+            <el-icon><RefreshRight /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="显示/隐藏标签" placement="top">
+          <el-button size="small" @click="toggleLabels">
+            <el-icon><PriceTag /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="截图" placement="top">
+          <el-button size="small" @click="captureScreen">
+            <el-icon><Camera /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="全屏" placement="top">
+          <el-button size="small" @click="toggleFullscreen">
+            <el-icon><FullScreen /></el-icon>
+          </el-button>
+        </el-tooltip>
+      </el-space>
+    </div>
+    
     <div class="three-d-container" ref="threeContainer">
       <div class="three-d-background"></div>
       <div class="three-d-model" ref="modelContainer"></div>
@@ -35,6 +66,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { ZoomIn, RefreshRight, PriceTag, Camera, FullScreen } from '@element-plus/icons-vue'
 
 defineProps({
   modelLabels: {
@@ -97,24 +129,25 @@ const toggleFullscreen = () => {
       setTimeout(() => {
         onWindowResize()
         isFullscreenTransition = false
-      }, 300)
+      }, 100)
     }).catch(err => {
       console.error(`Error attempting to enable fullscreen: ${err.message}`)
       isFullscreenTransition = false
     })
   } else {
     if (document.exitFullscreen) {
-      document.exitFullscreen().then(() => {
-        setTimeout(() => {
-          onWindowResize()
-          window.dispatchEvent(new Event('resize'))
-          isFullscreenTransition = false
-        }, 300)
-      }).catch(err => {
-        console.error(`Error exiting fullscreen: ${err.message}`)
-        isFullscreenTransition = false
-      })
+      document.exitFullscreen()
     }
+  }
+}
+
+const handleFullscreenChange = () => {
+  if (!document.fullscreenElement) {
+    setTimeout(() => {
+      onWindowResize()
+      window.dispatchEvent(new Event('resize'))
+      isFullscreenTransition = false
+    }, 100)
   }
 }
 
@@ -174,6 +207,7 @@ const initThreeScene = () => {
   animate()
 
   window.addEventListener('resize', onWindowResize)
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
 }
 
 const createShipEngineModel = () => {
@@ -328,6 +362,7 @@ const cleanThreeScene = () => {
     })
   }
   window.removeEventListener('resize', onWindowResize)
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
   if (resizeTimeout) clearTimeout(resizeTimeout)
 }
 
@@ -358,29 +393,24 @@ defineExpose({
 }
 
 .three-d-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid rgba(59, 130, 246, 0.2);
   background: rgba(59, 130, 246, 0.05);
 }
 
+.three-d-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
 .header-controls {
   display: flex;
   gap: 8px;
-}
-
-.btn-icon {
-  padding: 6px;
-  border-radius: 6px;
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.btn-icon:hover {
-  background-color: rgba(59, 130, 246, 0.2);
 }
 
 .three-d-container {

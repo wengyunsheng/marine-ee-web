@@ -1,15 +1,17 @@
 <template>
-  <div class="module">
-    <div class="breadcrumb">
-      <a href="#" @click.prevent>首页</a> > <a href="#" @click.prevent>能效评估</a> > <span>评估结果</span>
-    </div>
+  <div class="eval-result-container">
+    <el-breadcrumb separator=">" class="breadcrumb">
+      <el-breadcrumb-item><a href="#" @click.prevent>首页</a></el-breadcrumb-item>
+      <el-breadcrumb-item><a href="#" @click.prevent>能效评估</a></el-breadcrumb-item>
+      <el-breadcrumb-item>评估结果</el-breadcrumb-item>
+    </el-breadcrumb>
     
     <div class="module-header">
       <h2>船用发动机设备能效计算与能效分级</h2>
       <div class="module-actions">
-        <button class="btn btn-secondary" @click="backToConfig">返回参数配置</button>
-        <button class="btn btn-secondary" @click="exportReport">导出报告</button>
-        <button class="btn btn-primary" @click="newEvaluation">新建评估</button>
+        <el-button @click="backToConfig">返回参数配置</el-button>
+        <el-button @click="exportReport">导出报告</el-button>
+        <el-button type="primary" @click="newEvaluation">新建评估</el-button>
       </div>
     </div>
 
@@ -20,42 +22,50 @@
         </div>
         
         <div class="data-import-section">
-          <div class="import-box">
-            <div class="import-icon">📥</div>
-            <h4>数据导入</h4>
-            <p>按钮，选择发动机数据导入。</p>
-          </div>
+          <el-upload
+            drag
+            accept=".csv,.xlsx,.xls,.json,.xml"
+            :auto-upload="false"
+            class="import-box"
+          >
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text">
+              点击或拖拽文件到此处上传
+            </div>
+            <template #tip>
+              <div class="el-upload__tip">
+                按钮，选择发动机数据导入。
+              </div>
+            </template>
+          </el-upload>
         </div>
 
-        <div class="engine-info-grid">
-          <div class="info-item">
-            <label>发动机品牌:</label>
-            <span class="value readonly">{{ evaluationData.brand }}</span>
+        <el-form label-width="120px" class="engine-info-grid">
+          <el-form-item label="发动机品牌:">
+            <el-input v-model="evaluationData.brand" readonly />
             <span class="hint">由导入数据带出，不可修改。</span>
-          </div>
+          </el-form-item>
           
-          <div class="info-item">
-            <label>发动机类型:</label>
-            <select v-model="evaluationData.engineType" class="form-control">
-              <option value="低速机">船用柴油发动机（低速机）</option>
-              <option value="中速机">船用柴油发动机（中速机）</option>
-              <option value="lng-low">船用LNG/柴油双燃料发动机（低速机）</option>
-              <option value="lng-medium">船用LNG/柴油双燃料发动机（中速机）</option>
-              <option value="methanol-low">船用甲醇/柴油双燃料发动机（低速机）</option>
-              <option value="methanol-medium">船用甲醇/柴油双燃料发动机（中速机）</option>
-            </select>
+          <el-form-item label="发动机类型:">
+            <el-select v-model="evaluationData.engineType" style="width: 100%">
+              <el-option value="低速机" label="船用柴油发动机（低速机）" />
+              <el-option value="中速机" label="船用柴油发动机（中速机）" />
+              <el-option value="lng-low" label="船用LNG/柴油双燃料发动机（低速机）" />
+              <el-option value="lng-medium" label="船用LNG/柴油双燃料发动机（中速机）" />
+              <el-option value="methanol-low" label="船用甲醇/柴油双燃料发动机（低速机）" />
+              <el-option value="methanol-medium" label="船用甲醇/柴油双燃料发动机（中速机）" />
+            </el-select>
             <span class="hint">下拉框，选择发动机类型。</span>
-          </div>
+          </el-form-item>
           
-          <div class="info-item">
-            <label>排放等级:</label>
-            <select v-model="evaluationData.emissionLevel" class="form-control">
-              <option value="Tier II">Tier II</option>
-              <option value="Tier III">Tier III</option>
-            </select>
+          <el-form-item label="排放等级:">
+            <el-select v-model="evaluationData.emissionLevel" style="width: 100%">
+              <el-option value="Tier II" label="Tier II" />
+              <el-option value="Tier III" label="Tier III" />
+            </el-select>
             <span class="hint">由导入数据带出，可修改。</span>
-          </div>
-        </div>
+          </el-form-item>
+        </el-form>
       </div>
 
       <div class="eval-section params-section">
@@ -64,79 +74,15 @@
           <span class="hint">根据发动机类型，显示不同的发动机参数。参数的数值可修改。</span>
         </div>
         
-        <div class="params-table-container">
-          <table class="params-table">
-            <thead>
-              <tr>
-                <th>参数</th>
-                <th>单位</th>
-                <th>数值</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>额定转速</td>
-                <td>r/min</td>
-                <td><input type="number" v-model.number="engineParams.ratedSpeed" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>额定功率</td>
-                <td>kW</td>
-                <td><input type="number" v-model.number="engineParams.ratedPower" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>主燃料低热值</td>
-                <td>kJ/kg</td>
-                <td><input type="number" v-model.number="engineParams.mainFuelLHV" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>引燃油低热值</td>
-                <td>kJ/kg</td>
-                <td><input type="number" v-model.number="engineParams.pilotFuelLHV" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>25%工况下燃气消耗率</td>
-                <td>g/kWh</td>
-                <td><input type="number" v-model.number="engineParams.bsgc25" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>25%工况下引燃油消耗率</td>
-                <td>g/kWh</td>
-                <td><input type="number" v-model.number="engineParams.bsfc25" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>50%工况下燃气消耗率</td>
-                <td>g/kWh</td>
-                <td><input type="number" v-model.number="engineParams.bsgc50" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>50%工况下引燃油消耗率</td>
-                <td>g/kWh</td>
-                <td><input type="number" v-model.number="engineParams.bsfc50" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>75%工况下燃气消耗率</td>
-                <td>g/kWh</td>
-                <td><input type="number" v-model.number="engineParams.bsgc75" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>75%工况下引燃油消耗率</td>
-                <td>g/kWh</td>
-                <td><input type="number" v-model.number="engineParams.bsfc75" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>100%工况下燃气消耗率</td>
-                <td>g/kWh</td>
-                <td><input type="number" v-model.number="engineParams.bsgc100" class="param-input"></td>
-              </tr>
-              <tr>
-                <td>100%工况下引燃油消耗率</td>
-                <td>g/kWh</td>
-                <td><input type="number" v-model.number="engineParams.bsfc100" class="param-input"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <el-table :data="paramsTableData" style="width: 100%" border>
+          <el-table-column prop="param" label="参数" width="250" />
+          <el-table-column prop="unit" label="单位" width="120" />
+          <el-table-column label="数值" min-width="200">
+            <template #default="{ row }">
+              <el-input-number v-model.number="row.value" style="width: 100%" />
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
 
       <div class="eval-section calculation-section">
@@ -171,20 +117,29 @@
         </div>
 
         <div class="calculate-button">
-          <button class="btn btn-primary btn-lg" @click="calculateEfficiency">计算能效指标</button>
+          <el-button type="primary" size="large" @click="calculateEfficiency">计算能效指标</el-button>
         </div>
 
-        <div v-if="showResult" class="efficiency-result">
-          <div class="result-row">
-            <label>能效指标:</label>
-            <span class="result-value">{{ calculatedEfficiency.toFixed(2) }}%</span>
-            <span class="result-hint">能效指标、能效分级 不可修改。</span>
-          </div>
-          <div class="result-row">
-            <label>能效分级:</label>
-            <span class="result-value efficiency-level" :class="efficiencyLevelClass">{{ efficiencyLevel }}</span>
-          </div>
-        </div>
+        <el-alert
+          v-if="showResult"
+          type="success"
+          :closable="false"
+          class="efficiency-result"
+        >
+          <template #title>
+            <div class="result-row">
+              <label>能效指标:</label>
+              <span class="result-value">{{ calculatedEfficiency.toFixed(2) }}%</span>
+              <span class="result-hint">能效指标、能效分级 不可修改。</span>
+            </div>
+            <div class="result-row">
+              <label>能效分级:</label>
+              <el-tag :type="getLevelType(efficiencyLevel)" size="large" class="efficiency-level">
+                {{ efficiencyLevel }}
+              </el-tag>
+            </div>
+          </template>
+        </el-alert>
       </div>
 
       <div class="eval-section base-values-section">
@@ -193,28 +148,17 @@
           <span class="hint">由发动机类型带出，不可修改。</span>
         </div>
         
-        <div class="base-values-table-container">
-          <table class="base-values-table">
-            <thead>
-              <tr>
-                <th>发动机类型</th>
-                <th>排放等级</th>
-                <th>单缸功率区间 P/kW</th>
-                <th>能效等级</th>
-                <th>能效基值</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in baseValues" :key="item.id">
-                <td>{{ item.engineType }}</td>
-                <td>{{ item.emissionLevel }}</td>
-                <td>{{ item.powerRange }}</td>
-                <td>{{ item.efficiencyLevel }}</td>
-                <td>{{ item.baseValue }}%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <el-table :data="baseValues" style="width: 100%" border stripe>
+          <el-table-column prop="engineType" label="发动机类型" width="200" />
+          <el-table-column prop="emissionLevel" label="排放等级" width="120" />
+          <el-table-column prop="powerRange" label="单缸功率区间 P/kW" min-width="180" />
+          <el-table-column prop="efficiencyLevel" label="能效等级" width="120" />
+          <el-table-column label="能效基值" width="120">
+            <template #default="{ row }">
+              {{ row.baseValue }}%
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
     </div>
   </div>
@@ -222,6 +166,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { UploadFilled } from '@element-plus/icons-vue'
 
 const emit = defineEmits(['back', 'new'])
 
@@ -318,6 +263,27 @@ const efficiencyLevelClass = computed(() => {
   return 'level-3'
 })
 
+const getLevelType = (level) => {
+  if (level === '1级') return 'success'
+  if (level === '2级') return ''
+  return 'danger'
+}
+
+const paramsTableData = computed(() => [
+  { param: '额定转速', unit: 'r/min', value: engineParams.value.ratedSpeed },
+  { param: '额定功率', unit: 'kW', value: engineParams.value.ratedPower },
+  { param: '主燃料低热值', unit: 'kJ/kg', value: engineParams.value.mainFuelLHV },
+  { param: '引燃油低热值', unit: 'kJ/kg', value: engineParams.value.pilotFuelLHV },
+  { param: '25%工况下燃气消耗率', unit: 'g/kWh', value: engineParams.value.bsgc25 },
+  { param: '25%工况下引燃油消耗率', unit: 'g/kWh', value: engineParams.value.bsfc25 },
+  { param: '50%工况下燃气消耗率', unit: 'g/kWh', value: engineParams.value.bsgc50 },
+  { param: '50%工况下引燃油消耗率', unit: 'g/kWh', value: engineParams.value.bsfc50 },
+  { param: '75%工况下燃气消耗率', unit: 'g/kWh', value: engineParams.value.bsgc75 },
+  { param: '75%工况下引燃油消耗率', unit: 'g/kWh', value: engineParams.value.bsfc75 },
+  { param: '100%工况下燃气消耗率', unit: 'g/kWh', value: engineParams.value.bsgc100 },
+  { param: '100%工况下引燃油消耗率', unit: 'g/kWh', value: engineParams.value.bsfc100 }
+])
+
 const calculateEfficiency = () => {
   const params = engineParams.value
   const config = currentFuelConfig.value
@@ -361,19 +327,12 @@ const newEvaluation = () => {
 </script>
 
 <style scoped>
-.module {
+.eval-result-container {
   padding: 20px;
 }
 
 .breadcrumb {
   margin-bottom: 16px;
-  font-size: 14px;
-  color: #666;
-}
-
-.breadcrumb a {
-  color: #2563eb;
-  text-decoration: none;
 }
 
 .module-header {
@@ -436,37 +395,7 @@ const newEvaluation = () => {
 }
 
 .import-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 32px;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.import-box:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-}
-
-.import-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-}
-
-.import-box h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.import-box p {
-  margin: 0;
-  font-size: 14px;
-  color: #666;
 }
 
 .engine-info-grid {
@@ -475,86 +404,11 @@ const newEvaluation = () => {
   gap: 16px;
 }
 
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.info-item label {
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-}
-
-.info-item .value {
-  font-size: 16px;
-  color: #1e293b;
-}
-
-.info-item .value.readonly {
-  padding: 8px 12px;
-  background: #f8fafc;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-}
-
-.info-item .hint {
+.hint {
   font-size: 12px;
   color: #9ca3af;
-}
-
-.form-control {
-  padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.form-control:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.params-table-container {
-  overflow-x: auto;
-}
-
-.params-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.params-table th,
-.params-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.params-table th {
-  background: #f8fafc;
-  font-weight: 600;
-  color: #333;
-}
-
-.param-input {
-  width: 100px;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
-  text-align: right;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.param-input:focus {
-  border-color: #2563eb;
+  display: block;
+  margin-top: 4px;
 }
 
 .calculation-formula {
@@ -615,15 +469,10 @@ const newEvaluation = () => {
   margin-bottom: 20px;
 }
 
-.btn-lg {
-  padding: 12px 32px;
-  font-size: 16px;
-}
-
 .efficiency-result {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border-radius: 12px;
-  padding: 20px;
+  :deep(.el-alert__content) {
+    width: 100%;
+  }
 }
 
 .result-row {
@@ -649,84 +498,14 @@ const newEvaluation = () => {
   color: #16a34a;
 }
 
-.result-value.efficiency-level {
+.efficiency-level {
   padding: 6px 16px;
-  border-radius: 20px;
   font-size: 16px;
-}
-
-.efficiency-level.level-1 {
-  background: #22c55e;
-  color: white;
-}
-
-.efficiency-level.level-2 {
-  background: #f59e0b;
-  color: white;
-}
-
-.efficiency-level.level-3 {
-  background: #ef4444;
-  color: white;
 }
 
 .result-hint {
   font-size: 12px;
   color: #9ca3af;
-}
-
-.base-values-table-container {
-  overflow-x: auto;
-}
-
-.base-values-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.base-values-table th,
-.base-values-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.base-values-table th {
-  background: #f8fafc;
-  font-weight: 600;
-  color: #333;
-}
-
-.base-values-table tr:hover {
-  background: #f8fafc;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background: #2563eb;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #1d4ed8;
-}
-
-.btn-secondary {
-  background: #e2e8f0;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background: #cbd5e1;
 }
 
 @media (max-width: 1024px) {

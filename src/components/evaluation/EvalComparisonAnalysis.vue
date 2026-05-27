@@ -1,70 +1,82 @@
 <template>
-  <div class="modal-overlay" @click="handleClose">
-    <div class="modal-content comparison-modal" @click.stop>
-      <div class="modal-header">
-        <h2>对比分析</h2>
-        <button class="close-btn" @click="handleClose">×</button>
-      </div>
-      
-      <div class="comparison-analysis-container">
+  <el-dialog 
+    v-model="dialogVisible" 
+    title="对比分析"
+    width="80%"
+    :close-on-click-modal="false"
+    @close="handleClose"
+  >
+    <div class="comparison-analysis-container">
         <!-- 模式选择页面 -->
         <div v-if="currentView === 'mode-select'" class="mode-select-view">
           <div class="mode-section">
             <h4>选择对比模式</h4>
-            <div class="mode-cards">
-              <div 
-                class="mode-card" 
-                :class="{ selected: selectedMode === 'A' }"
-                @click="selectMode('A')"
-              >
-                <div class="mode-icon">🔄</div>
-                <div class="mode-title">模式A：同型号-不同船型</div>
-                <div class="mode-desc">同一设备型号，在不同船舶类型上的能效对比</div>
-              </div>
+            <el-row :gutter="16" class="mode-cards">
+              <el-col :span="12">
+                <el-card 
+                  shadow="hover" 
+                  class="mode-card"
+                  :class="{ selected: selectedMode === 'A' }"
+                  @click="selectMode('A')"
+                >
+                  <div class="mode-icon">🔄</div>
+                  <div class="mode-title">模式A：同型号-不同船型</div>
+                  <div class="mode-desc">同一设备型号，在不同船舶类型上的能效对比</div>
+                </el-card>
+              </el-col>
 
-              <div 
-                class="mode-card" 
-                :class="{ selected: selectedMode === 'B' }"
-                @click="selectMode('B')"
-              >
-                <div class="mode-icon">⚙️</div>
-                <div class="mode-title">模式B：同设备-不同工况</div>
-                <div class="mode-desc">同一设备/船型，在不同运行工况下的能效对比</div>
-              </div>
+              <el-col :span="12">
+                <el-card 
+                  shadow="hover" 
+                  class="mode-card"
+                  :class="{ selected: selectedMode === 'B' }"
+                  @click="selectMode('B')"
+                >
+                  <div class="mode-icon">⚙️</div>
+                  <div class="mode-title">模式B：同设备-不同工况</div>
+                  <div class="mode-desc">同一设备/船型，在不同运行工况下的能效对比</div>
+                </el-card>
+              </el-col>
 
-              <div 
-                class="mode-card" 
-                :class="{ selected: selectedMode === 'C' }"
-                @click="selectMode('C')"
-              >
-                <div class="mode-icon">📊</div>
-                <div class="mode-title">模式C：同设备-不同数据来源</div>
-                <div class="mode-desc">出厂定额 vs 台架试验 vs 实船运行数据对比</div>
-              </div>
+              <el-col :span="12">
+                <el-card 
+                  shadow="hover" 
+                  class="mode-card"
+                  :class="{ selected: selectedMode === 'C' }"
+                  @click="selectMode('C')"
+                >
+                  <div class="mode-icon">📊</div>
+                  <div class="mode-title">模式C：同设备-不同数据来源</div>
+                  <div class="mode-desc">出厂定额 vs 台架试验 vs 实船运行数据对比</div>
+                </el-card>
+              </el-col>
 
-              <div 
-                class="mode-card" 
-                :class="{ selected: selectedMode === 'D' }"
-                @click="selectMode('D')"
-              >
-                <div class="mode-icon">📋</div>
-                <div class="mode-title">模式D：自由对比</div>
-                <div class="mode-desc">自定义选择多个已完成评估任务进行对比</div>
-              </div>
-            </div>
+              <el-col :span="12">
+                <el-card 
+                  shadow="hover" 
+                  class="mode-card"
+                  :class="{ selected: selectedMode === 'D' }"
+                  @click="selectMode('D')"
+                >
+                  <div class="mode-icon">📋</div>
+                  <div class="mode-title">模式D：自由对比</div>
+                  <div class="mode-desc">自定义选择多个已完成评估任务进行对比</div>
+                </el-card>
+              </el-col>
+            </el-row>
           </div>
 
           <div class="action-bar">
-            <button class="btn btn-primary" :disabled="!selectedMode" @click="goToConfig">
+            <el-button type="primary" :disabled="!selectedMode" @click="goToConfig">
               下一步：配置对比条件
-            </button>
+            </el-button>
           </div>
         </div>
 
         <!-- 模式A：同型号-不同船型 配置页面 -->
         <div v-else-if="currentView === 'config-A'" class="config-view">
           <div class="config-header">
-            <button class="btn btn-link" @click="backToModeSelect">← 返回模式选择</button>
+            <el-button link @click="backToModeSelect">← 返回模式选择</el-button>
             <span class="config-title">对比分析 > 同型号-不同船型</span>
           </div>
 
@@ -72,25 +84,27 @@
             <div class="step">
               <h4>步骤1：选择设备型号</h4>
               <div class="step-content">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>设备品牌</label>
-                    <select v-model="configA.brand" @change="onBrandChange">
-                      <option value="">请选择品牌</option>
-                      <option value="MAN B&W">MAN B&W</option>
-                      <option value="Wärtsilä">Wärtsilä</option>
-                      <option value="Cummins">Cummins</option>
-                      <option value="Caterpillar">Caterpillar</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>设备型号</label>
-                    <select v-model="configA.model" :disabled="!configA.brand">
-                      <option value="">请选择型号</option>
-                      <option v-for="m in filteredModelsA" :key="m" :value="m">{{ m }}</option>
-                    </select>
-                  </div>
-                </div>
+                <el-form label-width="120px">
+                  <el-row :gutter="20">
+                    <el-col :span="12">
+                      <el-form-item label="设备品牌">
+                        <el-select v-model="configA.brand" placeholder="请选择品牌" style="width: 100%" @change="onBrandChange">
+                          <el-option value="MAN B&W" label="MAN B&W" />
+                          <el-option value="Wärtsilä" label="Wärtsilä" />
+                          <el-option value="Cummins" label="Cummins" />
+                          <el-option value="Caterpillar" label="Caterpillar" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                      <el-form-item label="设备型号">
+                        <el-select v-model="configA.model" placeholder="请选择型号" :disabled="!configA.brand" style="width: 100%">
+                          <el-option v-for="m in filteredModelsA" :key="m" :label="m" :value="m" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
                 <div class="form-hint">型号联动，仅展示该品牌下的型号</div>
               </div>
             </div>
@@ -98,35 +112,38 @@
             <div class="step">
               <h4>步骤2：选择工况条件</h4>
               <div class="step-content">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>运行工况</label>
-                    <select v-model="configA.loadCondition">
-                      <option value="">请选择工况</option>
-                      <option value="100%">100%额定工况</option>
-                      <option value="75%">75%工况</option>
-                      <option value="50%">50%工况</option>
-                      <option value="25%">25%工况</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>试验循环</label>
-                    <select v-model="configA.testCycle">
-                      <option value="">请选择循环</option>
-                      <option value="E2">E2（恒速辅机运行模式）</option>
-                      <option value="E3">E3（推进特性）</option>
-                      <option value="D2">D2（恒速辅机运行模式）</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>数据来源</label>
-                    <select v-model="configA.dataSource">
-                      <option value="">全部</option>
-                      <option value="台架试验">台架试验</option>
-                      <option value="实船运行">实船运行</option>
-                    </select>
-                  </div>
-                </div>
+                <el-form label-width="120px">
+                  <el-row :gutter="20">
+                    <el-col :span="8">
+                      <el-form-item label="运行工况">
+                        <el-select v-model="configA.loadCondition" placeholder="请选择工况" style="width: 100%">
+                          <el-option value="100%" label="100%额定工况" />
+                          <el-option value="75%" label="75%工况" />
+                          <el-option value="50%" label="50%工况" />
+                          <el-option value="25%" label="25%工况" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                      <el-form-item label="试验循环">
+                        <el-select v-model="configA.testCycle" placeholder="请选择循环" style="width: 100%">
+                          <el-option value="E2" label="E2（恒速辅机运行模式）" />
+                          <el-option value="E3" label="E3（推进特性）" />
+                          <el-option value="D2" label="D2（恒速辅机运行模式）" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                      <el-form-item label="数据来源">
+                        <el-select v-model="configA.dataSource" placeholder="全部" style="width: 100%">
+                          <el-option value="" label="全部" />
+                          <el-option value="台架试验" label="台架试验" />
+                          <el-option value="实船运行" label="实船运行" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
               </div>
             </div>
 
@@ -134,34 +151,35 @@
               <h4>步骤3：选择船型（多选）</h4>
               <div class="step-content">
                 <div class="ship-type-list">
-                  <div 
-                    v-for="ship in shipTypes" 
-                    :key="ship.id"
-                    class="ship-type-item"
-                    :class="{ selected: configA.shipTypes.includes(ship.id), disabled: ship.dataCount === 0 }"
-                    @click="toggleShipTypeA(ship)"
-                  >
-                    <input type="checkbox" :checked="configA.shipTypes.includes(ship.id)" :disabled="ship.dataCount === 0">
-                    <span class="ship-name">{{ ship.name }}</span>
-                    <span class="data-count">数据：{{ ship.dataCount }}条可用</span>
-                  </div>
+                  <el-checkbox-group v-model="configA.shipTypes">
+                    <el-checkbox 
+                      v-for="ship in shipTypes" 
+                      :key="ship.id"
+                      :label="ship.id"
+                      :disabled="ship.dataCount === 0"
+                      class="ship-type-item"
+                    >
+                      <span class="ship-name">{{ ship.name }}</span>
+                      <span class="data-count">数据：{{ ship.dataCount }}条可用</span>
+                    </el-checkbox>
+                  </el-checkbox-group>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="action-bar">
-            <button class="btn btn-secondary" @click="handleClose">取消</button>
-            <button class="btn btn-primary" :disabled="!canStartComparisonA" @click="startComparison">
+            <el-button @click="handleClose">取消</el-button>
+            <el-button type="primary" :disabled="!canStartComparisonA" @click="startComparison">
               开始对比分析
-            </button>
+            </el-button>
           </div>
         </div>
 
         <!-- 模式B：同设备-不同工况 配置页面 -->
         <div v-else-if="currentView === 'config-B'" class="config-view">
           <div class="config-header">
-            <button class="btn btn-link" @click="backToModeSelect">← 返回模式选择</button>
+            <el-button link @click="backToModeSelect">← 返回模式选择</el-button>
             <span class="config-title">对比分析 > 同设备-不同工况</span>
           </div>
 
@@ -169,101 +187,95 @@
             <div class="step">
               <h4>步骤1：选择设备</h4>
               <div class="step-content">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>设备品牌</label>
-                    <select v-model="configB.brand">
-                      <option value="">请选择品牌</option>
-                      <option value="MAN B&W">MAN B&W</option>
-                      <option value="Wärtsilä">Wärtsilä</option>
-                      <option value="Cummins">Cummins</option>
-                      <option value="Caterpillar">Caterpillar</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>设备型号</label>
-                    <select v-model="configB.model" :disabled="!configB.brand">
-                      <option value="">请选择型号</option>
-                      <option v-for="m in filteredModelsB" :key="m" :value="m">{{ m }}</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>所属船型（可选）</label>
-                    <select v-model="configB.shipType">
-                      <option value="">不限制</option>
-                      <option value="VLCC">VLCC超大型油轮</option>
-                      <option value="散货船">散货船</option>
-                      <option value="集装箱船">集装箱船</option>
-                      <option value="液化气船">液化气船</option>
-                    </select>
-                  </div>
-                </div>
+                <el-form label-width="120px">
+                  <el-row :gutter="20">
+                    <el-col :span="8">
+                      <el-form-item label="设备品牌">
+                        <el-select v-model="configB.brand" placeholder="请选择品牌" style="width: 100%">
+                          <el-option value="MAN B&W" label="MAN B&W" />
+                          <el-option value="Wärtsilä" label="Wärtsilä" />
+                          <el-option value="Cummins" label="Cummins" />
+                          <el-option value="Caterpillar" label="Caterpillar" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                      <el-form-item label="设备型号">
+                        <el-select v-model="configB.model" placeholder="请选择型号" :disabled="!configB.brand" style="width: 100%">
+                          <el-option v-for="m in filteredModelsB" :key="m" :label="m" :value="m" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                      <el-form-item label="所属船型（可选）">
+                        <el-select v-model="configB.shipType" placeholder="不限制" style="width: 100%">
+                          <el-option value="" label="不限制" />
+                          <el-option value="VLCC" label="VLCC超大型油轮" />
+                          <el-option value="散货船" label="散货船" />
+                          <el-option value="集装箱船" label="集装箱船" />
+                          <el-option value="液化气船" label="液化气船" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
               </div>
             </div>
 
             <div class="step">
               <h4>步骤2：选择对比的工况点（多选）</h4>
               <div class="step-content">
-                <div class="condition-list">
-                  <div 
+                <el-checkbox-group v-model="configB.conditions" class="condition-list">
+                  <el-checkbox 
                     v-for="cond in loadConditions" 
                     :key="cond.value"
+                    :label="cond.value"
                     class="condition-item"
-                    :class="{ selected: configB.conditions.includes(cond.value) }"
-                    @click="toggleConditionB(cond)"
                   >
-                    <input type="checkbox" :checked="configB.conditions.includes(cond.value)">
                     <span class="condition-name">{{ cond.label }}</span>
                     <span class="condition-weight">加权系数：{{ cond.weight }}</span>
-                  </div>
-                </div>
-                <div class="form-row" style="margin-top: 16px;">
-                  <div class="form-group">
-                    <label>试验循环</label>
-                    <select v-model="configB.testCycle">
-                      <option value="">请选择循环</option>
-                      <option value="E2">E2（恒速辅机运行模式）</option>
-                      <option value="E3">E3（推进特性）</option>
-                      <option value="D2">D2（恒速辅机运行模式）</option>
-                    </select>
-                  </div>
-                </div>
+                  </el-checkbox>
+                </el-checkbox-group>
+                <el-form label-width="120px" style="margin-top: 16px">
+                  <el-row :gutter="20">
+                    <el-col :span="8">
+                      <el-form-item label="试验循环">
+                        <el-select v-model="configB.testCycle" placeholder="请选择循环" style="width: 100%">
+                          <el-option value="E2" label="E2（恒速辅机运行模式）" />
+                          <el-option value="E3" label="E3（推进特性）" />
+                          <el-option value="D2" label="D2（恒速辅机运行模式）" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
               </div>
             </div>
 
             <div class="step">
               <h4>步骤3：选择数据来源</h4>
               <div class="step-content">
-                <div class="radio-group">
-                  <label class="radio-item">
-                    <input type="radio" v-model="configB.dataSource" value="台架试验">
-                    <span>仅台架试验数据</span>
-                  </label>
-                  <label class="radio-item">
-                    <input type="radio" v-model="configB.dataSource" value="实船运行">
-                    <span>仅实船运行数据</span>
-                  </label>
-                  <label class="radio-item">
-                    <input type="radio" v-model="configB.dataSource" value="">
-                    <span>全部可用数据</span>
-                  </label>
-                </div>
+                <el-radio-group v-model="configB.dataSource">
+                  <el-radio value="台架试验">仅台架试验数据</el-radio>
+                  <el-radio value="实船运行">仅实船运行数据</el-radio>
+                  <el-radio value="">全部可用数据</el-radio>
+                </el-radio-group>
               </div>
             </div>
           </div>
 
           <div class="action-bar">
-            <button class="btn btn-secondary" @click="handleClose">取消</button>
-            <button class="btn btn-primary" :disabled="!canStartComparisonB" @click="startComparison">
+            <el-button @click="handleClose">取消</el-button>
+            <el-button type="primary" :disabled="!canStartComparisonB" @click="startComparison">
               开始对比分析
-            </button>
+            </el-button>
           </div>
         </div>
 
         <!-- 模式C：同设备-不同数据来源 配置页面 -->
         <div v-else-if="currentView === 'config-C'" class="config-view">
           <div class="config-header">
-            <button class="btn btn-link" @click="backToModeSelect">← 返回模式选择</button>
+            <el-button link @click="backToModeSelect">← 返回模式选择</el-button>
             <span class="config-title">对比分析 > 同设备-不同数据来源</span>
           </div>
 
@@ -271,89 +283,85 @@
             <div class="step">
               <h4>步骤1：选择设备</h4>
               <div class="step-content">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>设备品牌</label>
-                    <select v-model="configC.brand">
-                      <option value="">请选择品牌</option>
-                      <option value="MAN B&W">MAN B&W</option>
-                      <option value="Wärtsilä">Wärtsilä</option>
-                      <option value="Cummins">Cummins</option>
-                      <option value="Caterpillar">Caterpillar</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>设备型号</label>
-                    <select v-model="configC.model" :disabled="!configC.brand">
-                      <option value="">请选择型号</option>
-                      <option v-for="m in filteredModelsC" :key="m" :value="m">{{ m }}</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>所属船型（可选）</label>
-                    <select v-model="configC.shipType">
-                      <option value="">不限制</option>
-                      <option value="VLCC">VLCC超大型油轮</option>
-                      <option value="散货船">散货船</option>
-                      <option value="集装箱船">集装箱船</option>
-                      <option value="液化气船">液化气船</option>
-                    </select>
-                  </div>
-                </div>
+                <el-form label-width="120px">
+                  <el-row :gutter="20">
+                    <el-col :span="8">
+                      <el-form-item label="设备品牌">
+                        <el-select v-model="configC.brand" placeholder="请选择品牌" style="width: 100%">
+                          <el-option value="MAN B&W" label="MAN B&W" />
+                          <el-option value="Wärtsilä" label="Wärtsilä" />
+                          <el-option value="Cummins" label="Cummins" />
+                          <el-option value="Caterpillar" label="Caterpillar" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                      <el-form-item label="设备型号">
+                        <el-select v-model="configC.model" placeholder="请选择型号" :disabled="!configC.brand" style="width: 100%">
+                          <el-option v-for="m in filteredModelsC" :key="m" :label="m" :value="m" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                      <el-form-item label="所属船型（可选）">
+                        <el-select v-model="configC.shipType" placeholder="不限制" style="width: 100%">
+                          <el-option value="" label="不限制" />
+                          <el-option value="VLCC" label="VLCC超大型油轮" />
+                          <el-option value="散货船" label="散货船" />
+                          <el-option value="集装箱船" label="集装箱船" />
+                          <el-option value="液化气船" label="液化气船" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
               </div>
             </div>
 
             <div class="step">
               <h4>步骤2：选择工况</h4>
               <div class="step-content">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>运行工况</label>
-                    <select v-model="configC.loadCondition">
-                      <option value="">请选择工况</option>
-                      <option value="100%">100%额定工况</option>
-                      <option value="75%">75%工况</option>
-                      <option value="50%">50%工况</option>
-                      <option value="25%">25%工况</option>
-                    </select>
-                  </div>
-                </div>
+                <el-form label-width="120px">
+                  <el-row :gutter="20">
+                    <el-col :span="8">
+                      <el-form-item label="运行工况">
+                        <el-select v-model="configC.loadCondition" placeholder="请选择工况" style="width: 100%">
+                          <el-option value="100%" label="100%额定工况" />
+                          <el-option value="75%" label="75%工况" />
+                          <el-option value="50%" label="50%工况" />
+                          <el-option value="25%" label="25%工况" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
               </div>
             </div>
 
             <div class="step">
               <h4>步骤3：选择对比的数据来源</h4>
               <div class="step-content">
-                <div class="checkbox-group">
-                  <label class="checkbox-item">
-                    <input type="checkbox" v-model="configC.dataSources" value="出厂定额">
-                    <span>出厂定额（设备参数管理中的默认值）</span>
-                  </label>
-                  <label class="checkbox-item">
-                    <input type="checkbox" v-model="configC.dataSources" value="台架试验">
-                    <span>台架试验数据</span>
-                  </label>
-                  <label class="checkbox-item">
-                    <input type="checkbox" v-model="configC.dataSources" value="实船运行">
-                    <span>实船运行数据</span>
-                  </label>
-                </div>
+                <el-checkbox-group v-model="configC.dataSources">
+                  <el-checkbox value="出厂定额">出厂定额（设备参数管理中的默认值）</el-checkbox>
+                  <el-checkbox value="台架试验">台架试验数据</el-checkbox>
+                  <el-checkbox value="实船运行">实船运行数据</el-checkbox>
+                </el-checkbox-group>
               </div>
             </div>
           </div>
 
           <div class="action-bar">
-            <button class="btn btn-secondary" @click="handleClose">取消</button>
-            <button class="btn btn-primary" :disabled="!canStartComparisonC" @click="startComparison">
+            <el-button @click="handleClose">取消</el-button>
+            <el-button type="primary" :disabled="!canStartComparisonC" @click="startComparison">
               开始对比分析
-            </button>
+            </el-button>
           </div>
         </div>
 
         <!-- 模式D：自由对比 配置页面 -->
         <div v-else-if="currentView === 'config-D'" class="config-view">
           <div class="config-header">
-            <button class="btn btn-link" @click="backToModeSelect">← 返回模式选择</button>
+            <el-button link @click="backToModeSelect">← 返回模式选择</el-button>
             <span class="config-title">对比分析 > 自由对比</span>
           </div>
 
@@ -366,49 +374,51 @@
                     <span>已完成评估任务</span>
                     <span class="count">已选 {{ selectedTaskIds.length }} 个</span>
                   </div>
-                  <div class="task-list">
-                    <div class="list-header">
-                      <span class="col-checkbox"></span>
-                      <span class="col-name">任务名称</span>
-                      <span class="col-device">设备</span>
-                      <span class="col-score">得分</span>
-                      <span class="col-level">等级</span>
-                    </div>
-                    <div 
-                      v-for="task in completedTasks" 
-                      :key="task.id" 
-                      class="task-item"
-                      :class="{ selected: selectedTaskIds.includes(task.id) }"
-                      @click="toggleTask(task)"
-                    >
-                      <input type="checkbox" :checked="selectedTaskIds.includes(task.id)">
-                      <div class="task-name">{{ task.name }}</div>
-                      <div class="task-device">{{ task.device }}</div>
-                      <div class="task-score">{{ task.score }}</div>
-                      <div class="task-level"><span class="level-badge" :class="'level-' + task.levelClass">{{ task.level }}</span></div>
-                    </div>
-                  </div>
+                  <el-table 
+                    :data="completedTasks" 
+                    style="width: 100%"
+                    highlight-current-row
+                    @row-click="toggleTask"
+                  >
+                    <el-table-column type="selection" width="55" align="center">
+                      <template #default="{ row }">
+                        <el-checkbox 
+                          :model-value="selectedTaskIds.includes(row.id)"
+                          @change="() => toggleTask(row)"
+                          @click.stop
+                        />
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="任务名称" prop="name" min-width="200" />
+                    <el-table-column label="设备" prop="device" min-width="150" />
+                    <el-table-column label="得分" prop="score" width="80" align="center" />
+                    <el-table-column label="等级" width="80" align="center">
+                      <template #default="{ row }">
+                        <el-tag :type="getLevelType(row.levelClass)" size="small">{{ row.level }}</el-tag>
+                      </template>
+                    </el-table-column>
+                  </el-table>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="action-bar">
-            <button class="btn btn-secondary" @click="handleClose">取消</button>
-            <button class="btn btn-primary" :disabled="selectedTaskIds.length < 2" @click="startComparison">
+            <el-button @click="handleClose">取消</el-button>
+            <el-button type="primary" :disabled="selectedTaskIds.length < 2" @click="startComparison">
               开始对比分析
-            </button>
+            </el-button>
           </div>
         </div>
 
         <!-- 结果展示页面 -->
         <div v-else-if="currentView === 'results'" class="results-view">
           <div class="results-header">
-            <button class="btn btn-link" @click="backToConfig">← 返回配置</button>
+            <el-button link @click="backToConfig">← 返回配置</el-button>
             <span class="results-title">对比分析结果</span>
             <div class="header-actions">
-              <button class="btn btn-sm btn-secondary" @click="exportPDF">导出PDF</button>
-              <button class="btn btn-sm btn-secondary" @click="exportExcel">导出Excel</button>
+              <el-button size="small" @click="exportPDF">导出PDF</el-button>
+              <el-button size="small" @click="exportExcel">导出Excel</el-button>
             </div>
           </div>
 
@@ -441,29 +451,30 @@
             <div class="results-section">
               <h4>二、详细数据对比表</h4>
               <div class="comparison-table-container">
-                <table class="comparison-table">
-                  <thead>
-                    <tr>
-                      <th>指标</th>
-                      <th v-for="col in comparisonColumns" :key="col">{{ col }}</th>
-                      <th>对比差异</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="row in comparisonTableData" :key="row.indicator">
-                      <td>{{ row.indicator }}</td>
-                      <td v-for="(val, i) in row.values" :key="i">{{ val }}</td>
-                      <td :class="row.diffClass">{{ row.diff }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <el-table :data="comparisonTableData" style="width: 100%" border>
+                  <el-table-column prop="indicator" label="指标" width="150" />
+                  <el-table-column 
+                    v-for="(col, index) in comparisonColumns" 
+                    :key="col"
+                    :label="col"
+                    align="center"
+                  >
+                    <template #default="{ row }">
+                      {{ row.values[index] }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="对比差异" align="center">
+                    <template #default="{ row }">
+                      <span :class="row.diffClass">{{ row.diff }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </el-dialog>
 </template>
 
 <script setup>
@@ -481,6 +492,9 @@ const emit = defineEmits(['close'])
 const handleClose = () => {
   emit('close')
 }
+
+// 对话框可见性
+const dialogVisible = ref(true)
 
 // 当前视图状态
 const currentView = ref('mode-select')
@@ -680,73 +694,23 @@ const exportPDF = () => {
 const exportExcel = () => {
   alert('导出Excel功能开发中')
 }
+
+// 获取等级标签类型
+const getLevelType = (levelClass) => {
+  const typeMap = {
+    'level-1': 'success',
+    'level-2': '',
+    'level-3': 'warning',
+    'level-4': 'danger',
+    'level-5': 'danger'
+  }
+  return typeMap[levelClass] || ''
+}
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  max-width: 900px;
-  width: 90%;
-  max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-}
-
-.close-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  font-size: 24px;
-  color: #64748b;
-  cursor: pointer;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.close-btn:hover {
-  background: #e2e8f0;
-  color: #333;
-}
-
 .comparison-analysis-container {
-  padding: 24px;
-  overflow-y: auto;
-  flex: 1;
+  padding: 20px;
 }
 
 /* 模式选择视图 */
@@ -758,23 +722,13 @@ const exportExcel = () => {
 }
 
 .mode-cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  margin-top: 16px;
 }
 
 .mode-card {
-  padding: 16px;
-  background: #fff;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.mode-card:hover {
-  border-color: #2563eb;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+  border: 2px solid transparent;
 }
 
 .mode-card.selected {
@@ -800,77 +754,6 @@ const exportExcel = () => {
   line-height: 1.4;
 }
 
-/* 配置视图 */
-.config-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.config-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-}
-
-.config-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.step {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.step h4 {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-}
-
-.step-content {
-  padding: 0 4px;
-}
-
-.form-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.form-group {
-  flex: 1;
-  min-width: 150px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 12px;
-  color: #64748b;
-  margin-bottom: 4px;
-}
-
-.form-group select,
-.form-group input {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 13px;
-  background: #fff;
-}
-
-.form-group select:focus,
-.form-group input:focus {
-  outline: none;
-  border-color: #2563eb;
-}
 
 .form-hint {
   font-size: 11px;
@@ -879,41 +762,6 @@ const exportExcel = () => {
 }
 
 /* 船型列表 */
-.ship-type-list,
-.condition-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.ship-type-item,
-.condition-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.ship-type-item:hover:not(.disabled),
-.condition-item:hover {
-  background: #f1f5f9;
-}
-
-.ship-type-item.selected,
-.condition-item.selected {
-  background: #eff6ff;
-  border-color: #2563eb;
-}
-
-.ship-type-item.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .ship-name,
 .condition-name {
@@ -931,40 +779,21 @@ const exportExcel = () => {
   font-size: 12px;
   color: #64748b;
 }
-
-/* 单选组 */
-.radio-group {
+/* 单选组和复选框组样式调整 */
+:deep(.el-radio-group),
+:deep(.el-checkbox-group) {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.radio-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-/* 复选框组 */
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  cursor: pointer;
+:deep(.el-checkbox),
+:deep(.el-radio) {
+  margin-right: 0;
 }
 
 /* 任务选择器 */
 .task-selector {
-  background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   overflow: hidden;
@@ -983,62 +812,6 @@ const exportExcel = () => {
 .selector-header .count {
   color: #2563eb;
 }
-
-.list-header {
-  display: flex;
-  padding: 8px 12px;
-  background: #f1f5f9;
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-}
-
-.task-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 12px;
-  border-bottom: 1px solid #e2e8f0;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.task-item:last-child {
-  border-bottom: none;
-}
-
-.task-item:hover {
-  background: #f8fafc;
-}
-
-.task-item.selected {
-  background: #eff6ff;
-}
-
-.col-checkbox { width: 30px; }
-.col-name { flex: 2; }
-.col-device { flex: 1; }
-.col-score { width: 60px; text-align: center; }
-.col-level { width: 60px; text-align: center; }
-
-.task-name { flex: 2; font-size: 13px; }
-.task-device { flex: 1; font-size: 12px; color: #64748b; }
-.task-score { width: 60px; text-align: center; font-size: 13px; font-weight: 500; }
-.task-level { width: 60px; text-align: center; }
-
-.level-badge {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 11px;
-  color: white;
-}
-
-.level-badge.level-1 { background-color: #22c55e; }
-.level-badge.level-2 { background-color: #3b82f6; }
-.level-badge.level-3 { background-color: #f59e0b; }
-.level-badge.level-4 { background-color: #f97316; }
-.level-badge.level-5 { background-color: #ef4444; }
-
 /* 操作栏 */
 .action-bar {
   display: flex;
@@ -1047,57 +820,6 @@ const exportExcel = () => {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid #e2e8f0;
-}
-
-/* 按钮样式 */
-.btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-}
-
-.btn-primary {
-  background-color: #2563eb;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #1d4ed8;
-}
-
-.btn-primary:disabled {
-  background-color: #94a3b8;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: #e2e8f0;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background-color: #cbd5e1;
-}
-
-.btn-link {
-  background: none;
-  border: none;
-  color: #2563eb;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.btn-link:hover {
-  text-decoration: underline;
-}
-
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 12px;
 }
 
 /* 结果视图 */
@@ -1118,144 +840,5 @@ const exportExcel = () => {
 .header-actions {
   display: flex;
   gap: 8px;
-}
-
-.results-content {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.comparison-condition {
-  padding: 10px 12px;
-  background: #fff;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #64748b;
-  margin-bottom: 16px;
-}
-
-.results-section {
-  margin-bottom: 20px;
-}
-
-.results-section:last-child {
-  margin-bottom: 0;
-}
-
-.results-section h4 {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-}
-
-.efficiency-chart {
-  padding: 16px;
-  background: #fff;
-  border-radius: 6px;
-}
-
-.chart-container {
-  height: 200px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 30px;
-  padding-top: 16px;
-}
-
-.bar-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 20px;
-}
-
-.bar-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.bar-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #333;
-}
-
-.bar-wrapper {
-  width: 50px;
-  height: 150px;
-  background: #e2e8f0;
-  border-radius: 4px;
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-}
-
-.bar {
-  width: 100%;
-  border-radius: 4px;
-  transition: height 0.5s ease;
-}
-
-.bar-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-}
-
-/* 对比表格 */
-.comparison-table-container {
-  overflow-x: auto;
-  background: #fff;
-  border-radius: 6px;
-}
-
-.comparison-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.comparison-table th,
-.comparison-table td {
-  padding: 10px 12px;
-  text-align: left;
-  border: 1px solid #e2e8f0;
-}
-
-.comparison-table th {
-  background: #f8fafc;
-  font-weight: 600;
-}
-
-.comparison-table td.positive {
-  color: #22c55e;
-}
-
-.comparison-table td.negative {
-  color: #ef4444;
-}
-
-.comparison-table td.neutral {
-  color: #64748b;
-}
-
-/* 响应式布局 */
-@media (max-width: 768px) {
-  .mode-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .form-row {
-    flex-direction: column;
-  }
-
-  .form-group {
-    min-width: 100%;
-  }
 }
 </style>
