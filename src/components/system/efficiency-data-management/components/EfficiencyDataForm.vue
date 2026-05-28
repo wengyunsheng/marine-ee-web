@@ -27,6 +27,10 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item label="版本号" v-if="isEdit">
+        <el-tag>v{{ form.version }}</el-tag>
+      </el-form-item>
+
       <el-form-item label="数据来源" required>
         <el-select v-model="form.dataSource" placeholder="请选择数据来源" style="width: 100%;">
           <el-option label="台架试验" value="台架试验" />
@@ -75,7 +79,8 @@ const form = ref({
   deviceType: '',
   deviceName: '',
   dataSource: '',
-  modelId: ''
+  modelId: '',
+  version: 1
 })
 
 // 选择样机模型后，自动填充设备类型和设备名称

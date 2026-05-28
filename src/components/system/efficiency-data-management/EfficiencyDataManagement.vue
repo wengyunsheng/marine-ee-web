@@ -44,6 +44,11 @@
             {{ getModelName(scope.row.modelId) }}
           </template>
         </el-table-column>
+        <el-table-column prop="version" label="版本" width="80" align="center">
+          <template #default="scope">
+            <el-tag size="small">v{{ scope.row.version }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="dataSource" label="数据来源" width="120" />
         <el-table-column label="操作" width="320" fixed="right">
           <template #default="scope">
@@ -135,7 +140,8 @@ const defaultFormData = {
   modelId: '',
   deviceType: '',
   deviceName: '',
-  dataSource: ''
+  dataSource: '',
+  version: 1
 }
 
 const formData = ref({ ...defaultFormData })
@@ -147,47 +153,62 @@ const localHistoryData = ref([
     modelId: 1,
     deviceType: '船用柴油发动机（低速机）',
     deviceName: 'VLCC超大型油轮 - 船用柴油发动机（低速机）',
-    dataSource: '台架试验'
+    dataSource: '台架试验',
+    version: 1
   },
   {
     id: 2,
+    dataDate: '2024-04-20',
+    modelId: 1,
+    deviceType: '船用柴油发动机（低速机）',
+    deviceName: 'VLCC超大型油轮 - 船用柴油发动机（低速机）',
+    dataSource: '台架试验',
+    version: 2
+  },
+  {
+    id: 3,
     dataDate: '2024-04-15',
     modelId: 2,
     deviceType: '船用柴油发动机（中速机）',
     deviceName: '散货船 - 船用柴油发动机（中速机）',
-    dataSource: '实船运行'
+    dataSource: '实船运行',
+    version: 1
   },
   {
-    id: 3,
+    id: 4,
     dataDate: '2024-04-10',
     modelId: 3,
     deviceType: '船用LNG/柴油双燃料发动机（低速机）',
     deviceName: '集装箱船 - 船用LNG/柴油双燃料发动机（低速机）',
-    dataSource: '台架试验'
+    dataSource: '台架试验',
+    version: 1
   },
   {
-    id: 4,
+    id: 5,
     dataDate: '2024-04-05',
     modelId: 4,
     deviceType: '船用LNG/柴油双燃料发动机（中速机）',
     deviceName: '液化气船 - 船用LNG/柴油双燃料发动机（中速机）',
-    dataSource: '实船运行'
+    dataSource: '实船运行',
+    version: 1
   },
   {
-    id: 5,
+    id: 6,
     dataDate: '2024-04-01',
     modelId: 5,
     deviceType: '船用甲醇/柴油双燃料发动机（低速机）',
     deviceName: 'VLCC超大型油轮 - 船用甲醇/柴油双燃料发动机（低速机）',
-    dataSource: '台架试验'
+    dataSource: '台架试验',
+    version: 1
   },
   {
-    id: 6,
+    id: 7,
     dataDate: '2024-03-25',
     modelId: 6,
     deviceType: '船用甲醇/柴油双燃料发动机（中速机）',
     deviceName: '散货船 - 船用甲醇/柴油双燃料发动机（中速机）',
-    dataSource: '实船运行'
+    dataSource: '实船运行',
+    version: 1
   }
 ])
 
@@ -292,10 +313,18 @@ const saveData = (data) => {
       localHistoryData.value[index] = { ...data }
     }
   } else {
+    // 计算版本号：查找相同样机模型和数据日期的最大版本号
+    const existingVersions = localHistoryData.value
+      .filter(d => d.modelId === data.modelId && d.dataDate === data.dataDate)
+      .map(d => d.version || 0)
+    const maxVersion = existingVersions.length > 0 ? Math.max(...existingVersions) : 0
+    const newVersion = maxVersion + 1
+    
     const newId = Math.max(...localHistoryData.value.map(d => d.id), 0) + 1
     localHistoryData.value.push({
       ...data,
-      id: newId
+      id: newId,
+      version: newVersion
     })
   }
   // 同步数据到全局状态

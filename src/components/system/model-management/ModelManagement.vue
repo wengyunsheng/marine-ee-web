@@ -98,6 +98,11 @@
             {{ currentModel.name }}
           </template>
         </el-table-column>
+        <el-table-column prop="version" label="版本" width="80" align="center">
+          <template #default="scope">
+            <el-tag size="small">v{{ scope.row.version }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="dataSource" label="数据来源" width="120" />
       </el-table>
       <template #footer>

@@ -375,9 +375,10 @@ const mapDeviceClassToName = (deviceClass) => {
 
 /* 侧边栏样式 */
 .sidebar {
-  background-color: #4a6b8a;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
   transition: width 0.3s ease;
   overflow-x: hidden;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar-header {
@@ -387,7 +388,7 @@ const mapDeviceClassToName = (deviceClass) => {
   justify-content: center;
   padding: 0 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: #3d5a75;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 100%);
 }
 
 .logo-text {
@@ -438,28 +439,36 @@ const mapDeviceClassToName = (deviceClass) => {
 
 /* 覆盖 Element Plus 菜单样式 */
 :deep(.el-menu) {
-  background-color: #4a6b8a !important;
+  background: transparent !important;
 }
 
 :deep(.el-menu-item) {
-  color: #ffffff !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  border-left: 3px solid transparent;
+  transition: all 0.3s;
 }
 
 :deep(.el-menu-item:hover) {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-:deep(.el-menu-item.is-active) {
-  background-color: rgba(255, 208, 75, 0.15) !important;
-  color: #ffd04b !important;
-}
-
-:deep(.el-sub-menu__title) {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
   color: #ffffff !important;
 }
 
+:deep(.el-menu-item.is-active) {
+  background: linear-gradient(90deg, rgba(255, 208, 75, 0.2) 0%, rgba(255, 208, 75, 0.08) 100%) !important;
+  color: #ffd04b !important;
+  border-left: 3px solid #ffd04b;
+  font-weight: 600;
+}
+
+:deep(.el-sub-menu__title) {
+  color: rgba(255, 255, 255, 0.85) !important;
+  border-left: 3px solid transparent;
+  transition: all 0.3s;
+}
+
 :deep(.el-sub-menu__title:hover) {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  color: #ffffff !important;
 }
 
 /* 主容器样式 */
@@ -470,18 +479,19 @@ const mapDeviceClassToName = (deviceClass) => {
 
 /* 顶部导航 */
 .top-header {
-  background-color: white;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-bottom: 1px solid #e4e7ed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 24px;
   height: 60px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   flex: 1;
 }
 
@@ -494,6 +504,31 @@ const mapDeviceClassToName = (deviceClass) => {
 
 .collapse-icon:hover {
   color: #409eff;
+}
+
+/* 面包屑样式优化 */
+:deep(.el-breadcrumb) {
+  font-size: 15px;
+}
+
+:deep(.el-breadcrumb__inner) {
+  color: #606266;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+:deep(.el-breadcrumb__inner:hover) {
+  color: #409eff;
+}
+
+:deep(.el-breadcrumb__separator) {
+  color: #c0c4cc;
+  margin: 0 8px;
+}
+
+:deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+  color: #303133;
+  font-weight: 600;
 }
 
 /* 内容区域 */

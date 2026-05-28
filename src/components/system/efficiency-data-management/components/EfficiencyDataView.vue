@@ -12,6 +12,9 @@
       <el-descriptions-item label="样机模型">
         {{ modelName }}
       </el-descriptions-item>
+      <el-descriptions-item label="版本">
+        <el-tag>v{{ data.version }}</el-tag>
+      </el-descriptions-item>
       <el-descriptions-item label="数据来源">
         {{ data.dataSource }}
       </el-descriptions-item>
