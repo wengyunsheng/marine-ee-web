@@ -6,14 +6,12 @@
           <el-icon><Plus /></el-icon>
           新增样机模型
         </el-button>
-        <el-button @click="importModel">导入样机模型</el-button>
-        <el-button @click="exportModels">导出样机模型</el-button>
       </div>
 
       <div class="search-filter">
         <el-input 
           v-model="searchQuery" 
-          placeholder="搜索模型名称" 
+          placeholder="搜索样机模型名称" 
           clearable
           style="width: 200px;"
           @keyup.enter="filterModels"
@@ -28,15 +26,16 @@
         </el-select>
         <el-select v-model="deviceTypeFilter" placeholder="全部设备类型" clearable style="width: 240px;" @change="filterModels">
           <el-option label="全部设备类型" value="" />
-          <el-option v-for="opt in deviceTypeOptions" :key="opt" :label="opt" :value="opt" />
+          <el-option v-for="opt in filteredDeviceTypeOptions" :key="opt" :label="opt" :value="opt" />
         </el-select>
+        <el-button @click="resetFilters">重置筛选</el-button>
       </div>
     </div>
 
     <div class="model-list-section">
       <h3>样机模型列表</h3>
       <el-table :data="paginatedModels" style="width: 100%" border stripe>
-        <el-table-column prop="name" label="模型名称" min-width="280" max-width="320" />
+        <el-table-column prop="name" label="样机模型名称" min-width="280" max-width="320" />
         <el-table-column prop="deviceType" label="设备类型名称" min-width="200" max-width="240" />
         <el-table-column label="类别" width="140">
           <template #default="{ row }">
@@ -47,11 +46,12 @@
         </el-table-column>
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
         <el-table-column prop="createdAt" label="创建时间" width="120" />
-        <el-table-column label="操作" min-width="280" fixed="right">
+        <el-table-column label="操作" min-width="380" fixed="right">
           <template #default="scope">
             <div class="operation-buttons">
               <el-button type="primary" size="small" @click="viewModel(scope.row)">查看</el-button>
               <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
+              <el-button type="primary" size="small" @click="viewAssociatedData(scope.row)">关联能效数据</el-button>
               <el-button :type="scope.row.model3D ? 'primary' : 'success'" size="small" @click="handle3DModel(scope.row)">
                 {{ scope.row.model3D ? '查看3D模型' : '上传3D模型' }}
               </el-button>
@@ -89,12 +89,21 @@
       @close="closeViewModal"
     />
 
-    <!-- 3D模型查看弹窗 -->
-    <Model3DView
-      v-if="show3DModel"
-      :model="current3DModel"
-      @close="close3DModel"
-    />
+    <!-- 查看关联能效数据弹窗 -->
+    <el-dialog v-model="showDataModal" title="关联能效数据" width="800px">
+      <el-table :data="associatedData" border stripe style="width: 100%;">
+        <el-table-column prop="dataDate" label="数据日期" width="120" />
+        <el-table-column label="样机模型" min-width="200" show-overflow-tooltip>
+          <template #default>
+            {{ currentModel.name }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="dataSource" label="数据来源" width="120" />
+      </el-table>
+      <template #footer>
+        <el-button type="primary" @click="showDataModal = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -104,12 +113,15 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import ModelForm from './components/ModelForm.vue'
 import ModelView from './components/ModelView.vue'
-import Model3DView from './components/Model3DView.vue'
 
 const props = defineProps({
   globalState: {
     type: Object,
     default: () => ({})
+  },
+  efficiencyData: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -121,10 +133,9 @@ const deviceTypeFilter = ref('')
 
 const showFormModal = ref(false)
 const showViewModal = ref(false)
-const show3DModel = ref(false)
+const showDataModal = ref(false)
 const isEditMode = ref(false)
 const currentModel = ref(null)
-const current3DModel = ref(null)
 
 const defaultFormData = {
   name: '',
@@ -184,8 +195,24 @@ const categoryConfig = {
 
 const categoryOptions = Object.entries(categoryConfig).map(([value, cfg]) => ({ value, label: cfg.label }))
 const deviceTypeOptions = Object.keys(deviceTypeToCategoryMap)
+
+// 根据类别过滤设备类型选项
+const filteredDeviceTypeOptions = computed(() => {
+  if (!categoryFilter.value) {
+    return deviceTypeOptions
+  }
+  return deviceTypeOptions.filter(dt => deviceTypeToCategoryMap[dt] === categoryFilter.value)
+})
+
 const getCategoryName = (category) => categoryConfig[category]?.label || category
 const getDeviceCategory = (deviceType) => deviceTypeToCategoryMap[deviceType] || ''
+
+// 类别变化时清空设备类型筛选
+watch(categoryFilter, (newVal, oldVal) => {
+  if (oldVal !== undefined && newVal !== oldVal) {
+    deviceTypeFilter.value = ''
+  }
+})
 
 // 初始化模型数据
 const initialModels = [
@@ -288,9 +315,24 @@ const resetPage = () => {
 }
 
 const filterModels = () => {
+  // 选择设备类型时，自动关联类别
+  if (deviceTypeFilter.value && !categoryFilter.value) {
+    categoryFilter.value = deviceTypeToCategoryMap[deviceTypeFilter.value] || ''
+  }
+  resetPage()
   console.log('过滤模型', {
-    searchQuery: searchQuery.value
+    searchQuery: searchQuery.value,
+    categoryFilter: categoryFilter.value,
+    deviceTypeFilter: deviceTypeFilter.value
   })
+}
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  categoryFilter.value = ''
+  deviceTypeFilter.value = ''
+  resetPage()
+  console.log('重置筛选条件')
 }
 
 const openAddModal = () => {
@@ -345,6 +387,17 @@ const closeViewModal = () => {
   currentModel.value = null
 }
 
+// 查看关联能效数据
+const associatedData = computed(() => {
+  if (!currentModel.value) return []
+  return props.efficiencyData.filter(data => data.modelId === currentModel.value.id)
+})
+
+const viewAssociatedData = (model) => {
+  currentModel.value = model
+  showDataModal.value = true
+}
+
 const deleteModel = async (modelId) => {
   try {
     await ElMessageBox.confirm('确定要删除这个模型吗？', '提示', {
@@ -357,70 +410,6 @@ const deleteModel = async (modelId) => {
   } catch {
     // 用户取消删除
   }
-}
-
-const importModel = () => {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = '.json'
-  input.onchange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        try {
-          const importedData = JSON.parse(event.target.result)
-          if (Array.isArray(importedData)) {
-            // 检查数据格式是否正确
-            const validData = importedData.filter(item => 
-              item.name && item.deviceType && item.version && item.status
-            )
-            if (validData.length > 0) {
-              // 生成新的ID
-              const maxId = Math.max(...models.value.map(m => m.id), 0)
-              validData.forEach((item, index) => {
-                item.id = maxId + index + 1
-                item.category = getDeviceCategory(item.deviceType)
-                item.createdAt = item.createdAt || new Date().toISOString().split('T')[0]
-              })
-              models.value = [...models.value, ...validData]
-              ElMessage.success(`成功导入 ${validData.length} 个模型`)
-            } else {
-              ElMessage.error('导入的数据格式不正确')
-            }
-          } else {
-            ElMessage.error('导入的数据格式不正确')
-          }
-        } catch (error) {
-          ElMessage.error('导入失败：' + error.message)
-        }
-      }
-      reader.readAsText(file)
-    }
-  }
-  input.click()
-}
-
-const exportModels = () => {
-  const dataToExport = models.value.map(item => ({
-    name: item.name,
-    deviceType: item.deviceType,
-    version: item.version,
-    status: item.status,
-    connectionInfo: item.connectionInfo,
-    description: item.description,
-    createdAt: item.createdAt,
-    metrics: item.metrics
-  }))
-  
-  const jsonString = JSON.stringify(dataToExport, null, 2)
-  const blob = new Blob([jsonString], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `models-${new Date().toISOString().split('T')[0]}.json`
-  a.click()
-  URL.revokeObjectURL(url)
 }
 
 const handle3DModel = (model) => {
@@ -459,11 +448,6 @@ const view3DModel = (model) => {
     // 触发切换到可视化模块的事件
     emit('switch-to-visualization')
   }
-}
-
-const close3DModel = () => {
-  show3DModel.value = false
-  current3DModel.value = null
 }
 </script>
 

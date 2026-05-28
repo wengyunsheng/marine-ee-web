@@ -6,8 +6,8 @@
     @close="$emit('close')"
   >
     <el-form :model="localFormData" label-width="120px">
-      <el-form-item label="模型名称" required>
-        <el-input v-model="localFormData.name" placeholder="请输入模型名称" />
+      <el-form-item label="样机模型名称" required>
+        <el-input v-model="localFormData.name" placeholder="请输入样机模型名称" />
       </el-form-item>
       <el-form-item label="设备类型名称" required>
         <el-select v-model="localFormData.deviceType" placeholder="请选择设备类型" style="width: 100%;">

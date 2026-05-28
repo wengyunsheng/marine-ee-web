@@ -40,10 +40,6 @@
               <el-icon><Edit /></el-icon>
               <template #title>设备参数管理</template>
             </el-menu-item>
-            <el-menu-item index="weight-params">
-              <el-icon><ScaleToOriginal /></el-icon>
-              <template #title>发动机运行模式管理</template>
-            </el-menu-item>
             <el-menu-item index="efficiency-level-management">
               <el-icon><TrophyBase /></el-icon>
               <template #title>能效等级和能效基值管理</template>
@@ -93,12 +89,11 @@
         <Visualization v-else-if="currentModule === 'visualization'" :global-state="globalState" />
         <template v-else-if="currentModule === 'system-management'">
           <SystemManagement v-if="!currentSystemSubModule" @navigate="navigateSystemModule" />
-          <ModelManagement v-else-if="currentSystemSubModule === 'model-management'" :global-state="globalState" @switch-to-visualization="switchToVisualization" />
+          <ModelManagement v-else-if="currentSystemSubModule === 'model-management'" :global-state="globalState" :efficiency-data="globalState.efficiencyData" @switch-to-visualization="switchToVisualization" />
           <DeviceTypeManagement v-else-if="currentSystemSubModule === 'device-type-management'" />
           <EfficiencyLevelManagement v-else-if="currentSystemSubModule === 'efficiency-level-management'" />
-          <EfficiencyDataManagement v-else-if="currentSystemSubModule === 'history-data'" />
+          <EfficiencyDataManagement v-else-if="currentSystemSubModule === 'history-data'" :models="globalState.models" :global-state="globalState" />
           <DeviceParamsManagement v-else-if="currentSystemSubModule === 'device-params'" />
-          <WeightParamsManagement v-else-if="currentSystemSubModule === 'weight-params'" />
         </template>
       </el-main>
     </el-container>
@@ -149,7 +144,6 @@ import DeviceTypeManagement from './components/system/device-type-management/Dev
 import EfficiencyLevelManagement from './components/system/efficiency-level-management/EfficiencyLevelManagement.vue'
 import EfficiencyDataManagement from './components/system/efficiency-data-management/EfficiencyDataManagement.vue'
 import DeviceParamsManagement from './components/system/device-params-management/DeviceParamsManagement.vue'
-import WeightParamsManagement from './components/system/weight-params-management/WeightParamsManagement.vue'
 
 const currentModule = ref('evaluation')
 const currentEvalPage = ref('eval-overview')
@@ -161,7 +155,8 @@ const isSidebarCollapsed = ref(false)
 // 全局状态管理
 const globalState = ref({
   selectedModel: null, // 选中的模型
-  models: [] // 模型列表
+  models: [], // 模型列表
+  efficiencyData: [] // 能效接入数据（全局共享，供样机模型查看关联数据）
 })
 
 // 历史评估数据（全局共享）
@@ -254,7 +249,6 @@ const modalTitles = {
 const systemSubModuleNames = {
   'device-type-management': '设备类型管理',
   'device-params': '设备参数管理',
-  'weight-params': '发动机运行模式管理',
   'efficiency-level-management': '能效等级和能效基值管理',
   'model-management': '样机模型管理',
   'history-data': '能效数据管理'

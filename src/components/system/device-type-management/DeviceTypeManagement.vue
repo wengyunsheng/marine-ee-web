@@ -5,8 +5,6 @@
         <el-button type="primary" @click="openAddModal">
           <el-icon><Plus /></el-icon> 新增设备类型
         </el-button>
-        <el-button @click="importDeviceTypes">导入设备类型</el-button>
-        <el-button @click="exportDeviceTypes">导出设备类型</el-button>
       </div>
 
       <div class="search-filter">
@@ -450,64 +448,6 @@ const deleteDeviceType = async (deviceTypeId) => {
   }
 }
 
-const importDeviceTypes = () => {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = '.json'
-  input.onchange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        try {
-          const importedData = JSON.parse(event.target.result)
-          if (Array.isArray(importedData)) {
-            // 检查数据格式是否正确
-            const validData = importedData.filter(item => 
-              item.name && item.category && item.description
-            )
-            if (validData.length > 0) {
-              // 生成新的ID
-              const maxId = Math.max(...deviceTypes.value.map(d => d.id), 0)
-              validData.forEach((item, index) => {
-                item.id = maxId + index + 1
-                item.createdAt = item.createdAt || new Date().toISOString().split('T')[0]
-              })
-              deviceTypes.value = [...deviceTypes.value, ...validData]
-              ElMessage.success(`成功导入 ${validData.length} 个设备类型`)
-            } else {
-              ElMessage.error('导入的数据格式不正确')
-            }
-          } else {
-            ElMessage.error('导入的数据格式不正确')
-          }
-        } catch (error) {
-          ElMessage.error('导入失败：' + error.message)
-        }
-      }
-      reader.readAsText(file)
-    }
-  }
-  input.click()
-}
-
-const exportDeviceTypes = () => {
-  const dataToExport = deviceTypes.value.map(item => ({
-    name: item.name,
-    category: item.category,
-    description: item.description,
-    createdAt: item.createdAt
-  }))
-  
-  const jsonString = JSON.stringify(dataToExport, null, 2)
-  const blob = new Blob([jsonString], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `device-types-${new Date().toISOString().split('T')[0]}.json`
-  a.click()
-  URL.revokeObjectURL(url)
-}
 </script>
 
 <style scoped>

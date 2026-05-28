@@ -6,8 +6,6 @@
           <el-icon><Plus /></el-icon>
           新增运行模式
         </el-button>
-        <el-button @click="importModes">导入运行模式</el-button>
-        <el-button @click="exportModes">导出运行模式</el-button>
       </div>
 
       <div class="search-filter">
@@ -22,6 +20,7 @@
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
+        <el-button @click="resetFilters">重置筛选</el-button>
       </div>
     </div>
 
@@ -174,6 +173,12 @@ const filterModes = () => {
   resetPage()
 }
 
+const resetFilters = () => {
+  searchQuery.value = ''
+  resetPage()
+  console.log('重置筛选条件')
+}
+
 const addMode = () => {
   editingMode.value = null
   showEditModal.value = true
@@ -199,24 +204,6 @@ const deleteMode = async (modeId) => {
   } catch {
     // 用户取消删除
   }
-}
-
-const importModes = () => {
-  ElMessage.info('导入功能已触发，请选择文件')
-}
-
-const exportModes = () => {
-  const data = JSON.stringify(runModes.value, null, 2)
-  const blob = new Blob([data], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'weight-modes.json'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-  ElMessage.success('导出成功')
 }
 
 const openViewModal = (mode) => {
@@ -281,7 +268,7 @@ const handleSaveWeights = (weights) => {
 
 <style scoped>
 .weight-params-container {
-  padding: 20px;
+  padding: 0;
   height: 100%;
   min-height: calc(100vh - 120px);
   overflow-y: auto;

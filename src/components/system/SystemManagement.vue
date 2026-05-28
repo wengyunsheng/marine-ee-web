@@ -35,7 +35,6 @@
 import { ref, computed } from 'vue'
 import DeviceTypeManagement from './device-type-management/DeviceTypeManagement.vue'
 import DeviceParamsManagement from './device-params-management/DeviceParamsManagement.vue'
-import WeightParamsManagement from './weight-params-management/WeightParamsManagement.vue'
 import ModelManagement from './model-management/ModelManagement.vue'
 import EfficiencyLevelManagement from './efficiency-level-management/EfficiencyLevelManagement.vue'
 import EfficiencyDataManagement from './efficiency-data-management/EfficiencyDataManagement.vue'
@@ -51,17 +50,12 @@ const modules = [
   {
     id: 'device-params',
     title: '设备参数管理',
-    description: '管理设备的技术参数和性能指标，支持批量导入导出。'
-  },
-  {
-    id: 'weight-params',
-    title: '发动机运行模式管理',
-    description: '管理发动机的运行模式及能效评估的加权参数，调整各指标的权重比例。'
+    description: '管理设备的技术参数模板和加权参数配置，支持按设备类型分类管理。'
   },
   {
     id: 'model-management',
-    title: '模型管理',
-    description: '管理能效评估模型，支持自定义评估算法和标准。'
+    title: '样机模型管理',
+    description: '管理不同型号船型及船用设备的样机模型，支持建立三维模型与数据连接，构建不同船型能效评估样机模型。'
   },
   {
     id: 'efficiency-level',
@@ -70,8 +64,8 @@ const modules = [
   },
   {
     id: 'history-data',
-    title: '历史数据管理',
-    description: '管理历史评估数据，支持数据备份、恢复和导出。'
+    title: '能效数据管理',
+    description: '支持台架试验、实船运行历史能效数据界面结构化展示，支持船型、设备、能效、工况特性等多维度快捷检索。'
   }
 ]
 
@@ -79,7 +73,6 @@ const currentSubModuleComponent = computed(() => {
   const components = {
     'device-type': DeviceTypeManagement,
     'device-params': DeviceParamsManagement,
-    'weight-params': WeightParamsManagement,
     'model-management': ModelManagement,
     'efficiency-level': EfficiencyLevelManagement,
     'history-data': EfficiencyDataManagement

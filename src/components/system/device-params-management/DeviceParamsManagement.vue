@@ -1,114 +1,99 @@
 <template>
   <div class="device-params-container">
-    <div class="device-params-controls">
-      <div class="control-group">
-        <el-button type="primary" @click="addParamTemplate">
-          <el-icon><Plus /></el-icon>
-          新增设备参数
-        </el-button>
-        <el-button @click="importParamTemplates">导入设备参数</el-button>
-        <el-button @click="exportParamTemplates">导出设备参数</el-button>
-      </div>
+    <!-- Tab 切换 -->
+    <el-tabs v-model="activeTab" class="device-params-tabs">
+      <!-- 参数模板 Tab -->
+      <el-tab-pane label="参数模板" name="template">
+        <div class="device-params-controls">
+          <div class="control-group">
+            <el-button type="primary" @click="addParamTemplate">
+              <el-icon><Plus /></el-icon>
+              新增设备参数
+            </el-button>
+          </div>
 
-      <div class="search-filter">
-        <el-input 
-          v-model="searchQuery" 
-          placeholder="搜索设备类型名称" 
-          clearable
-          style="width: 200px;"
-          @keyup.enter="filterTemplates"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-        <el-select v-model="categoryFilter" placeholder="全部类别" clearable style="width: 150px;" @change="filterTemplates">
-          <el-option label="全部类别" value="" />
-          <el-option label="船用发动机" value="engine" />
-          <el-option label="船用齿轮箱" value="gearbox" />
-          <el-option label="船用余热回收发电装置" value="waste-heat" />
-          <el-option label="船用焚烧炉" value="incinerator" />
-          <el-option label="船用碟式分离机" value="separator" />
-          <el-option label="船用压载水处理设备" value="ballast" />
-          <el-option label="船用锚绞机" value="windlass" />
-          <el-option label="船用吊机" value="crane" />
-          <el-option label="船用发电机" value="generator" />
-          <el-option label="船用组合式空调机组" value="air-conditioner" />
-          <el-option label="船用冷水机组" value="chiller" />
-          <el-option label="船用惰性气体系统" value="inert-gas" />
-          <el-option label="船用二氧化碳捕集设备" value="co2-capture" />
-          <el-option label="船用推进器" value="propeller" />
-        </el-select>
-        <el-select v-model="deviceTypeFilter" placeholder="全部设备类型" clearable style="width: 250px;" @change="filterTemplates">
-          <el-option label="全部设备类型" value="" />
-          <el-option label="船用柴油发动机（低速机）" value="船用柴油发动机（低速机）" />
-          <el-option label="船用柴油发动机（中速机）" value="船用柴油发动机（中速机）" />
-          <el-option label="船用LNG/柴油双燃料发动机（低速机）" value="船用LNG/柴油双燃料发动机（低速机）" />
-          <el-option label="船用LNG/柴油双燃料发动机（中速机）" value="船用LNG/柴油双燃料发动机（中速机）" />
-          <el-option label="船用甲醇/柴油双燃料发动机（低速机）" value="船用甲醇/柴油双燃料发动机（低速机）" />
-          <el-option label="船用甲醇/柴油双燃料发动机（中速机）" value="船用甲醇/柴油双燃料发动机（中速机）" />
-          <el-option label="单台齿轮箱" value="单台齿轮箱" />
-          <el-option label="两台齿轮箱" value="两台齿轮箱" />
-          <el-option label="船用有机朗肯循环发电装置" value="船用有机朗肯循环发电装置" />
-          <el-option label="船用蒸汽透平发电装置" value="船用蒸汽透平发电装置" />
-          <el-option label="单功能焚烧炉（固体废弃物）" value="单功能焚烧炉（固体废弃物）" />
-          <el-option label="单功能焚烧炉（污油泥）" value="单功能焚烧炉（污油泥）" />
-          <el-option label="双功能焚烧炉" value="双功能焚烧炉" />
-          <el-option label="多功能焚烧炉" value="多功能焚烧炉" />
-          <el-option label="船用碟式分离机" value="船用碟式分离机" />
-          <el-option label="船用压载水处理设备" value="船用压载水处理设备" />
-          <el-option label="船用起锚机" value="船用起锚机" />
-          <el-option label="船用系泊绞车" value="船用系泊绞车" />
-          <el-option label="船用吊机" value="船用吊机" />
-          <el-option label="船用低压交流三相同步发电机" value="船用低压交流三相同步发电机" />
-          <el-option label="船用中压交流三相同步发电机" value="船用中压交流三相同步发电机" />
-          <el-option label="船用组合式空调机组" value="船用组合式空调机组" />
-          <el-option label="船用冷水机组" value="船用冷水机组" />
-          <el-option label="船用惰性气体系统" value="船用惰性气体系统" />
-          <el-option label="船用二氧化碳捕集设备" value="船用二氧化碳捕集设备" />
-          <el-option label="船用推进器" value="船用推进器" />
-        </el-select>
-      </div>
-    </div>
+          <div class="search-filter">
+            <el-input 
+              v-model="searchQuery" 
+              placeholder="搜索设备类型名称" 
+              clearable
+              style="width: 200px;"
+              @keyup.enter="filterTemplates"
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+            <el-select v-model="categoryFilter" placeholder="全部类别" clearable style="width: 150px;" @change="filterTemplates">
+              <el-option label="全部类别" value="" />
+              <el-option label="船用发动机" value="engine" />
+              <el-option label="船用齿轮箱" value="gearbox" />
+              <el-option label="船用余热回收发电装置" value="waste-heat" />
+              <el-option label="船用焚烧炉" value="incinerator" />
+              <el-option label="船用碟式分离机" value="separator" />
+              <el-option label="船用压载水处理设备" value="ballast" />
+              <el-option label="船用锚绞机" value="windlass" />
+              <el-option label="船用吊机" value="crane" />
+              <el-option label="船用发电机" value="generator" />
+              <el-option label="船用组合式空调机组" value="air-conditioner" />
+              <el-option label="船用冷水机组" value="chiller" />
+              <el-option label="船用惰性气体系统" value="inert-gas" />
+              <el-option label="船用二氧化碳捕集设备" value="co2-capture" />
+              <el-option label="船用推进器" value="propeller" />
+            </el-select>
+            <el-select v-model="deviceTypeFilter" placeholder="全部设备类型" clearable style="width: 250px;" @change="filterTemplates">
+              <el-option label="全部设备类型" value="" />
+              <el-option v-for="opt in filteredDeviceTypeOptions" :key="opt" :label="opt" :value="opt" />
+            </el-select>
+            <el-button @click="resetFilters">重置筛选</el-button>
+          </div>
+        </div>
 
-    <div class="template-list-section">
-      <h3>设备参数列表</h3>
-      <el-table :data="paginatedTemplates" style="width: 100%" border stripe>
-        <el-table-column prop="deviceType" label="设备类型名称" min-width="250" />
-        <el-table-column label="类别" min-width="180">
-          <template #default="scope">
-            <span class="device-category" :class="scope.row.category">
-              {{ getCategoryName(scope.row.category) }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column label="参数数量" width="120">
-          <template #default="scope">
-            {{ scope.row.params.length }} 个参数
-          </template>
-        </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="300" show-overflow-tooltip />
-        <el-table-column label="操作" width="400" fixed="right">
-          <template #default="scope">
-            <el-button type="primary" size="small" @click="openViewModal(scope.row)">查看</el-button>
-            <el-button type="warning" size="small" @click="editTemplate(scope.row)">编辑</el-button>
-            <el-button type="success" size="small" @click="openDefaultValueModal(scope.row)">默认值配置</el-button>
-            <el-button type="danger" size="small" @click="deleteTemplate(scope.row.id)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      
-      <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="pageSizes"
-          :total="filteredTemplates.length"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="resetPage"
-        />
-      </div>
-    </div>
+        <div class="template-list-section">
+          <h3>设备参数列表</h3>
+          <el-table :data="paginatedTemplates" style="width: 100%" border stripe>
+            <el-table-column prop="deviceType" label="设备类型名称" min-width="250" />
+            <el-table-column label="类别" min-width="180">
+              <template #default="scope">
+                <span class="device-category" :class="scope.row.category">
+                  {{ getCategoryName(scope.row.category) }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column label="参数数量" width="120">
+              <template #default="scope">
+                {{ scope.row.params.length }} 个参数
+              </template>
+            </el-table-column>
+            <el-table-column prop="description" label="描述" min-width="300" show-overflow-tooltip />
+            <el-table-column label="操作" width="400" fixed="right">
+              <template #default="scope">
+                <el-button type="primary" size="small" @click="openViewModal(scope.row)">查看</el-button>
+                <el-button type="warning" size="small" @click="editTemplate(scope.row)">编辑</el-button>
+                <el-button type="success" size="small" @click="openDefaultValueModal(scope.row)">默认值配置</el-button>
+                <el-button type="danger" size="small" @click="deleteTemplate(scope.row.id)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          
+          <div class="pagination-container">
+            <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :page-sizes="pageSizes"
+              :total="filteredTemplates.length"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="resetPage"
+            />
+          </div>
+        </div>
+      </el-tab-pane>
+
+      <!-- 加权参数 Tab（仅当选择船用发动机时显示） -->
+      <el-tab-pane label="加权参数" name="weight" v-if="categoryFilter === 'engine'">
+        <WeightParamsManagement />
+      </el-tab-pane>
+    </el-tabs>
 
     <!-- 查看设备参数弹窗 -->
     <DeviceParamsView
@@ -141,12 +126,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import DeviceParamsForm from './components/DeviceParamsForm.vue'
 import DefaultValueConfig from './components/DefaultValueConfig.vue'
 import DeviceParamsView from './components/DeviceParamsView.vue'
+import WeightParamsManagement from './weight-params/WeightParamsManagement.vue'
+
+const activeTab = ref('template')
 
 const categoryMap = {
   engine: '船用发动机',
@@ -165,9 +153,62 @@ const categoryMap = {
   propeller: '船用推进器'
 }
 
+// 设备类型→类别映射
+const deviceTypeToCategoryMap = {
+  '船用柴油发动机（低速机）': 'engine',
+  '船用柴油发动机（中速机）': 'engine',
+  '船用LNG/柴油双燃料发动机（低速机）': 'engine',
+  '船用LNG/柴油双燃料发动机（中速机）': 'engine',
+  '船用甲醇/柴油双燃料发动机（低速机）': 'engine',
+  '船用甲醇/柴油双燃料发动机（中速机）': 'engine',
+  '单台齿轮箱': 'gearbox',
+  '两台齿轮箱': 'gearbox',
+  '船用有机朗肯循环发电装置': 'waste-heat',
+  '船用蒸汽透平发电装置': 'waste-heat',
+  '单功能焚烧炉（固体废弃物）': 'incinerator',
+  '单功能焚烧炉（污油泥）': 'incinerator',
+  '双功能焚烧炉': 'incinerator',
+  '多功能焚烧炉': 'incinerator',
+  '船用碟式分离机': 'separator',
+  '船用压载水处理设备': 'ballast',
+  '船用起锚机': 'windlass',
+  '船用系泊绞车': 'windlass',
+  '船用吊机': 'crane',
+  '船用低压交流三相同步发电机': 'generator',
+  '船用中压交流三相同步发电机': 'generator',
+  '船用组合式空调机组': 'air-conditioner',
+  '船用冷水机组': 'chiller',
+  '船用惰性气体系统': 'inert-gas',
+  '船用二氧化碳捕集设备': 'co2-capture',
+  '船用推进器': 'propeller'
+}
+
 const getCategoryName = (category) => {
   return categoryMap[category] || category
 }
+
+// 搜索和过滤相关
+const searchQuery = ref('')
+const categoryFilter = ref('')
+const deviceTypeFilter = ref('')
+
+// 所有设备类型列表
+const allDeviceTypes = Object.keys(deviceTypeToCategoryMap)
+
+// 根据类别过滤设备类型选项
+const filteredDeviceTypeOptions = computed(() => {
+  if (!categoryFilter.value) {
+    return allDeviceTypes
+  }
+  return allDeviceTypes.filter(dt => deviceTypeToCategoryMap[dt] === categoryFilter.value)
+})
+
+// 类别变化时清空设备类型筛选
+watch(categoryFilter, (newVal, oldVal) => {
+  if (oldVal !== undefined && newVal !== oldVal) {
+    deviceTypeFilter.value = ''
+  }
+})
 
 const paramTemplates = ref([
   {
@@ -540,10 +581,7 @@ const paramTemplates = ref([
   }
 ])
 
-// 搜索和过滤相关
-const searchQuery = ref('')
-const categoryFilter = ref('')
-const deviceTypeFilter = ref('')
+// 分页相关
 const currentPage = ref(1)
 const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50, 100, 200, 500])
@@ -586,11 +624,24 @@ const resetPage = () => {
 }
 
 const filterTemplates = () => {
+  // 选择设备类型时，自动关联类别
+  if (deviceTypeFilter.value && !categoryFilter.value) {
+    categoryFilter.value = deviceTypeToCategoryMap[deviceTypeFilter.value] || ''
+  }
   resetPage()
   console.log('过滤设备参数', {
     searchQuery: searchQuery.value,
+    categoryFilter: categoryFilter.value,
     deviceTypeFilter: deviceTypeFilter.value
   })
+}
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  categoryFilter.value = ''
+  deviceTypeFilter.value = ''
+  resetPage()
+  console.log('重置筛选条件')
 }
 
 const deviceTypes = ref([
@@ -729,75 +780,6 @@ const closeFormModal = () => {
   }
 }
 
-const importParamTemplates = () => {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = '.json'
-  input.onchange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        try {
-          const importedData = JSON.parse(event.target.result)
-          if (Array.isArray(importedData)) {
-            // 检查数据格式是否正确
-            const validData = importedData.filter(item => 
-              item.deviceType && item.description && Array.isArray(item.params)
-            )
-            if (validData.length > 0) {
-              // 生成新的ID
-              const maxId = Math.max(...paramTemplates.value.map(t => t.id), 0)
-              validData.forEach((item, index) => {
-                item.id = maxId + index + 1
-                // 确保params数组中的每个参数都有id
-                item.params.forEach((param, paramIndex) => {
-                  if (!param.id) {
-                    param.id = Date.now() + paramIndex
-                  }
-                })
-              })
-              paramTemplates.value = [...paramTemplates.value, ...validData]
-              ElMessage.success(`成功导入 ${validData.length} 个设备参数`)
-            } else {
-              ElMessage.error('导入的数据格式不正确')
-            }
-          } else {
-            ElMessage.error('导入的数据格式不正确')
-          }
-        } catch (error) {
-          ElMessage.error('导入失败：' + error.message)
-        }
-      }
-      reader.readAsText(file)
-    }
-  }
-  input.click()
-}
-
-const exportParamTemplates = () => {
-  const dataToExport = paramTemplates.value.map(item => ({
-    deviceType: item.deviceType,
-    description: item.description,
-    params: item.params.map(param => ({
-      name: param.name,
-      unit: param.unit,
-      defaultValue: param.defaultValue,
-      minValue: param.minValue,
-      maxValue: param.maxValue
-    }))
-  }))
-  
-  const jsonString = JSON.stringify(dataToExport, null, 2)
-  const blob = new Blob([jsonString], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `param-templates-${new Date().toISOString().split('T')[0]}.json`
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
 const getDeviceParams = (deviceType) => {
   const deviceTypeMap = {
     'diesel-low': '船用柴油发动机（低速机）',
@@ -820,6 +802,16 @@ const getDeviceParams = (deviceType) => {
   min-height: calc(100vh - 120px); 
   overflow-y: auto; 
   box-sizing: border-box; 
+}
+
+/* Tab 样式 */
+.device-params-tabs {
+  height: 100%;
+}
+
+/* 参数模板 Tab 内容区域 */
+.device-params-controls {
+  margin-top: 0;
 }
 
 .device-params-controls { 

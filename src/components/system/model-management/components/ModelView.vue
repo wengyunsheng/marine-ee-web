@@ -6,7 +6,7 @@
     @close="$emit('close')"
   >
     <el-descriptions :column="1" border>
-      <el-descriptions-item label="模型名称">
+      <el-descriptions-item label="样机模型名称">
         {{ model?.name }}
       </el-descriptions-item>
       <el-descriptions-item label="设备类型名称">

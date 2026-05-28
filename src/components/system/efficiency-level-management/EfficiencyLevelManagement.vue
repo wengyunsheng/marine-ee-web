@@ -6,8 +6,6 @@
           <el-icon><Plus /></el-icon>
           新增能效等级和能效基值
         </el-button>
-        <el-button @click="importBaseValues">导入能效等级和能效基值</el-button>
-        <el-button @click="exportBaseValues">导出能效等级和能效基值</el-button>
       </div>
 
       <div class="search-filter">
@@ -28,8 +26,9 @@
         </el-select>
         <el-select v-model="engineTypeFilter" placeholder="全部设备类型" clearable style="width: 200px;" @change="filterBaseValues">
           <el-option label="全部设备类型" value="" />
-          <el-option v-for="opt in engineTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+          <el-option v-for="opt in filteredEngineTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
         </el-select>
+        <el-button @click="resetFilters">重置筛选</el-button>
       </div>
     </div>
 
@@ -123,7 +122,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import EfficiencyLevelForm from './components/EfficiencyLevelForm.vue'
@@ -132,6 +131,23 @@ import EfficiencyLevelView from './components/EfficiencyLevelView.vue'
 const searchQuery = ref('')
 const engineTypeFilter = ref('')
 const categoryFilter = ref('')
+
+// 根据类别过滤设备类型选项
+const filteredEngineTypeOptions = computed(() => {
+  if (!categoryFilter.value) {
+    return engineTypeOptions
+  }
+  const cfg = categoryConfig[categoryFilter.value]
+  return cfg ? cfg.engineTypes.map(name => ({ value: name, label: name })) : []
+})
+
+// 类别变化时清空设备类型筛选
+watch(categoryFilter, (newVal, oldVal) => {
+  // 只有用户主动切换类别时才清空设备类型
+  if (oldVal !== undefined && newVal !== oldVal) {
+    engineTypeFilter.value = ''
+  }
+})
 const showFormModal = ref(false)
 const showViewModal = ref(false)
 const isEditMode = ref(false)
@@ -696,7 +712,21 @@ const resetPage = () => {
 }
 
 const filterBaseValues = () => {
+  // 选择设备类型时，自动关联类别
+  if (engineTypeFilter.value && !categoryFilter.value) {
+    const foundCategory = Object.entries(categoryConfig).find(([_, cfg]) => cfg.engineTypes.includes(engineTypeFilter.value))
+    categoryFilter.value = foundCategory?.[0] || ''
+  }
   resetPage()
+  console.log('筛选条件:', { categoryFilter: categoryFilter.value, engineTypeFilter: engineTypeFilter.value })
+}
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  categoryFilter.value = ''
+  engineTypeFilter.value = ''
+  resetPage()
+  console.log('重置筛选条件')
 }
 
 const openAddModal = () => { isEditMode.value = false; formData.value = { ...defaultFormData }; showFormModal.value = true }
@@ -733,22 +763,6 @@ const deleteBaseValue = async (id) => {
   } catch {
     // 用户取消删除
   }
-}
-
-const importBaseValues = () => { ElMessage.info('导入能效基值功能开发中') }
-
-const exportBaseValues = () => {
-  const data = JSON.stringify(efficiencyBaseValues.value, null, 2)
-  const blob = new Blob([data], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'efficiency-base-values.json'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-  ElMessage.success('导出成功')
 }
 
 </script>

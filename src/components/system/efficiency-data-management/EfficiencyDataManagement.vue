@@ -1,6 +1,6 @@
 <template>
-  <div class="history-data-management-container">
-    <div class="history-data-controls">
+  <div class="efficiency-data-management-container">
+    <div class="efficiency-data-controls">
       <div class="control-group">
         <el-button type="primary" @click="openAddModal">
           <el-icon><Plus /></el-icon>
@@ -13,92 +13,43 @@
       <div class="search-filter">
         <el-input 
           v-model="searchQuery" 
-          placeholder="搜索设备名称或数据日期" 
+          placeholder="搜索数据日期" 
           clearable
-          style="width: 250px;"
+          style="width: 200px;"
           @keyup.enter="filterData"
         >
           <template #prefix>
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        <el-select v-model="deviceFilter" placeholder="全部设备类型" clearable style="width: 200px;" @change="filterData">
-          <el-option label="全部设备类型" value="" />
-          <el-option label="船用柴油发动机（低速机）" value="船用柴油发动机（低速机）" />
-          <el-option label="船用柴油发动机（中速机）" value="船用柴油发动机（中速机）" />
-          <el-option label="船用LNG/柴油双燃料发动机（低速机）" value="船用LNG/柴油双燃料发动机（低速机）" />
-          <el-option label="船用LNG/柴油双燃料发动机（中速机）" value="船用LNG/柴油双燃料发动机（中速机）" />
-          <el-option label="船用甲醇/柴油双燃料发动机（低速机）" value="船用甲醇/柴油双燃料发动机（低速机）" />
-          <el-option label="船用甲醇/柴油双燃料发动机（中速机）" value="船用甲醇/柴油双燃料发动机（中速机）" />
-          <el-option label="单台齿轮箱" value="单台齿轮箱" />
-          <el-option label="两台齿轮箱" value="两台齿轮箱" />
-          <el-option label="船用有机朗肯循环发电装置" value="船用有机朗肯循环发电装置" />
-          <el-option label="船用蒸汽透平发电装置" value="船用蒸汽透平发电装置" />
-          <el-option label="单功能焚烧炉（固体废弃物）" value="单功能焚烧炉（固体废弃物）" />
-          <el-option label="单功能焚烧炉（污油泥）" value="单功能焚烧炉（污油泥）" />
-          <el-option label="双功能焚烧炉" value="双功能焚烧炉" />
-          <el-option label="多功能焚烧炉" value="多功能焚烧炉" />
-          <el-option label="船用碟式分离机" value="船用碟式分离机" />
-          <el-option label="船用压载水处理设备" value="船用压载水处理设备" />
-          <el-option label="船用起锚机" value="船用起锚机" />
-          <el-option label="船用系泊绞车" value="船用系泊绞车" />
-          <el-option label="船用吊机" value="船用吊机" />
-          <el-option label="船用低压交流三相同步发电机" value="船用低压交流三相同步发电机" />
-          <el-option label="船用中压交流三相同步发电机" value="船用中压交流三相同步发电机" />
-          <el-option label="船用组合式空调机组" value="船用组合式空调机组" />
-          <el-option label="船用冷水机组" value="船用冷水机组" />
-          <el-option label="船用惰性气体系统" value="船用惰性气体系统" />
-          <el-option label="船用二氧化碳捕集设备" value="船用二氧化碳捕集设备" />
-          <el-option label="船用推进器" value="船用推进器" />
+        <el-select v-model="modelFilter" placeholder="全部样机模型" clearable style="width: 250px;" @change="filterData">
+          <el-option label="全部样机模型" value="" />
+          <el-option v-for="model in models" :key="model.id" :label="model.name" :value="model.id" />
         </el-select>
         <el-select v-model="dataSourceFilter" placeholder="全部数据来源" clearable style="width: 150px;" @change="filterData">
           <el-option label="全部数据来源" value="" />
           <el-option label="台架试验" value="台架试验" />
           <el-option label="实船运行" value="实船运行" />
         </el-select>
-        <el-select v-model="workingConditionFilter" placeholder="全部工况特性" clearable style="width: 150px;" @change="filterData">
-          <el-option label="全部工况特性" value="" />
-          <el-option label="额定工况" value="额定工况" />
-          <el-option label="部分负荷" value="部分负荷" />
-          <el-option label="低负荷" value="低负荷" />
-          <el-option label="变工况" value="变工况" />
-        </el-select>
-        <el-select v-model="efficiencyLevelFilter" placeholder="全部能效等级" clearable style="width: 130px;" @change="filterData">
-          <el-option label="全部能效等级" value="" />
-          <el-option label="1级" value="1级" />
-          <el-option label="2级" value="2级" />
-          <el-option label="3级" value="3级" />
-          <el-option label="4级" value="4级" />
-          <el-option label="5级" value="5级" />
-        </el-select>
+        <el-button @click="resetFilters">重置筛选</el-button>
       </div>
     </div>
 
-    <div class="history-data-list-section">
+    <div class="efficiency-data-list-section">
       <h3>能效数据列表</h3>
       <el-table :data="paginatedData" style="width: 100%" border stripe>
         <el-table-column prop="dataDate" label="数据日期" width="120" />
-        <el-table-column prop="deviceType" label="设备类型" min-width="200" />
-        <el-table-column prop="deviceName" label="设备名称" min-width="150" />
+        <el-table-column label="样机模型" min-width="200" show-overflow-tooltip>
+          <template #default="scope">
+            {{ getModelName(scope.row.modelId) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="dataSource" label="数据来源" width="120" />
-        <el-table-column prop="workingCondition" label="工况特性" width="120" />
-        <el-table-column prop="efficiencyValue" label="能效指标值" width="120">
-          <template #default="scope">
-            {{ scope.row.efficiencyValue || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="能效等级" width="100">
-          <template #default="scope">
-            <el-tag v-if="scope.row.efficiencyLevel" :type="getEfficiencyLevelType(scope.row.efficiencyLevel)">
-              {{ scope.row.efficiencyLevel }}
-            </el-tag>
-            <span v-else class="text-muted">-</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column label="操作" width="320" fixed="right">
           <template #default="scope">
             <el-button type="primary" size="small" @click="viewData(scope.row)">查看</el-button>
             <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
+            <el-button type="success" size="small" @click="viewOperatingData(scope.row)">工况数据</el-button>
             <el-button type="danger" size="small" @click="deleteData(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -121,6 +72,7 @@
       v-if="showFormModal"
       :is-edit="isEditMode"
       :form-data="formData"
+      :models="models"
       @save="saveData"
       @close="closeFormModal"
     />
@@ -128,8 +80,17 @@
     <!-- 查看历史数据弹窗 -->
     <EfficiencyDataView 
       v-if="showViewModal" 
-      :data="currentData" 
+      :data="currentData"
+      :models="models"
       @close="closeViewModal" 
+    />
+
+    <!-- 查看工况数据弹窗 -->
+    <OperatingDataView
+      v-if="showOperatingDataModal"
+      :data="currentOperatingData"
+      :models="models"
+      @close="closeOperatingDataModal"
     />
   </div>
 </template>
@@ -140,34 +101,41 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import EfficiencyDataForm from './components/EfficiencyDataForm.vue'
 import EfficiencyDataView from './components/EfficiencyDataView.vue'
+import OperatingDataView from './components/OperatingDataView.vue'
 
 const props = defineProps({
   historyData: {
     type: Array,
     default: () => []
+  },
+  models: {
+    type: Array,
+    default: () => []
+  },
+  globalState: {
+    type: Object,
+    default: () => ({})
   }
 })
 
 const emit = defineEmits(['delete'])
 
 const searchQuery = ref('')
-const deviceFilter = ref('')
+const modelFilter = ref('')
 const dataSourceFilter = ref('')
-const workingConditionFilter = ref('')
-const efficiencyLevelFilter = ref('')
 const showFormModal = ref(false)
 const showViewModal = ref(false)
 const isEditMode = ref(false)
 const currentData = ref(null)
+const showOperatingDataModal = ref(false)
+const currentOperatingData = ref(null)
 
 const defaultFormData = {
   dataDate: '',
+  modelId: '',
   deviceType: '',
   deviceName: '',
-  dataSource: '',
-  workingCondition: '',
-  efficiencyValue: '',
-  efficiencyLevel: ''
+  dataSource: ''
 }
 
 const formData = ref({ ...defaultFormData })
@@ -176,62 +144,50 @@ const localHistoryData = ref([
   {
     id: 1,
     dataDate: '2024-04-20',
+    modelId: 1,
     deviceType: '船用柴油发动机（低速机）',
-    deviceName: 'MAN B&W 6S70MC',
-    dataSource: '台架试验',
-    workingCondition: '额定工况',
-    efficiencyValue: 85.6,
-    efficiencyLevel: '2级'
+    deviceName: 'VLCC超大型油轮 - 船用柴油发动机（低速机）',
+    dataSource: '台架试验'
   },
   {
     id: 2,
     dataDate: '2024-04-15',
+    modelId: 2,
     deviceType: '船用柴油发动机（中速机）',
-    deviceName: 'Cummins QSK60',
-    dataSource: '实船运行',
-    workingCondition: '部分负荷',
-    efficiencyValue: 78.2,
-    efficiencyLevel: '2级'
+    deviceName: '散货船 - 船用柴油发动机（中速机）',
+    dataSource: '实船运行'
   },
   {
     id: 3,
     dataDate: '2024-04-10',
+    modelId: 3,
     deviceType: '船用LNG/柴油双燃料发动机（低速机）',
-    deviceName: 'Wärtsilä 50DF',
-    dataSource: '台架试验',
-    workingCondition: '额定工况',
-    efficiencyValue: 92.1,
-    efficiencyLevel: '1级'
+    deviceName: '集装箱船 - 船用LNG/柴油双燃料发动机（低速机）',
+    dataSource: '台架试验'
   },
   {
     id: 4,
     dataDate: '2024-04-05',
+    modelId: 4,
     deviceType: '船用LNG/柴油双燃料发动机（中速机）',
-    deviceName: 'Caterpillar 3516E',
-    dataSource: '实船运行',
-    workingCondition: '变工况',
-    efficiencyValue: 72.5,
-    efficiencyLevel: '3级'
+    deviceName: '液化气船 - 船用LNG/柴油双燃料发动机（中速机）',
+    dataSource: '实船运行'
   },
   {
     id: 5,
     dataDate: '2024-04-01',
+    modelId: 5,
     deviceType: '船用甲醇/柴油双燃料发动机（低速机）',
-    deviceName: 'MAN B&W ME-LGIM',
-    dataSource: '台架试验',
-    workingCondition: '低负荷',
-    efficiencyValue: 88.7,
-    efficiencyLevel: '2级'
+    deviceName: 'VLCC超大型油轮 - 船用甲醇/柴油双燃料发动机（低速机）',
+    dataSource: '台架试验'
   },
   {
     id: 6,
     dataDate: '2024-03-25',
+    modelId: 6,
     deviceType: '船用甲醇/柴油双燃料发动机（中速机）',
-    deviceName: 'Wärtsilä 32 Methanol',
-    dataSource: '实船运行',
-    workingCondition: '额定工况',
-    efficiencyValue: 90.3,
-    efficiencyLevel: '1级'
+    deviceName: '散货船 - 船用甲醇/柴油双燃料发动机（中速机）',
+    dataSource: '实船运行'
   }
 ])
 
@@ -244,36 +200,24 @@ const mergedData = computed(() => {
 
 
 
+// 获取样机模型名称
+const getModelName = (modelId) => {
+  const model = props.models.find(m => m.id === modelId)
+  return model ? model.name : '-'
+}
+
 const filteredData = computed(() => {
   let result = mergedData.value
   if (searchQuery.value) {
     result = result.filter(data =>
-      data.deviceName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       data.dataDate.includes(searchQuery.value)
     )
   }
-  if (deviceFilter.value) {
-    const deviceTypeMap = {
-      'diesel-low': '船用柴油发动机（低速机）',
-      'diesel-medium': '船用柴油发动机（中速机）',
-      'lng-diesel-low': '船用LNG/柴油双燃料发动机（低速机）',
-      'lng-diesel-medium': '船用LNG/柴油双燃料发动机（中速机）',
-      'methanol-diesel-low': '船用甲醇/柴油双燃料发动机（低速机）',
-      'methanol-diesel-medium': '船用甲醇/柴油双燃料发动机（中速机）'
-    }
-    const deviceTypeName = deviceTypeMap[deviceFilter.value]
-    if (deviceTypeName) {
-      result = result.filter(data => data.deviceType === deviceTypeName)
-    }
+  if (modelFilter.value) {
+    result = result.filter(data => data.modelId === modelFilter.value)
   }
   if (dataSourceFilter.value) {
     result = result.filter(data => data.dataSource === dataSourceFilter.value)
-  }
-  if (workingConditionFilter.value) {
-    result = result.filter(data => data.workingCondition === workingConditionFilter.value)
-  }
-  if (efficiencyLevelFilter.value) {
-    result = result.filter(data => data.efficiencyLevel === efficiencyLevelFilter.value)
   }
   return result
 })
@@ -304,13 +248,19 @@ const resetPage = () => {
 
 const filterData = () => {
   resetPage()
-  console.log('过滤数据', { 
-    searchQuery: searchQuery.value, 
-    deviceFilter: deviceFilter.value,
-    dataSourceFilter: dataSourceFilter.value,
-    workingConditionFilter: workingConditionFilter.value,
-    efficiencyLevelFilter: efficiencyLevelFilter.value
+  console.log('过滤数据', {
+    searchQuery: searchQuery.value,
+    modelFilter: modelFilter.value,
+    dataSourceFilter: dataSourceFilter.value
   })
+}
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  modelFilter.value = ''
+  dataSourceFilter.value = ''
+  resetPage()
+  console.log('重置筛选条件')
 }
 
 const openAddModal = () => {
@@ -331,7 +281,7 @@ const closeFormModal = () => {
 }
 
 const saveData = (data) => {
-  if (!data.dataDate || !data.deviceType || !data.deviceName || !data.dataSource || !data.workingCondition) {
+  if (!data.dataDate || !data.modelId || !data.dataSource) {
     ElMessage.warning('请填写所有必填项')
     return
   }
@@ -348,6 +298,8 @@ const saveData = (data) => {
       id: newId
     })
   }
+  // 同步数据到全局状态
+  syncToGlobalState()
   closeFormModal()
 }
 
@@ -362,13 +314,14 @@ const closeViewModal = () => {
   currentData.value = null
 }
 
-const getEfficiencyLevelType = (level) => {
-  const levelNum = parseInt(level.replace('级', ''))
-  if (levelNum === 1) return 'success'
-  if (levelNum === 2) return ''
-  if (levelNum === 3) return 'warning'
-  if (levelNum >= 4) return 'danger'
-  return ''
+const viewOperatingData = (data) => {
+  currentOperatingData.value = data
+  showOperatingDataModal.value = true
+}
+
+const closeOperatingDataModal = () => {
+  showOperatingDataModal.value = false
+  currentOperatingData.value = null
 }
 
 const importData = () => {
@@ -384,7 +337,7 @@ const importData = () => {
           const importedData = JSON.parse(event.target.result)
           if (Array.isArray(importedData)) {
             const validData = importedData.filter(item => 
-              item.dataDate && item.deviceType && item.deviceName && item.dataSource && item.workingCondition
+              item.dataDate && item.modelId && item.dataSource
             )
             if (validData.length > 0) {
               const maxId = Math.max(...localHistoryData.value.map(d => d.id), 0)
@@ -392,9 +345,10 @@ const importData = () => {
                 item.id = maxId + index + 1
               })
               localHistoryData.value = [...localHistoryData.value, ...validData]
-              ElMessage.success(`成功导入 ${validData.length} 条待评估历史数据`)
+              syncToGlobalState()
+              ElMessage.success(`成功导入 ${validData.length} 条能效数据`)
             } else {
-              ElMessage.error('导入的数据格式不正确，缺少必需字段（dataDate、deviceType、deviceName、dataSource、workingCondition）')
+              ElMessage.error('导入的数据格式不正确，缺少必需字段（dataDate、modelId、dataSource）')
             }
           } else {
             ElMessage.error('导入的数据格式不正确')
@@ -412,10 +366,8 @@ const importData = () => {
 const exportData = () => {
   const dataToExport = localHistoryData.value.map(item => ({
     dataDate: item.dataDate,
-    deviceType: item.deviceType,
-    deviceName: item.deviceName,
-    dataSource: item.dataSource,
-    workingCondition: item.workingCondition
+    modelId: item.modelId,
+    dataSource: item.dataSource
   }))
   
   const jsonString = JSON.stringify(dataToExport, null, 2)
@@ -437,16 +389,27 @@ const deleteData = async (id) => {
       type: 'warning'
     })
     localHistoryData.value = localHistoryData.value.filter(data => data.id !== id)
+    syncToGlobalState()
     emit('delete', id)
     ElMessage.success('删除成功')
   } catch {
     // 用户取消删除
   }
 }
+
+// 同步数据到全局状态，供样机模型管理查看关联数据
+const syncToGlobalState = () => {
+  if (props.globalState) {
+    props.globalState.efficiencyData = [...localHistoryData.value]
+  }
+}
+
+// 初始化时同步一次
+syncToGlobalState()
 </script>
 
 <style scoped>
-.history-data-management-container {
+.efficiency-data-management-container {
   padding: 20px;
   height: 100%;
   min-height: calc(100vh - 120px);
@@ -454,7 +417,7 @@ const deleteData = async (id) => {
   box-sizing: border-box;
 }
 
-.history-data-controls {
+.efficiency-data-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -476,11 +439,11 @@ const deleteData = async (id) => {
   flex-wrap: wrap;
 }
 
-.history-data-list-section {
+.efficiency-data-list-section {
   margin-bottom: 24px;
 }
 
-.history-data-list-section h3 {
+.efficiency-data-list-section h3 {
   margin: 0 0 16px 0;
   font-size: 18px;
   font-weight: 600;
@@ -493,7 +456,7 @@ const deleteData = async (id) => {
 
 /* 响应式布局 */
 @media (max-width: 768px) {
-  .history-data-controls {
+  .efficiency-data-controls {
     flex-direction: column;
     align-items: flex-start;
   }

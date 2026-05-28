@@ -9,26 +9,11 @@
       <el-descriptions-item label="数据日期">
         {{ data.dataDate }}
       </el-descriptions-item>
-      <el-descriptions-item label="设备类型">
-        {{ data.deviceType }}
-      </el-descriptions-item>
-      <el-descriptions-item label="设备名称">
-        {{ data.deviceName }}
+      <el-descriptions-item label="样机模型">
+        {{ modelName }}
       </el-descriptions-item>
       <el-descriptions-item label="数据来源">
         {{ data.dataSource }}
-      </el-descriptions-item>
-      <el-descriptions-item label="工况特性">
-        {{ data.workingCondition }}
-      </el-descriptions-item>
-      <el-descriptions-item label="能效指标值">
-        {{ data.efficiencyValue || '-' }}
-      </el-descriptions-item>
-      <el-descriptions-item label="能效等级">
-        <el-tag v-if="data.efficiencyLevel" :type="getEfficiencyLevelType(data.efficiencyLevel)">
-          {{ data.efficiencyLevel }}
-        </el-tag>
-        <span v-else class="text-muted">-</span>
       </el-descriptions-item>
     </el-descriptions>
 
@@ -45,10 +30,20 @@ const props = defineProps({
   data: {
     type: Object,
     required: true
+  },
+  models: {
+    type: Array,
+    default: () => []
   }
 })
 
 const emit = defineEmits(['close'])
+
+const modelName = computed(() => {
+  if (!props.data?.modelId) return '-'
+  const model = props.models.find(m => m.id === props.data.modelId)
+  return model ? model.name : '-'
+})
 
 const visible = computed({
   get: () => true,
@@ -56,19 +51,7 @@ const visible = computed({
     if (!value) emit('close')
   }
 })
-
-const getEfficiencyLevelType = (level) => {
-  const levelNum = parseInt(level.replace('级', ''))
-  if (levelNum === 1) return 'success'
-  if (levelNum === 2) return ''
-  if (levelNum === 3) return 'warning'
-  if (levelNum >= 4) return 'danger'
-  return ''
-}
 </script>
 
 <style scoped>
-.text-muted {
-  color: #94a3b8;
-}
 </style>
