@@ -89,12 +89,12 @@
       </el-table-column>
       <el-table-column label="能效基值" width="100" align="center">
         <template #default="{ row }">
-          <span class="score-text" :class="getScoreClass(row.score)">{{ row.score || '-' }}</span>
+          <span>{{ row.score || '-' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="能效等级" width="100" align="center">
         <template #default="{ row }">
-          <el-tag :type="getLevelTagType(row.levelClass)" size="small">{{ row.level }}</el-tag>
+          <span>{{ row.level }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="dataDate" label="数据日期" width="120" />

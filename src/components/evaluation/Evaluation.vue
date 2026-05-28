@@ -8,7 +8,12 @@
   </div>
 
   <!-- 能效评估向导对话框 -->
-  <EvalWizard v-if="showWizard" @close="closeWizard" @complete="completeEval" />
+  <EvalWizard 
+    v-if="showWizard" 
+    :global-state="globalState"
+    @close="closeWizard" 
+    @complete="completeEval" 
+  />
 </template>
 
 <script setup>
@@ -16,6 +21,13 @@ import { ref } from 'vue'
 import EvalWizard from './EvalWizard.vue'
 import EvaluationOverview from './EvaluationOverview.vue'
 import EvaluationTaskList from './EvaluationTaskList.vue'
+
+const props = defineProps({
+  globalState: {
+    type: Object,
+    default: () => ({})
+  }
+})
 
 const emit = defineEmits(['navigate', 'evalComplete'])
 

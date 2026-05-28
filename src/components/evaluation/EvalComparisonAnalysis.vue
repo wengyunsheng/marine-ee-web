@@ -27,7 +27,9 @@
 
       <!-- 对比表格 -->
       <div v-else class="comparison-content">
+        <div class="table-tip">💡 提示：拖动列表头可调整列顺序，第一列为参考基准</div>
         <el-table 
+          ref="tableRef"
           :data="comparisonData" 
           border 
           stripe 
@@ -36,12 +38,19 @@
         >
           <el-table-column label="指标" prop="indicator" width="150" fixed="left" />
           <el-table-column 
-            v-for="(item, index) in selectedItems" 
-            :key="index"
+            v-for="(item, index) in sortedItems" 
+            :key="item.id"
             :label="getDeviceName(item)"
             min-width="180"
             align="center"
+            :class-name="index === 0 ? 'reference-column' : ''"
           >
+            <template #header>
+              <div class="column-header" :class="{ 'is-reference': index === 0 }">
+                <span>{{ getDeviceName(item) }}</span>
+                <el-icon class="drag-icon"><Rank /></el-icon>
+              </div>
+            </template>
             <template #default="{ row }">
               <span :class="getHighlightClass(row, index)">
                 {{ row.values[index] }}
@@ -49,50 +58,19 @@
             </template>
           </el-table-column>
         </el-table>
-
-        <!-- 能效基值对比 -->
-        <div class="score-comparison">
-          <h4>能效基值对比</h4>
-          <div class="score-chart">
-            <div 
-              v-for="(item, index) in selectedItems" 
-              :key="index"
-              class="score-bar-item"
-            >
-              <div class="score-label">{{ getDeviceName(item) }}</div>
-              <div class="score-bar-wrapper">
-                <div 
-                  class="score-bar"
-                  :style="{ 
-                    width: (item.score / 100 * 100) + '%',
-                    backgroundColor: getScoreColor(item.score)
-                  }"
-                >
-                  <span class="score-value">{{ item.score }}</span>
-                </div>
-              </div>
-              <div class="score-level">
-                <el-tag :type="getLevelType(item.levelClass)" size="small">
-                  {{ item.level }}
-                </el-tag>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
     <template #footer>
       <el-button @click="handleClose">关闭</el-button>
-      <el-button type="primary" @click="exportComparison" :disabled="selectedItems.length === 0">
-        导出对比报告
-      </el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { Star, Rank } from '@element-plus/icons-vue'
+import Sortable from 'sortablejs'
 
 const props = defineProps({
   selectedItems: {
@@ -104,9 +82,63 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const dialogVisible = ref(true)
+const tableRef = ref(null)
+const sortedItems = ref([])
 
 const handleClose = () => {
   emit('close')
+}
+
+// 初始化排序后的数据
+const initSortable = () => {
+  sortedItems.value = [...props.selectedItems].map((item, index) => ({
+    ...item,
+    id: item.id || `item-${index}`
+  }))
+}
+
+// 初始化拖拽功能
+const initDrag = async () => {
+  await nextTick()
+  if (!tableRef.value) return
+  
+  const table = tableRef.value.$el
+  const headerWrapper = table.querySelector('.el-table__header-wrapper')
+  const headerRow = headerWrapper?.querySelector('tr')
+  
+  if (!headerRow) return
+  
+  // 销毁旧实例
+  if (window.draggableInstance) {
+    window.draggableInstance.destroy()
+  }
+  
+  window.draggableInstance = Sortable.create(headerRow, {
+    animation: 200,
+    handle: '.column-header',
+    ghostClass: 'sortable-ghost',
+    dragClass: 'sortable-drag',
+    onEnd: async (evt) => {
+      const oldIndex = evt.oldIndex
+      const newIndex = evt.newIndex
+      
+      if (oldIndex === newIndex) return
+      
+      // 跳过第一列（指标列），调整实际数据列
+      const dataOldIndex = oldIndex - 1
+      const dataNewIndex = newIndex - 1
+      
+      // 交换数据
+      const itemArray = [...sortedItems.value]
+      const [movedItem] = itemArray.splice(dataOldIndex, 1)
+      itemArray.splice(dataNewIndex, 0, movedItem)
+      sortedItems.value = itemArray
+      
+      // 等待 DOM 更新后重新初始化拖拽
+      await nextTick()
+      initDrag()
+    }
+  })
 }
 
 // 获取设备名称
@@ -134,42 +166,38 @@ const getScoreColor = (score) => {
   return '#f56c6c'
 }
 
-// 对比数据
+// 对比数据 - 使用 sortedItems 而不是 props.selectedItems
 const comparisonData = computed(() => {
-  if (props.selectedItems.length === 0) return []
+  if (sortedItems.value.length === 0) return []
   
   return [
     {
-      indicator: '样机模型名称',
-      values: props.selectedItems.map(item => item.device)
-    },
-    {
       indicator: '设备类型名称',
-      values: props.selectedItems.map(item => item.deviceClass)
+      values: sortedItems.value.map(item => item.deviceClass)
     },
     {
       indicator: '类别',
-      values: props.selectedItems.map(item => getCategoryName(item.category))
+      values: sortedItems.value.map(item => getCategoryName(item.category))
     },
     {
       indicator: '能效基值',
-      values: props.selectedItems.map(item => item.score)
+      values: sortedItems.value.map(item => item.score)
     },
     {
       indicator: '能效等级',
-      values: props.selectedItems.map(item => item.level)
+      values: sortedItems.value.map(item => item.level)
     },
     {
       indicator: '数据日期',
-      values: props.selectedItems.map(item => item.dataDate || '-')
+      values: sortedItems.value.map(item => item.dataDate || '-')
     },
     {
       indicator: '版本',
-      values: props.selectedItems.map(item => `v${item.version}`)
+      values: sortedItems.value.map(item => `v${item.version}`)
     },
     {
       indicator: '评估时间',
-      values: props.selectedItems.map(item => item.evalTime)
+      values: sortedItems.value.map(item => item.evalTime)
     }
   ]
 })
@@ -195,22 +223,49 @@ const getCategoryName = (category) => {
   return categoryMap[category] || category
 }
 
-// 高亮最优值
+// 监听数据变化
+watch(() => props.selectedItems, (newVal) => {
+  initSortable()
+}, { immediate: true, deep: true })
+
+// 挂载后初始化拖拽
+onMounted(() => {
+  initDrag()
+})
+
+// 高亮逻辑：以第一列为参考基准
 const getHighlightClass = (row, index) => {
+  // 第一列（参考列）不标注
+  if (index === 0) return ''
+  
+  // 能效基值对比
   if (row.indicator === '能效基值') {
-    const scores = props.selectedItems.map(item => item.score)
-    const maxScore = Math.max(...scores)
-    if (row.values[index] === maxScore) {
-      return 'highlight-best'
+    const referenceScore = row.values[0]
+    const currentScore = row.values[index]
+    
+    if (currentScore < referenceScore) {
+      return 'highlight-better'
+    } else if (currentScore > referenceScore) {
+      return 'highlight-worse'
     }
   }
+  
+  // 能效等级对比
+  if (row.indicator === '能效等级') {
+    const referenceLevel = parseInt(row.values[0])
+    const currentLevel = parseInt(row.values[index])
+    
+    if (currentLevel < referenceLevel) {
+      return 'highlight-better'
+    } else if (currentLevel > referenceLevel) {
+      return 'highlight-worse'
+    }
+  }
+  
   return ''
 }
 
-// 导出对比报告
-const exportComparison = () => {
-  alert('导出对比报告功能开发中')
-}
+
 </script>
 
 <style scoped>
@@ -221,7 +276,16 @@ const exportComparison = () => {
 .comparison-content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
+}
+
+.table-tip {
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border: 1px solid #d1e9ff;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #409eff;
 }
 
 .score-comparison h4 {
@@ -284,8 +348,92 @@ const exportComparison = () => {
   text-align: center;
 }
 
-.highlight-best {
-  color: var(--el-color-primary);
+.highlight-better {
+  color: #67c23a;
   font-weight: 600;
+}
+
+.highlight-worse {
+  color: #e6a23c;
+  font-weight: 600;
+}
+
+/* 参考列样式 - 整列加强 */
+.reference-column {
+  background-color: #fff7e6 !important;
+  position: relative;
+  font-weight: 600;
+}
+
+/* 参考列的外边框 - 用 box-shadow 实现 */
+.reference-column .cell {
+  position: relative;
+  z-index: 1;
+}
+
+/* 参考列的左侧渐变边框 */
+.reference-column::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+  z-index: 1;
+}
+
+/* 参考列的右侧边框 */
+.reference-column::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+  z-index: 1;
+}
+
+/* 参考列的表头 */
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: move;
+  padding: 4px 8px;
+}
+
+.column-header.is-reference {
+  color: #d97706;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* 拖动图标 */
+.drag-icon {
+  font-size: 16px;
+  color: #909399;
+  cursor: grab;
+  transition: all 0.3s ease;
+}
+
+.drag-icon:hover {
+  color: #409eff;
+  transform: scale(1.2);
+}
+
+/* 拖拽效果 */
+.sortable-ghost {
+  opacity: 0.6;
+  background: #c8ebfb !important;
+  border: 2px dashed #409eff !important;
+}
+
+.sortable-drag {
+  opacity: 0.9;
+  background: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 </style>

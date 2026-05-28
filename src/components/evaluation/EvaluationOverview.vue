@@ -137,15 +137,15 @@
               <div class="step-item">
                 <div class="step-number">1</div>
                 <div class="step-text">
-                  <div class="step-title">选择设备类型</div>
-                  <div class="step-desc">支持14类船用设备</div>
+                  <div class="step-title">选择样机模型</div>
+                  <div class="step-desc">选择要评估的样机模型</div>
                 </div>
               </div>
               <div class="step-item">
                 <div class="step-number">2</div>
                 <div class="step-text">
-                  <div class="step-title">导入工况数据</div>
-                  <div class="step-desc">台架试验或实船运行数据</div>
+                  <div class="step-title">选择能效数据</div>
+                  <div class="step-desc">选择已有数据或上传新数据</div>
                 </div>
               </div>
               <div class="step-item">

@@ -80,11 +80,7 @@
       <el-main class="content">
         <DataAccess v-if="false" />
         <template v-else-if="currentModule === 'evaluation'">
-          <Evaluation v-if="currentEvalPage === 'eval-overview'" @navigate="navigateEvalPage" @evalComplete="handleEvalComplete" />
-          <DeviceSelect v-else-if="currentEvalPage === 'device-select'" @navigate="navigateEvalPage" />
-          <DataLoad v-else-if="currentEvalPage === 'data-load'" @navigate="navigateEvalPage" />
-          <ParamConfig v-else-if="currentEvalPage === 'param-config'" @navigate="navigateEvalPage" />
-          <EvalResult v-else-if="currentEvalPage === 'eval-result'" @navigate="navigateEvalPage" />
+          <Evaluation v-if="currentEvalPage === 'eval-overview'" :global-state="globalState" @navigate="navigateEvalPage" @evalComplete="handleEvalComplete" />
         </template>
         <Visualization v-else-if="currentModule === 'visualization'" :global-state="globalState" />
         <template v-else-if="currentModule === 'system-management'">
@@ -106,10 +102,7 @@
           <button class="modal-close" @click="closeModal">×</button>
         </div>
         <div class="modal-body">
-          <DeviceSelect v-if="currentModal === 'device-select'" @navigate="navigateEvalModal" />
-          <DataLoad v-else-if="currentModal === 'data-load'" @navigate="navigateEvalModal" />
-          <ParamConfig v-else-if="currentModal === 'param-config'" @navigate="navigateEvalModal" />
-          <EvalResult v-else-if="currentModal === 'eval-result'" @navigate="navigateEvalModal" />
+          <!-- 模态框内容已迁移到 EvalWizard 组件中 -->
         </div>
       </div>
     </div>
@@ -135,10 +128,6 @@ import DataAccess from './components/DataAccess.vue'
 import Evaluation from './components/evaluation/Evaluation.vue'
 import Visualization from './components/visualization/Visualization.vue'
 import SystemManagement from './components/system/SystemManagement.vue'
-import DeviceSelect from './components/evaluation/process/DeviceSelect.vue'
-import DataLoad from './components/evaluation/process/DataLoad.vue'
-import ParamConfig from './components/evaluation/process/ParamConfig.vue'
-import EvalResult from './components/evaluation/process/EvalResult.vue'
 import ModelManagement from './components/system/model-management/ModelManagement.vue'
 import DeviceTypeManagement from './components/system/device-type-management/DeviceTypeManagement.vue'
 import EfficiencyLevelManagement from './components/system/efficiency-level-management/EfficiencyLevelManagement.vue'
@@ -155,7 +144,56 @@ const isSidebarCollapsed = ref(false)
 // 全局状态管理
 const globalState = ref({
   selectedModel: null, // 选中的模型
-  models: [], // 模型列表
+  models: [
+    {
+      id: 1,
+      name: '散货船 - 船用柴油发动机（低速机）',
+      deviceType: '船用柴油发动机（低速机）',
+      category: 'engine',
+      description: '用于散货船柴油发动机的能效评估仿真模型',
+      createdAt: '2024-04-01'
+    },
+    {
+      id: 2,
+      name: '油轮 - 船用柴油发动机（中速机）',
+      deviceType: '船用柴油发动机（中速机）',
+      category: 'engine',
+      description: '用于油轮柴油发动机的能效评估仿真模型',
+      createdAt: '2024-04-02'
+    },
+    {
+      id: 3,
+      name: '集装箱船 - 船用LNG/柴油双燃料发动机（低速机）',
+      deviceType: '船用LNG/柴油双燃料发动机（低速机）',
+      category: 'engine',
+      description: '用于集装箱船LNG/柴油双燃料发动机的能效评估仿真模型',
+      createdAt: '2024-04-03'
+    },
+    {
+      id: 4,
+      name: '液化气船 - 船用LNG/柴油双燃料发动机（中速机）',
+      deviceType: '船用LNG/柴油双燃料发动机（中速机）',
+      category: 'engine',
+      description: '用于液化气船LNG/柴油双燃料发动机的能效评估仿真模型',
+      createdAt: '2024-04-04'
+    },
+    {
+      id: 5,
+      name: 'VLCC超大型油轮 - 船用甲醇/柴油双燃料发动机（低速机）',
+      deviceType: '船用甲醇/柴油双燃料发动机（低速机）',
+      category: 'engine',
+      description: '用于VLCC超大型油轮甲醇/柴油双燃料发动机的能效评估仿真模型',
+      createdAt: '2024-04-05'
+    },
+    {
+      id: 6,
+      name: '散货船 - 船用甲醇/柴油双燃料发动机（中速机）',
+      deviceType: '船用甲醇/柴油双燃料发动机（中速机）',
+      category: 'engine',
+      description: '用于散货船甲醇/柴油双燃料发动机的能效评估仿真模型',
+      createdAt: '2024-04-06'
+    }
+  ], // 模型列表
   efficiencyData: [] // 能效接入数据（全局共享，供样机模型查看关联数据）
 })
 
@@ -238,10 +276,6 @@ const moduleNames = {
 }
 
 const modalTitles = {
-  'device-select': '设备选择',
-  'data-load': '数据加载',
-  'param-config': '参数配置',
-  'eval-result': '评估结果',
   'model-management': '样机模型管理',
   'device-type-management': '设备类型管理'
 }
@@ -299,26 +333,12 @@ const handleQuickAction = (action) => {
 }
 
 const navigateEvalPage = (page) => {
-  if (['device-select', 'data-load', 'param-config', 'eval-result'].includes(page)) {
-    currentModal.value = page
-    showModal.value = true
-  } else {
-    currentEvalPage.value = page
-  }
+  currentEvalPage.value = page
 }
 
 const closeModal = () => {
   showModal.value = false
   currentModal.value = ''
-}
-
-const navigateEvalModal = (page) => {
-  if (page === 'eval-overview') {
-    closeModal()
-    currentEvalPage.value = 'eval-overview'
-  } else {
-    currentModal.value = page
-  }
 }
 
 const navigateSystemModule = (module) => {
