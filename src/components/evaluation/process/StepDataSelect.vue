@@ -130,6 +130,11 @@ const handleImport = () => {
 <style scoped>
 .step-card {
   margin-bottom: 20px;
+  padding: 20px;
+}
+
+.step-card :deep(.el-card__body) {
+  padding: 0;
 }
 
 .card-header {

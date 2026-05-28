@@ -1,7 +1,7 @@
 <template>
   <div class="energy-evaluation-container">
     <!-- 评估概览组件 -->
-    <EvaluationOverview @navigate="startEval" />
+    <EvaluationOverview @start="startEval" />
 
     <!-- 评估任务列表组件 -->
     <EvaluationTaskList ref="taskListRef" />

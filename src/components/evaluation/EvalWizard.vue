@@ -2,7 +2,7 @@
   <el-dialog 
     v-model="dialogVisible" 
     title="能效评估向导"
-    width="80%"
+    width="1100px"
     :close-on-click-modal="false"
     @close="closeWizard"
   >
@@ -43,19 +43,9 @@
           :show-result="showEfficiencyResult"
           :calculated-efficiency="calculatedEfficiency"
           :efficiency-level="efficiencyLevel"
-          @calculate="handleCalculate"
-        />
-
-        <!-- 第四步：查看评估结果 -->
-        <StepResult
-          v-if="currentStep === 3"
-          :selected-model="selectedModel"
-          :engine-info="engineInfo"
-          :show-result="showEfficiencyResult"
-          :calculated-efficiency="calculatedEfficiency"
-          :efficiency-level="efficiencyLevel"
           :efficiency-level-class="efficiencyLevelClass"
           :current-fuel-config="currentFuelConfig"
+          @calculate="handleCalculate"
         />
 
         <!-- 向导底部按钮 -->
@@ -64,14 +54,14 @@
             ← 上一步
           </el-button>
           <el-button 
-            v-if="currentStep < 3" 
+            v-if="currentStep < 2" 
             type="primary" 
             @click="nextStep"
           >
             下一步 →
           </el-button>
           <el-button 
-            v-if="currentStep === 3 && showEfficiencyResult" 
+            v-if="currentStep === 2 && showEfficiencyResult" 
             type="success" 
             @click="finishWizard"
           >
@@ -85,12 +75,11 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Box, Document, Cpu, CircleCheck } from '@element-plus/icons-vue'
+import { Box, Document, Cpu } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import StepModelSelect from './process/StepModelSelect.vue'
 import StepDataSelect from './process/StepDataSelect.vue'
 import StepCalculation from './process/StepCalculation.vue'
-import StepResult from './process/StepResult.vue'
 
 const props = defineProps({
   globalState: {
@@ -111,13 +100,12 @@ const selectedHistoryData = ref(null)
 const steps = [
   { label: '选择样机模型' },
   { label: '选择能效数据' },
-  { label: '自动计算评估' },
-  { label: '查看评估结果' }
+  { label: '自动计算评估' }
 ]
 
 // 获取步骤图标
 const getStepIcon = (index) => {
-  const icons = [Box, Document, Cpu, CircleCheck]
+  const icons = [Box, Document, Cpu]
   return icons[index] || Box
 }
 
@@ -351,7 +339,7 @@ const finishWizard = () => {
 .wizard-content {
   flex: 1;
   overflow-y: auto;
-  padding: 0 20px;
+  padding: 0;
   background: #ffffff;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -379,12 +367,10 @@ const finishWizard = () => {
 .wizard-footer {
   display: flex;
   justify-content: space-between;
-  padding: 20px 0;
+  padding: 20px;
   margin-top: 20px;
   border-top: 2px solid #e4e7ed;
   background: #fafbfc;
-  padding-left: 20px;
-  padding-right: 20px;
   margin-left: -20px;
   margin-right: -20px;
   margin-bottom: -24px;

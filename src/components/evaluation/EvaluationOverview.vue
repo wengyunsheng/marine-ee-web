@@ -77,9 +77,8 @@
               <el-select 
                 v-model="selectedDeviceType" 
                 placeholder="全部设备类型" 
-                clearable 
-                size="small"
-                style="width: 220px"
+                clearable
+                style="width: 250px"
                 @change="updateChart"
               >
                 <el-option label="全部设备类型" value="" />
@@ -145,25 +144,18 @@
                 <div class="step-number">2</div>
                 <div class="step-text">
                   <div class="step-title">选择能效数据</div>
-                  <div class="step-desc">选择已有数据或上传新数据</div>
+                  <div class="step-desc">选择已有数据或导入新数据</div>
                 </div>
               </div>
               <div class="step-item">
                 <div class="step-number">3</div>
                 <div class="step-text">
                   <div class="step-title">自动计算评估</div>
-                  <div class="step-desc">根据标准公式快速计算</div>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-number">4</div>
-                <div class="step-text">
-                  <div class="step-title">查看评估结果</div>
-                  <div class="step-desc">获取能效等级和指标</div>
+                  <div class="step-desc">根据标准公式计算能效指标</div>
                 </div>
               </div>
             </div>
-            <el-button type="primary" size="default" class="start-btn" @click="$emit('navigate', 'device-select')">
+            <el-button type="primary" size="default" class="start-btn" @click="$emit('start')">
               <el-icon><VideoPlay /></el-icon>
               开始评估
             </el-button>
@@ -381,7 +373,7 @@ onMounted(() => {
 }
 
 .step-list {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   flex: 1;
 }
 
@@ -389,7 +381,7 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   padding: 8px;
   border-radius: 8px;
   transition: all 0.3s;
@@ -418,23 +410,23 @@ onMounted(() => {
 }
 
 .step-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #303133;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .step-desc {
-  font-size: 12px;
+  font-size: 14px;
   color: #909399;
 }
 
 .start-btn {
   width: 100%;
-  height: 40px;
-  font-size: 15px;
+  height: 36px;
+  font-size: 14px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 6px;
   margin-top: auto;
 }
 
