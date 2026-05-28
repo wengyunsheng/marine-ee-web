@@ -3,7 +3,7 @@
     <template #header>
       <div class="section-header">
         <h3>能效评估列表</h3>
-        <el-button type="success" @click="showComparison = true">对比分析</el-button>
+        <el-button type="success" @click="handleComparison">对比分析</el-button>
       </div>
       <div class="filter-bar">
         <el-input 
@@ -63,18 +63,21 @@
       </div>
     </template>
 
-    <el-table :data="paginatedTasks" style="width: 100%" stripe>
+    <el-table 
+      :data="paginatedTasks" 
+      style="width: 100%" 
+      stripe
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="55" />
       <el-table-column label="样机模型名称" min-width="250">
         <template #default="{ row }">
-          <div class="model-info">
-            <div class="model-name">{{ row.device }}</div>
-            <div class="model-standard">{{ row.model }}</div>
-          </div>
+          <div class="model-name">{{ row.device }}</div>
         </template>
       </el-table-column>
       <el-table-column label="设备类型名称" min-width="200">
         <template #default="{ row }">
-          <span>{{ row.device }}</span>
+          <span>{{ row.deviceClass }}</span>
         </template>
       </el-table-column>
       <el-table-column label="类别" min-width="120">
@@ -84,7 +87,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="能效得分" width="100" align="center">
+      <el-table-column label="能效基值" width="100" align="center">
         <template #default="{ row }">
           <span class="score-text" :class="getScoreClass(row.score)">{{ row.score || '-' }}</span>
         </template>
@@ -125,7 +128,7 @@
   <!-- 对比分析弹窗 -->
   <EvalComparisonAnalysis 
     v-if="showComparison" 
-    :tasks="tasks" 
+    :selected-items="selectedTasks"
     @close="closeComparison" 
   />
 </template>
@@ -133,6 +136,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import EvalComparisonAnalysis from './EvalComparisonAnalysis.vue'
 
 const searchQuery = ref('')
@@ -227,11 +231,11 @@ const getCategoryName = (category) => {
 }
 
 const tasks = ref([
-  { id: 'EVAL-20240707-001', name: '船用柴油发动机（低速机）能效评估', device: '船用柴油发动机（低速机）', deviceClass: '船用柴油发动机（低速机）', category: 'engine', model: 'ISO 15550:2016', dataDate: '2024-04-20', version: 1, score: 89, level: '2级', levelClass: 'level-2', evalTime: '2024-04-07 13:45' },
-  { id: 'EVAL-20240707-002', name: '船用柴油发动机（中速机）能效评估', device: '船用柴油发动机（中速机）', deviceClass: '船用柴油发动机（中速机）', category: 'engine', model: 'GB/T 38999-2020', dataDate: '2024-04-15', version: 1, score: 93, level: '1级', levelClass: 'level-1', evalTime: '2024-04-07 12:30' },
-  { id: 'EVAL-20240605-003', name: '船用LNG/柴油双燃料发动机（低速机）能效评估', device: '船用LNG/柴油双燃料发动机（低速机）', deviceClass: '船用LNG/柴油双燃料发动机（低速机）', category: 'engine', model: 'TSG G0003-2010', dataDate: '2024-04-10', version: 1, score: 76, level: '2级', levelClass: 'level-2', evalTime: '2024-04-05 15:20' },
-  { id: 'EVAL-20240604-004', name: '船用LNG/柴油双燃料发动机（中速机）能效评估', device: '船用LNG/柴油双燃料发动机（中速机）', deviceClass: '船用LNG/柴油双燃料发动机（中速机）', category: 'engine', model: 'GB/T 13006-2013', dataDate: '2024-04-05', version: 1, score: 65, level: '3级', levelClass: 'level-3', evalTime: '2024-04-04 10:15' },
-  { id: 'EVAL-20240601-005', name: '船用甲醇/柴油双燃料发动机（低速机）能效评估', device: '船用甲醇/柴油双燃料发动机（低速机）', deviceClass: '船用甲醇/柴油双燃料发动机（低速机）', category: 'engine', model: 'IMO EEXI标准', dataDate: '2024-04-01', version: 1, score: 82, level: '2级', levelClass: 'level-2', evalTime: '2024-04-01 16:00' }
+  { id: 'EVAL-20240707-001', name: 'VLCC超大型油轮 - 船用柴油发动机（低速机）能效评估', device: 'VLCC超大型油轮 - 船用柴油发动机（低速机）', deviceClass: '船用柴油发动机（低速机）', category: 'engine', model: 'ISO 15550:2016', dataDate: '2024-04-20', version: 1, score: 89, level: '2级', levelClass: 'level-2', evalTime: '2024-04-07 13:45' },
+  { id: 'EVAL-20240707-002', name: '散货船 - 船用柴油发动机（中速机）能效评估', device: '散货船 - 船用柴油发动机（中速机）', deviceClass: '船用柴油发动机（中速机）', category: 'engine', model: 'GB/T 38999-2020', dataDate: '2024-04-15', version: 1, score: 93, level: '1级', levelClass: 'level-1', evalTime: '2024-04-07 12:30' },
+  { id: 'EVAL-20240605-003', name: '集装箱船 - 船用LNG/柴油双燃料发动机（低速机）能效评估', device: '集装箱船 - 船用LNG/柴油双燃料发动机（低速机）', deviceClass: '船用LNG/柴油双燃料发动机（低速机）', category: 'engine', model: 'TSG G0003-2010', dataDate: '2024-04-10', version: 1, score: 76, level: '2级', levelClass: 'level-2', evalTime: '2024-04-05 15:20' },
+  { id: 'EVAL-20240604-004', name: '液化气船 - 船用LNG/柴油双燃料发动机（中速机）能效评估', device: '液化气船 - 船用LNG/柴油双燃料发动机（中速机）', deviceClass: '船用LNG/柴油双燃料发动机（中速机）', category: 'engine', model: 'GB/T 13006-2013', dataDate: '2024-04-05', version: 1, score: 65, level: '3级', levelClass: 'level-3', evalTime: '2024-04-04 10:15' },
+  { id: 'EVAL-20240601-005', name: 'VLCC超大型油轮 - 船用甲醇/柴油双燃料发动机（低速机）能效评估', device: 'VLCC超大型油轮 - 船用甲醇/柴油双燃料发动机（低速机）', deviceClass: '船用甲醇/柴油双燃料发动机（低速机）', category: 'engine', model: 'IMO EEXI标准', dataDate: '2024-04-01', version: 1, score: 82, level: '2级', levelClass: 'level-2', evalTime: '2024-04-01 16:00' }
 ])
 
 const totalTasks = computed(() => filteredTasks.value.length)
@@ -341,6 +345,19 @@ const addTask = (taskData) => {
 
 // 对比分析相关
 const showComparison = ref(false)
+const selectedTasks = ref([])
+
+const handleSelectionChange = (selection) => {
+  selectedTasks.value = selection
+}
+
+const handleComparison = () => {
+  if (selectedTasks.value.length < 2) {
+    ElMessage.warning('请至少勾选两条数据进行对比分析')
+    return
+  }
+  showComparison.value = true
+}
 
 const closeComparison = () => {
   showComparison.value = false
@@ -367,7 +384,7 @@ defineExpose({
 
 /* 移除el-card默认内边距，让内容贴边 */
 .table-section :deep(.el-card__header) {
-  padding: 12px 20px;
+  padding: 12px 20px 12px 0;
 }
 
 .table-section :deep(.el-card__body) {
@@ -376,7 +393,6 @@ defineExpose({
 
 .section-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 16px;
   margin-bottom: 12px;
@@ -387,6 +403,7 @@ defineExpose({
   font-size: 18px;
   font-weight: 600;
   color: #333;
+  white-space: nowrap;
 }
 
 .filter-bar {
@@ -557,22 +574,10 @@ defineExpose({
 }
 
 /* 样机模型名称样式 */
-.model-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  line-height: 1.5;
-}
-
 .model-name {
   font-size: 14px;
   font-weight: 500;
   color: #333;
-}
-
-.model-standard {
-  font-size: 12px;
-  color: #666;
 }
 
 /* 类别标签样式 */

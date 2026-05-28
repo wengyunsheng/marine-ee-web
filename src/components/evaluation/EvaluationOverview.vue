@@ -34,7 +34,7 @@
         </el-card>
       </el-col>
       
-      <!-- 平均能效得分 -->
+      <!-- 平均能效基值 -->
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
@@ -42,7 +42,7 @@
               <el-icon :size="28"><TrendCharts /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-label">平均能效得分</div>
+              <div class="stat-label">平均能效基值</div>
               <div class="stat-value">82.6</div>
               <div class="stat-desc">整体能效水平良好</div>
             </div>
