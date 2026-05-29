@@ -603,21 +603,11 @@ const filteredTemplates = computed(() => {
   return result
 })
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredTemplates.value.length / pageSize.value)
-})
-
 const paginatedTemplates = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   return filteredTemplates.value.slice(start, end)
 })
-
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
 
 const resetPage = () => {
   currentPage.value = 1
@@ -800,13 +790,28 @@ const getDeviceParams = (deviceType) => {
   padding: 20px; 
   height: 100%; 
   min-height: calc(100vh - 120px); 
-  overflow-y: auto; 
   box-sizing: border-box; 
+  display: flex;
+  flex-direction: column;
 }
 
 /* Tab 样式 */
 .device-params-tabs {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tab 内容区 */
+:deep(.el-tabs__content) {
+  flex: 1;
+  overflow: hidden;
+}
+
+:deep(.el-tab-pane) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 参数模板 Tab 内容区域 */
@@ -837,7 +842,11 @@ const getDeviceParams = (deviceType) => {
 }
 
 .template-list-section { 
-  margin-bottom: 24px; 
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-bottom: 0;
 }
 
 .template-list-section h3 { 
@@ -845,12 +854,20 @@ const getDeviceParams = (deviceType) => {
   font-size: 18px; 
   font-weight: 600; 
   color: #333; 
+  flex-shrink: 0;
+}
+
+.template-list-section .el-table {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
 }
 
 .pagination-container {
   display: flex;
   justify-content: flex-end;
-  padding: 16px 0;
+  padding: 16px 0 0 0;
+  flex-shrink: 0;
 }
 
 .device-category {

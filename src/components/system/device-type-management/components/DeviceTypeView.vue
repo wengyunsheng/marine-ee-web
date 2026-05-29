@@ -25,8 +25,6 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close'])
-
 const getCategoryName = (category) => {
   const categoryMap = {
     'engine': '船用发动机',

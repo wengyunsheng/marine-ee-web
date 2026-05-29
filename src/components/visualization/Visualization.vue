@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref } from 'vue'
 import ThreeDModel from './components/ThreeDModel.vue'
 import { Refresh } from '@element-plus/icons-vue'
 

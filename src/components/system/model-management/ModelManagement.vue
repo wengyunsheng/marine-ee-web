@@ -299,21 +299,11 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50, 100, 200, 500])
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredModels.value.length / pageSize.value)
-})
-
 const paginatedModels = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   return filteredModels.value.slice(start, end)
 })
-
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
 
 const resetPage = () => {
   currentPage.value = 1
@@ -438,20 +428,6 @@ const handle3DModel = (model) => {
       }
     }
     input.click()
-  }
-}
-
-const upload3DModel = (model) => {
-  // 保留旧方法名以防其他地方调用
-  handle3DModel(model)
-}
-
-const view3DModel = (model) => {
-  // 更新全局状态中的选中模型
-  if (props.globalState) {
-    props.globalState.selectedModel = model
-    // 触发切换到可视化模块的事件
-    emit('switch-to-visualization')
   }
 }
 

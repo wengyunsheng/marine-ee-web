@@ -78,13 +78,12 @@
 
       <!-- 内容区域 -->
       <el-main class="content">
-        <DataAccess v-if="false" />
-        <template v-else-if="currentModule === 'evaluation'">
+        <template v-if="currentModule === 'evaluation'">
           <Evaluation v-if="currentEvalPage === 'eval-overview'" :global-state="globalState" @navigate="navigateEvalPage" @evalComplete="handleEvalComplete" @switchToSystem="handleSwitchToSystem" />
         </template>
         <Visualization v-else-if="currentModule === 'visualization'" :global-state="globalState" />
         <template v-else-if="currentModule === 'system-management'">
-          <SystemManagement v-if="!currentSystemSubModule" @navigate="navigateSystemModule" />
+          <SystemManagement v-if="!currentSystemSubModule" />
           <ModelManagement v-else-if="currentSystemSubModule === 'model-management'" :global-state="globalState" :efficiency-data="globalState.efficiencyData" @switch-to-visualization="switchToVisualization" />
           <DeviceTypeManagement v-else-if="currentSystemSubModule === 'device-type-management'" />
           <EfficiencyLevelManagement v-else-if="currentSystemSubModule === 'efficiency-level-management'" />
@@ -93,19 +92,6 @@
         </template>
       </el-main>
     </el-container>
-
-    <!-- 弹窗组件 -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>{{ modalTitles[currentModal] || '弹窗' }}</h3>
-          <button class="modal-close" @click="closeModal">×</button>
-        </div>
-        <div class="modal-body">
-          <!-- 模态框内容已迁移到 EvalWizard 组件中 -->
-        </div>
-      </div>
-    </div>
   </el-container>
 </template>
 
@@ -117,14 +103,13 @@ import {
   Setting,
   Document,
   Edit,
-  ScaleToOriginal,
   TrophyBase,
   Tools,
   Folder,
   Fold,
   Expand
 } from '@element-plus/icons-vue'
-import DataAccess from './components/DataAccess.vue'
+
 import Evaluation from './components/evaluation/Evaluation.vue'
 import Visualization from './components/visualization/Visualization.vue'
 import SystemManagement from './components/system/SystemManagement.vue'
@@ -137,8 +122,6 @@ import DeviceParamsManagement from './components/system/device-params-management
 const currentModule = ref('evaluation')
 const currentEvalPage = ref('eval-overview')
 const currentSystemSubModule = ref('')
-const showModal = ref(false)
-const currentModal = ref('')
 const isSidebarCollapsed = ref(false)
 
 // 全局状态管理
@@ -197,88 +180,6 @@ const globalState = ref({
   efficiencyData: [] // 能效接入数据（全局共享，供样机模型查看关联数据）
 })
 
-// 历史评估数据（全局共享）
-const historyData = ref([
-  {
-    id: 1,
-    evalDate: '2024-04-20',
-    deviceType: '船用柴油发动机（低速机）',
-    deviceName: 'MAN B&W 6S70MC',
-    score: 85.6,
-    level: '2级',
-    levelClass: 'good'
-  },
-  {
-    id: 2,
-    evalDate: '2024-04-15',
-    deviceType: '船用柴油发动机（中速机）',
-    deviceName: 'Cummins QSK60',
-    score: 78.2,
-    level: '2级',
-    levelClass: 'good'
-  },
-  {
-    id: 3,
-    evalDate: '2024-04-10',
-    deviceType: '船用LNG/柴油双燃料发动机（低速机）',
-    deviceName: 'Wärtsilä 50DF',
-    score: 92.1,
-    level: '1级',
-    levelClass: 'excellent'
-  },
-  {
-    id: 4,
-    evalDate: '2024-04-05',
-    deviceType: '船用LNG/柴油双燃料发动机（中速机）',
-    deviceName: 'Caterpillar 3516E',
-    score: 72.5,
-    level: '3级',
-    levelClass: 'level-c'
-  },
-  {
-    id: 5,
-    evalDate: '2024-04-01',
-    deviceType: '船用甲醇/柴油双燃料发动机（低速机）',
-    deviceName: 'MAN B&W ME-LGIM',
-    score: 88.7,
-    level: '2级',
-    levelClass: 'good'
-  },
-  {
-    id: 6,
-    evalDate: '2024-03-25',
-    deviceType: '船用甲醇/柴油双燃料发动机（中速机）',
-    deviceName: 'Wärtsilä 32 Methanol',
-    score: 90.3,
-    level: '1级',
-    levelClass: 'excellent'
-  }
-])
-
-// 添加历史数据
-const addHistoryData = (data) => {
-  const maxId = Math.max(...historyData.value.map(d => d.id), 0)
-  historyData.value.unshift({
-    id: maxId + 1,
-    ...data
-  })
-}
-
-// 删除历史数据
-const deleteHistoryData = (id) => {
-  historyData.value = historyData.value.filter(d => d.id !== id)
-}
-
-const moduleNames = {
-  'data-access': '数据接入',
-  'evaluation': '能效评估与标准验证',
-  'visualization': '样机模型可视化'
-}
-
-const modalTitles = {
-  'model-management': '样机模型管理',
-  'device-type-management': '设备类型管理'
-}
 
 const systemSubModuleNames = {
   'device-type-management': '设备类型管理',
@@ -287,13 +188,6 @@ const systemSubModuleNames = {
   'model-management': '样机模型管理',
   'history-data': '能效数据管理'
 }
-
-const currentModuleName = computed(() => {
-  if (currentModule.value === 'system-management' && currentSystemSubModule.value) {
-    return '系统管理 / ' + (systemSubModuleNames[currentSystemSubModule.value] || '')
-  }
-  return moduleNames[currentModule.value] || ''
-})
 
 // 当前激活的菜单项
 const activeMenu = computed(() => {
@@ -324,33 +218,8 @@ const switchSystemSubModule = (subModule) => {
   currentSystemSubModule.value = subModule
 }
 
-const handleSearch = () => {
-  // 搜索功能
-}
-
-const handleQuickAction = (action) => {
-  // 快捷操作
-}
-
 const navigateEvalPage = (page) => {
   currentEvalPage.value = page
-}
-
-const closeModal = () => {
-  showModal.value = false
-  currentModal.value = ''
-}
-
-const navigateSystemModule = (module) => {
-  if (module === 'model-management' || module === 'device-type-management') {
-    // 打开系统管理相关弹窗
-    currentModal.value = module
-    showModal.value = true
-  } else {
-    // 其他系统管理模块的处理
-    console.log('导航到系统管理模块:', module)
-    alert(`导航到: ${module}`)
-  }
 }
 
 const toggleSidebar = () => {
@@ -368,29 +237,9 @@ const handleSwitchToSystem = () => {
   currentSystemSubModule.value = 'model-management'
 }
 
-// 处理评估完成事件，同步到历史数据
 const handleEvalComplete = (evalData) => {
-  addHistoryData({
-    evalDate: evalData.evalDate,
-    deviceType: mapDeviceClassToName(evalData.deviceType),
-    deviceName: evalData.deviceName,
-    score: evalData.score,
-    level: evalData.level,
-    levelClass: evalData.levelClass === '1' ? 'excellent' : evalData.levelClass === '2' ? 'good' : 'level-c'
-  })
-}
-
-// 设备类型映射
-const mapDeviceClassToName = (deviceClass) => {
-  const deviceTypeMap = {
-    'diesel-low': '船用柴油发动机（低速机）',
-    'diesel-medium': '船用柴油发动机（中速机）',
-    'lng-diesel-low': '船用LNG/柴油双燃料发动机（低速机）',
-    'lng-diesel-medium': '船用LNG/柴油双燃料发动机（中速机）',
-    'methanol-diesel-low': '船用甲醇/柴油双燃料发动机（低速机）',
-    'methanol-diesel-medium': '船用甲醇/柴油双燃料发动机（中速机）'
-  }
-  return deviceTypeMap[deviceClass] || deviceClass
+  // 评估完成后同步数据到全局状态
+  console.log('评估完成:', evalData)
 }
 </script>
 
@@ -562,91 +411,5 @@ const mapDeviceClassToName = (deviceClass) => {
   flex: 1;
   padding: 20px;
   background-color: #f5f7fa;
-}
-</style>
-
-<style>
-/* 全局弹窗样式（不使用scoped） */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
-
-.modal-content {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  width: 90%;
-  max-width: 1000px;
-  max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #64748b;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.modal-close:hover {
-  background-color: #e2e8f0;
-}
-
-.modal-body {
-  padding: 24px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-/* 响应式弹窗 */
-@media (max-width: 768px) {
-  .modal-content {
-    width: 95%;
-    max-height: 95vh;
-  }
-  
-  .modal-header {
-    padding: 16px;
-  }
-  
-  .modal-body {
-    padding: 16px;
-  }
 }
 </style>

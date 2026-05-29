@@ -247,21 +247,11 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50, 100, 200, 500])
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredData.value.length / pageSize.value)
-})
-
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   return filteredData.value.slice(start, end)
 })
-
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
 
 const resetPage = () => {
   currentPage.value = 1

@@ -369,13 +369,6 @@ const getStandardVerification = (level) => {
   return ''
 }
 
-const getLevelClass = (level) => {
-  if (level === '1级') return 'level-1'
-  if (level === '2级') return 'level-2'
-  if (level === '3级') return 'level-3'
-  return ''
-}
-
 const handleSearch = () => {
   currentPage.value = 1
 }

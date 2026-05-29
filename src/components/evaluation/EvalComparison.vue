@@ -69,7 +69,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { Star, Rank } from '@element-plus/icons-vue'
+import { Rank } from '@element-plus/icons-vue'
 import Sortable from 'sortablejs'
 
 const props = defineProps({
@@ -144,26 +144,6 @@ const initDrag = async () => {
 // 获取设备名称
 const getDeviceName = (item) => {
   return item.device || item.name || '设备'
-}
-
-// 获取等级标签类型
-const getLevelType = (levelClass) => {
-  const typeMap = {
-    'level-1': 'success',
-    'level-2': '',
-    'level-3': 'warning',
-    'level-4': 'danger',
-    'level-5': 'danger'
-  }
-  return typeMap[levelClass] || ''
-}
-
-// 获取得分颜色
-const getScoreColor = (score) => {
-  if (score >= 90) return '#67c23a'
-  if (score >= 80) return '#409eff'
-  if (score >= 70) return '#e6a23c'
-  return '#f56c6c'
 }
 
 // 对比数据 - 使用 sortedItems 而不是 props.selectedItems

@@ -55,10 +55,6 @@ const localFormData = ref({ ...props.formData })
 watch(() => props.formData, (newValue) => {
   localFormData.value = { ...newValue }
 }, { deep: true })
-
-const handleSave = () => {
-  emit('save', { ...localFormData.value })
-}
 </script>
 
 <style scoped>

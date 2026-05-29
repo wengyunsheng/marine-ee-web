@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Box, Document, Cpu } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import StepModelSelect from './process/StepModelSelect.vue'
@@ -193,7 +193,6 @@ const brandMap = {
 }
 
 // 监听样机选择变化
-import { watch } from 'vue'
 watch(selectedModelId, (newModelId) => {
   if (newModelId) {
     const model = modelOptions.value.find(m => m.id === newModelId)

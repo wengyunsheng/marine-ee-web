@@ -1,7 +1,7 @@
 {
   "name": "ship-energy-efficiency-platform",
   "version": "1.0.0",
-  "description": "船用设备能效评估平台",
+  "description": "船舶设备运行能效智能评估系统验证平台",
   "type": "module",
   "scripts": {
     "dev": "vite",

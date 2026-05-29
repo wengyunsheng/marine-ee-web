@@ -327,7 +327,6 @@ const categoryConfig = {
 const categoryOptions = Object.entries(categoryConfig).map(([value, cfg]) => ({ value, label: cfg.label }))
 const engineTypeOptions = Object.values(categoryConfig).flatMap(cfg => cfg.engineTypes.map(name => ({ value: name, label: name })))
 const metricTypeOptions = [...new Map(Object.values(categoryConfig).flatMap(cfg => cfg.metricTypes).map(m => [m.value, m])).values()]
-const allUnits = [...new Set(Object.values(categoryConfig).map(cfg => cfg.defaultUnit))]
 
 const getCategoryName = (category) => categoryConfig[category]?.label || category
 const getMetricTypeName = (metricType) => metricTypeOptions.find(m => m.value === metricType)?.label || metricType || '-'
@@ -691,21 +690,11 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50, 100, 200, 500])
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredBaseValues.value.length / pageSize.value)
-})
-
 const paginatedBaseValues = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   return filteredBaseValues.value.slice(start, end)
 })
-
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
 
 const resetPage = () => {
   currentPage.value = 1
