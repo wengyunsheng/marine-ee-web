@@ -19,12 +19,12 @@
         >
           <el-menu-item index="evaluation">
             <el-icon><DataAnalysis /></el-icon>
-            <template #title>能效评估</template>
+            <template #title>能效评估与标准验证</template>
           </el-menu-item>
 
           <el-menu-item index="visualization">
             <el-icon><View /></el-icon>
-            <template #title>可视化</template>
+            <template #title>样机模型可视化</template>
           </el-menu-item>
 
           <el-sub-menu index="system-management">
@@ -68,8 +68,8 @@
           </el-icon>
           <el-breadcrumb separator="/">
             <el-breadcrumb-item>船舶设备运行能效智能评估系统验证平台</el-breadcrumb-item>
-            <el-breadcrumb-item v-if="currentModule === 'evaluation'">能效评估</el-breadcrumb-item>
-            <el-breadcrumb-item v-else-if="currentModule === 'visualization'">可视化</el-breadcrumb-item>
+            <el-breadcrumb-item v-if="currentModule === 'evaluation'">能效评估与标准验证</el-breadcrumb-item>
+            <el-breadcrumb-item v-else-if="currentModule === 'visualization'">样机模型可视化</el-breadcrumb-item>
             <el-breadcrumb-item v-else-if="currentModule === 'system-management' && !currentSystemSubModule">系统管理</el-breadcrumb-item>
             <el-breadcrumb-item v-else-if="currentModule === 'system-management' && currentSystemSubModule">{{ systemSubModuleNames[currentSystemSubModule] }}</el-breadcrumb-item>
           </el-breadcrumb>
@@ -271,8 +271,8 @@ const deleteHistoryData = (id) => {
 
 const moduleNames = {
   'data-access': '数据接入',
-  'evaluation': '能效评估',
-  'visualization': '可视化'
+  'evaluation': '能效评估与标准验证',
+  'visualization': '样机模型可视化'
 }
 
 const modalTitles = {
