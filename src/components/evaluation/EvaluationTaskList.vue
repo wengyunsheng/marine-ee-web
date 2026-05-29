@@ -117,10 +117,12 @@
       </el-table-column>
 
       <el-table-column prop="evalTime" label="评估时间" width="160" />
-      <el-table-column label="操作" width="150" fixed="right" align="center">
+      <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
-          <el-button type="primary" size="small" @click="viewTask(row)">查看</el-button>
-          <el-button type="warning" size="small" @click="downloadReport(row)">下载</el-button>
+          <div class="operation-buttons">
+            <el-button type="primary" size="small" @click="viewTask(row)">查看</el-button>
+            <el-button type="success" size="small" @click="exportReport(row)">导出</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -137,6 +139,66 @@
     </div>
   </el-card>
   
+  <!-- 查看详情弹窗 -->
+  <el-dialog
+    v-model="showDetailDialog"
+    :title="currentTask?.name || '评估详情'"
+    width="720px"
+    :close-on-click-modal="false"
+    append-to-body
+    destroy-on-close
+  >
+    <div v-if="currentTask" class="task-detail">
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="评估编号">{{ currentTask.id }}</el-descriptions-item>
+        <el-descriptions-item label="版本">
+          <el-tag size="small">v{{ currentTask.version }}</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="样机模型" :span="2">{{ currentTask.device }}</el-descriptions-item>
+        <el-descriptions-item label="设备类型">{{ currentTask.deviceClass }}</el-descriptions-item>
+        <el-descriptions-item label="类别">
+          <el-tag :class="['category-tag', currentTask.category]" size="small">
+            {{ getCategoryName(currentTask.category) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="评估模型">{{ currentTask.model }}</el-descriptions-item>
+        <el-descriptions-item label="数据日期">{{ currentTask.dataDate }}</el-descriptions-item>
+        <el-descriptions-item label="评估时间">{{ currentTask.evalTime }}</el-descriptions-item>
+        <el-descriptions-item label="评估状态">
+          <el-tag type="success" size="small">已完成</el-tag>
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <el-divider content-position="left">评估结果</el-divider>
+
+      <div class="result-cards">
+        <div class="result-card">
+          <div class="result-label">能效基值</div>
+          <div :class="['result-value', getScoreClass(currentTask.score)]">
+            {{ currentTask.score ?? '-' }}
+          </div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">能效等级</div>
+          <div>
+            <el-tag :type="getLevelTagType(currentTask.level)" effect="plain" size="large">
+              {{ currentTask.level }}
+            </el-tag>
+          </div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">标准验证</div>
+          <div class="result-value" style="font-size: 14px;">
+            {{ getStandardVerification(currentTask.level) }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <el-button type="primary" @click="showDetailDialog = false">关闭</el-button>
+    </template>
+  </el-dialog>
+
   <!-- 对比分析弹窗 -->
   <EvalComparison
     v-if="showComparison" 
@@ -315,66 +377,78 @@ const getLevelClass = (level) => {
 }
 
 const handleSearch = () => {
-  // 搜索功能
+  currentPage.value = 1
 }
 
-const viewTask = (task) => {
-  // 查看评估
-}
-
-const downloadReport = (task) => {
-  // 下载报告
-}
-
-const resetPage = () => { 
-  currentPage.value = 1 
+const resetPage = () => {
+  currentPage.value = 1
 }
 
 const resetFilters = () => {
+  searchQuery.value = ''
   categoryFilter.value = ''
   deviceTypeFilter.value = ''
   efficiencyFilter.value = ''
   dataDateRange.value = []
   versionFilter.value = ''
-  searchQuery.value = ''
   currentPage.value = 1
-}
-
-// 添加新评估的方法
-const addTask = (taskData) => {
-  const now = new Date()
-  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
-  const randomNum = Math.floor(Math.random() * 900) + 100
-  const taskId = `EVAL-${dateStr}-${randomNum}`
-  
-  const newTask = {
-    id: taskId,
-    name: `${taskData.deviceName}能效评估`,
-    device: taskData.deviceName,
-    deviceClass: taskData.deviceClass,
-    category: deviceTypeToCategoryMap[taskData.deviceName] || 'engine',
-    model: taskData.evalModel || 'ISO 15550:2016',
-    score: taskData.score,
-    level: taskData.level,
-    levelClass: taskData.levelClass,
-    evalTime: now.toLocaleString('zh-CN', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    }).replace(/\//g, '-')
-  }
-  
-  tasks.value.unshift(newTask)
 }
 
 // 对比分析相关
 const showComparison = ref(false)
 const selectedTasks = ref([])
 
+// 查看详情弹窗
+const showDetailDialog = ref(false)
+const currentTask = ref(null)
+
 const handleSelectionChange = (selection) => {
   selectedTasks.value = selection
+}
+
+// 查看评估详情
+const viewTask = (task) => {
+  currentTask.value = task
+  showDetailDialog.value = true
+}
+
+// 导出评估报告
+const exportReport = (task) => {
+  // 生成 Excel 数据
+  const excelData = [
+    ['能效评估报告'],
+    [],
+    ['基本信息'],
+    ['评估编号', task.id],
+    ['样机模型', task.device],
+    ['设备类型', task.deviceClass],
+    ['评估模型', task.model],
+    ['数据日期', task.dataDate],
+    ['评估时间', task.evalTime],
+    [],
+    ['评估结果'],
+    ['能效基值', task.score],
+    ['能效等级', task.level],
+    ['标准验证', getStandardVerification(task.level)]
+  ]
+  
+  // 将数据转换为 CSV 格式
+  const csvContent = excelData
+    .map(row => row.map(cell => `"${cell || ''}"`).join(','))
+    .join('\n')
+  
+  // 创建下载链接
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+  link.setAttribute('href', url)
+  link.setAttribute('download', `${task.id}_能效评估报告.csv`)
+  link.style.visibility = 'hidden'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  
+  ElMessage.success('报告导出成功！')
 }
 
 const handleComparison = () => {
@@ -392,6 +466,11 @@ const closeComparison = () => {
 // 获取所有评估数据（用于同步到历史数据）
 const getAllTasks = () => {
   return tasks.value
+}
+
+// 新增评估任务
+const addTask = (task) => {
+  tasks.value.unshift(task)
 }
 
 // 暴露方法给父组件
@@ -754,6 +833,50 @@ defineExpose({
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* 操作按钮样式 */
+.operation-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+/* 查看详情弹窗样式 */
+.task-detail {
+  padding: 0 4px;
+}
+
+.result-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.result-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.result-label {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 10px;
+}
+
+.result-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #303133;
+}
+
+.result-value.excellent { color: #27ae60; }
+.result-value.good { color: #2563eb; }
+.result-value.poor { color: #e74c3c; }
 
 /* 响应式布局 */
 @media (max-width: 768px) {

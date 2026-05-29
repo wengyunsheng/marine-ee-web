@@ -1,5 +1,28 @@
 <template>
   <div class="visualization-container">
+    <!-- 样机模型选择器 -->
+    <div class="model-selector-bar">
+      <el-space :size="12" class="selector-controls">
+        <span class="selector-label">样机模型：</span>
+        <el-select 
+          v-model="selectedModelId" 
+          placeholder="请选择样机模型"
+          @change="handleModelChange"
+          style="width: 280px;"
+        >
+          <el-option
+            v-for="model in modelList"
+            :key="model.id"
+            :label="model.name + ' (' + model.type + ')'"
+            :value="model.id"
+          />
+        </el-select>
+        <el-tooltip content="刷新数据" placement="top">
+          <el-button :icon="Refresh" @click="handleModelChange(selectedModelId)" :disabled="!selectedModelId" />
+        </el-tooltip>
+      </el-space>
+    </div>
+
     <ThreeDModel 
       ref="threeDModelRef" 
       :model-parts="modelParts" 
@@ -74,12 +97,21 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import ThreeDModel from './components/ThreeDModel.vue'
+import { Refresh } from '@element-plus/icons-vue'
 
 const threeDModelRef = ref(null)
 const showPartDialog = ref(false)
 const currentPartData = ref(null)
+const selectedModelId = ref('model-1')
+
+// 样机模型列表（模拟数据）
+const modelList = ref([
+  { id: 'model-1', name: 'LNG双燃料低速机-001', type: '船用柴油发动机（低速机）' },
+  { id: 'model-2', name: 'LNG双燃料中速机-002', type: '船用柴油发动机（中速机）' },
+  { id: 'model-3', name: '蒸汽透平发电装置-003', type: '船用蒸汽透平发电装置' }
+])
 
 // 部件数据（包含工况数据和能效计算结果）
 const modelParts = ref([
@@ -173,6 +205,12 @@ const handlePartClick = (partId) => {
   }
 }
 
+const handleModelChange = (modelId) => {
+  // TODO: 根据选择的样机模型加载对应的3D模型和部件数据
+  console.log('切换样机模型:', modelId)
+  // 这里应该调用API获取对应模型的3D数据和部件信息
+}
+
 const getLevelType = (level) => {
   if (level === '1') return 'success'
   if (level === '2') return ''
@@ -186,6 +224,30 @@ const getLevelType = (level) => {
   height: 100%;
   min-height: calc(100vh - 120px);
   background-color: #0f172a;
+  display: flex;
+  flex-direction: column;
+}
+
+.model-selector-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 12px 20px;
+  background: linear-gradient(to right, rgba(15, 23, 42, 0.9), rgba(30, 58, 95, 0.9));
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.selector-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.selector-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e8eaed;
 }
 
 .part-detail {
