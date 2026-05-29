@@ -57,7 +57,7 @@
       <div v-if="showResult" class="result-section">
         <el-divider content-position="left">
           <el-icon style="margin-right: 8px"><CircleCheck /></el-icon>
-          评估结果
+          评估结果与标准验证
         </el-divider>
         
         <div class="eval-result-panel">
@@ -70,6 +70,38 @@
               能效等级：{{ efficiencyLevel }}
             </div>
           </div>
+          
+          <!-- 标准验证区块 -->
+          <div class="standard-verification-card">
+            <div class="verification-header">
+              <el-icon class="verification-icon"><CircleCheckFilled /></el-icon>
+              <h4>标准验证结果</h4>
+            </div>
+            
+            <div class="verification-content">
+              <div class="standard-comparison">
+                <div class="comparison-item">
+                  <div class="comparison-label">1级能效标准基值</div>
+                  <div class="comparison-value">≥ 85%</div>
+                </div>
+                <div class="comparison-item">
+                  <div class="comparison-label">2级能效标准基值</div>
+                  <div class="comparison-value">≥ 75%</div>
+                </div>
+                <div class="comparison-item">
+                  <div class="comparison-label">3级能效标准基值</div>
+                  <div class="comparison-value">&lt; 75%</div>
+                </div>
+              </div>
+              
+              <div class="verification-result" :class="efficiencyLevelClass">
+                <div class="result-text">
+                  <span class="result-label">验证结论：</span>
+                  <span class="result-desc">{{ verificationResult }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -77,8 +109,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Cpu, CircleCheck } from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
+import { Cpu, CircleCheck, CircleCheckFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
@@ -119,6 +151,22 @@ const props = defineProps({
 const emit = defineEmits(['calculate'])
 
 const isCalculating = ref(false)
+
+// 标准验证结果
+const verificationResult = computed(() => {
+  if (!props.calculatedEfficiency) return ''
+  
+  const efficiency = props.calculatedEfficiency
+  const level = props.efficiencyLevel
+  
+  if (level === '1级') {
+    return `能效指标 ${efficiency.toFixed(2)}% ≥ 85%，符合1级能效标准，达到国际先进水平`
+  } else if (level === '2级') {
+    return `能效指标 ${efficiency.toFixed(2)}% ≥ 75%，符合2级能效标准，达到国内先进水平`
+  } else {
+    return `能效指标 ${efficiency.toFixed(2)}% < 75%，符合3级能效标准，达到行业准入水平`
+  }
+})
 
 const handleCalculate = () => {
   if (!props.selectedModel) {
@@ -282,6 +330,107 @@ const handleCalculate = () => {
 
 .result-level-badge.level-3 {
   background: #ef4444;
+}
+
+/* 标准验证卡片样式 */
+.standard-verification-card {
+  margin-top: 24px;
+  padding: 24px;
+  background: #ffffff;
+  border: 2px solid #e4e7ed;
+  border-radius: 12px;
+}
+
+.verification-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.verification-icon {
+  font-size: 24px;
+  color: #409eff;
+}
+
+.verification-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.verification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.standard-comparison {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.comparison-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  border: 1px solid #e4e7ed;
+}
+
+.comparison-label {
+  font-size: 13px;
+  color: #909399;
+  font-weight: 500;
+}
+
+.comparison-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #303133;
+}
+
+.verification-result {
+  padding: 16px 20px;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.verification-result.level-1 {
+  background: #f0fdf4;
+  border-left-color: #22c55e;
+}
+
+.verification-result.level-2 {
+  background: #fffbeb;
+  border-left-color: #f59e0b;
+}
+
+.verification-result.level-3 {
+  background: #fef2f2;
+  border-left-color: #ef4444;
+}
+
+.result-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #606266;
+}
+
+.result-desc {
+  font-size: 14px;
+  color: #303133;
+  font-weight: 500;
 }
 
 .result-detail-section h4 {

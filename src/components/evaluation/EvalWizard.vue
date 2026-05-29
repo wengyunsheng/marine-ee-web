@@ -24,6 +24,7 @@
           :model-options="modelOptions"
           :selected-model-id="selectedModelId"
           @update:selected-model-id="selectedModelId = $event"
+          @add="handleAddModel"
         />
 
         <!-- 第二步：选择能效数据 -->
@@ -81,14 +82,14 @@ import StepModelSelect from './process/StepModelSelect.vue'
 import StepDataSelect from './process/StepDataSelect.vue'
 import StepCalculation from './process/StepCalculation.vue'
 
+const emit = defineEmits(['close', 'complete', 'switch-to-system'])
+
 const props = defineProps({
   globalState: {
     type: Object,
     default: () => ({})
   }
 })
-
-const emit = defineEmits(['close', 'complete'])
 
 // 对话框可见性
 const dialogVisible = ref(true)
@@ -269,6 +270,18 @@ const finishWizard = () => {
     levelClass: efficiencyLevelClass.value
   }
   emit('complete', evalData)
+}
+
+// 新增样机模型
+const handleAddModel = () => {
+  // 关闭向导弹窗
+  closeWizard()
+  // 通知父组件切换到系统管理-样机模型管理
+  emit('switch-to-system')
+  // 触发新增操作
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('openModelForm', { detail: { mode: 'add' } }))
+  }, 100)
 }
 </script>
 

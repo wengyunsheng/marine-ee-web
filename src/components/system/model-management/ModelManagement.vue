@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import ModelForm from './components/ModelForm.vue'
@@ -454,6 +454,21 @@ const view3DModel = (model) => {
     emit('switch-to-visualization')
   }
 }
+
+// 监听全局新增样机模型事件
+const handleOpenModelForm = (event) => {
+  if (event.detail && event.detail.mode === 'add') {
+    openAddModal()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('openModelForm', handleOpenModelForm)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('openModelForm', handleOpenModelForm)
+})
 </script>
 
 <style scoped>

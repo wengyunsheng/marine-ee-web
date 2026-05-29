@@ -80,7 +80,7 @@
       <el-main class="content">
         <DataAccess v-if="false" />
         <template v-else-if="currentModule === 'evaluation'">
-          <Evaluation v-if="currentEvalPage === 'eval-overview'" :global-state="globalState" @navigate="navigateEvalPage" @evalComplete="handleEvalComplete" />
+          <Evaluation v-if="currentEvalPage === 'eval-overview'" :global-state="globalState" @navigate="navigateEvalPage" @evalComplete="handleEvalComplete" @switchToSystem="handleSwitchToSystem" />
         </template>
         <Visualization v-else-if="currentModule === 'visualization'" :global-state="globalState" />
         <template v-else-if="currentModule === 'system-management'">
@@ -360,6 +360,12 @@ const toggleSidebar = () => {
 const switchToVisualization = () => {
   currentModule.value = 'visualization'
   currentSystemSubModule.value = ''
+}
+
+// 切换到系统管理
+const handleSwitchToSystem = () => {
+  currentModule.value = 'system-management'
+  currentSystemSubModule.value = 'model-management'
 }
 
 // 处理评估完成事件，同步到历史数据

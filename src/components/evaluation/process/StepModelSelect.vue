@@ -6,30 +6,40 @@
           <el-icon class="step-icon"><Box /></el-icon>
           <h3>第一步：选择样机模型</h3>
         </div>
-        <p>请选择要评估的样机模型，并配置相关参数</p>
+        <p>选择已有样机模型或新增样机模型</p>
       </div>
     </template>
 
     <div class="device-selection">
-      <el-form label-width="100px">
-        <el-form-item label="样机模型">
-          <el-select 
-            :model-value="selectedModelId" 
-            @update:model-value="onModelChange"
-            placeholder="请选择样机模型"
-            style="width: 100%"
-            filterable
-          >
-            <el-option 
-              v-for="model in modelOptions" 
-              :key="model.id" 
-              :label="model.name" 
-              :value="model.id"
+      <el-form>
+        <el-form-item label="样机模型" class="full-width-item">
+          <div class="model-select-wrapper">
+            <el-select 
+              :model-value="selectedModelId" 
+              @update:model-value="onModelChange"
+              placeholder="请选择样机模型"
+              style="width: 100%"
+              filterable
             >
-              <span style="float: left">{{ model.name }}</span>
-              <span style="float: right; color: #8492a6; font-size: 13px">{{ model.deviceType }}</span>
-            </el-option>
-          </el-select>
+              <el-option 
+                v-for="model in modelOptions" 
+                :key="model.id" 
+                :label="model.name" 
+                :value="model.id"
+              >
+                <span style="float: left">{{ model.name }}</span>
+                <span style="float: right; color: #8492a6; font-size: 13px">{{ model.deviceType }}</span>
+              </el-option>
+            </el-select>
+            <el-button 
+              type="primary" 
+              @click="handleAddModel"
+              style="margin-left: 12px"
+            >
+              <el-icon><Plus /></el-icon>
+              新增样机模型
+            </el-button>
+          </div>
         </el-form-item>
       </el-form>
     </div>
@@ -38,7 +48,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Box } from '@element-plus/icons-vue'
+import { Box, Plus } from '@element-plus/icons-vue'
 
 const props = defineProps({
   modelOptions: {
@@ -51,7 +61,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:selectedModelId'])
+const emit = defineEmits(['update:selectedModelId', 'add'])
 
 const selectedModel = computed(() => {
   return props.modelOptions.find(m => m.id === props.selectedModelId) || null
@@ -59,6 +69,10 @@ const selectedModel = computed(() => {
 
 const onModelChange = (modelId) => {
   emit('update:selectedModelId', modelId)
+}
+
+const handleAddModel = () => {
+  emit('add')
 }
 </script>
 
@@ -104,5 +118,15 @@ const onModelChange = (modelId) => {
 
 .device-selection {
   padding: 20px 0;
+}
+
+.full-width-item {
+  width: 100%;
+}
+
+.model-select-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 </style>

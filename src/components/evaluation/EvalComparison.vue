@@ -188,6 +188,15 @@ const comparisonData = computed(() => {
       values: sortedItems.value.map(item => item.level)
     },
     {
+      indicator: '标准验证',
+      values: sortedItems.value.map(item => {
+        if (item.level === '1级') return '符合1级能效标准'
+        if (item.level === '2级') return '符合2级能效标准'
+        if (item.level === '3级') return '符合3级能效标准'
+        return '-'
+      })
+    },
+    {
       indicator: '数据日期',
       values: sortedItems.value.map(item => item.dataDate || '-')
     },

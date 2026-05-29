@@ -97,6 +97,18 @@
           <span>{{ row.level }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="标准验证" width="130" align="center">
+        <template #default="{ row }">
+          <el-tag 
+            v-if="row.level" 
+            :type="getLevelTagType(row.level)" 
+            size="small"
+            effect="plain"
+          >
+            {{ getStandardVerification(row.level) }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="dataDate" label="数据日期" width="120" />
       <el-table-column prop="version" label="版本" width="80" align="center">
         <template #default="{ row }">
@@ -281,11 +293,25 @@ const getScoreClass = (score) => {
   return 'poor'
 }
 
-const getLevelTagType = (levelClass) => {
-  if (levelClass === 'level-1') return 'success'
-  if (levelClass === 'level-2') return 'warning'
-  if (levelClass === 'level-3') return 'danger'
+const getLevelTagType = (level) => {
+  if (level === '1级') return 'success'
+  if (level === '2级') return 'warning'
+  if (level === '3级') return 'danger'
   return 'info'
+}
+
+const getStandardVerification = (level) => {
+  if (level === '1级') return '符合1级能效标准'
+  if (level === '2级') return '符合2级能效标准'
+  if (level === '3级') return '符合3级能效标准'
+  return ''
+}
+
+const getLevelClass = (level) => {
+  if (level === '1级') return 'level-1'
+  if (level === '2级') return 'level-2'
+  if (level === '3级') return 'level-3'
+  return ''
 }
 
 const handleSearch = () => {

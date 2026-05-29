@@ -12,7 +12,8 @@
     v-if="showWizard" 
     :global-state="globalState"
     @close="closeWizard" 
-    @complete="completeEval" 
+    @complete="completeEval"
+    @switch-to-system="handleSwitchToSystem"
   />
 </template>
 
@@ -29,7 +30,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['navigate', 'evalComplete'])
+const emit = defineEmits(['navigate', 'evalComplete', 'switchToSystem'])
 
 // 对话框状态
 const showWizard = ref(false)
@@ -62,6 +63,11 @@ const completeEval = (evalData) => {
   })
   
   closeWizard()
+}
+
+// 切换到系统管理
+const handleSwitchToSystem = () => {
+  emit('switchToSystem')
 }
 </script>
 

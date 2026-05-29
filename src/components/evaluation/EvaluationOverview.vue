@@ -137,7 +137,7 @@
                 <div class="step-number">1</div>
                 <div class="step-text">
                   <div class="step-title">选择样机模型</div>
-                  <div class="step-desc">选择要评估的样机模型</div>
+                  <div class="step-desc">选择已有样机模型或新增样机模型</div>
                 </div>
               </div>
               <div class="step-item">
