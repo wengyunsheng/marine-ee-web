@@ -4,7 +4,7 @@
       <div class="card-header">
         <div class="step-title">
           <el-icon class="step-icon"><Cpu /></el-icon>
-          <h3>第三步：自动计算评估</h3>
+          <h3>第三步：计算评估</h3>
         </div>
         <p>系统将基于选择的样机模型和能效数据，自动计算能效指标</p>
       </div>

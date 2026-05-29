@@ -126,7 +126,7 @@
   </el-card>
   
   <!-- 对比分析弹窗 -->
-  <EvalComparisonAnalysis 
+  <EvalComparison
     v-if="showComparison" 
     :selected-items="selectedTasks"
     @close="closeComparison" 
@@ -137,7 +137,7 @@
 import { ref, computed, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import EvalComparisonAnalysis from './EvalComparisonAnalysis.vue'
+import EvalComparison from './EvalComparison.vue'
 
 const searchQuery = ref('')
 const currentPage = ref(1)

@@ -34,7 +34,7 @@
           @update:selected-history-data="selectedHistoryData = $event"
         />
 
-        <!-- 第三步：自动计算评估 -->
+        <!-- 第三步：计算评估 -->
         <StepCalculation
           v-if="currentStep === 2"
           :selected-model="selectedModel"
@@ -100,7 +100,7 @@ const selectedHistoryData = ref(null)
 const steps = [
   { label: '选择样机模型' },
   { label: '选择能效数据' },
-  { label: '自动计算评估' }
+  { label: '计算评估' }
 ]
 
 // 获取步骤图标

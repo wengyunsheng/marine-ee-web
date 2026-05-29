@@ -150,7 +150,7 @@
               <div class="step-item">
                 <div class="step-number">3</div>
                 <div class="step-text">
-                  <div class="step-title">自动计算评估</div>
+                  <div class="step-title">计算评估</div>
                   <div class="step-desc">根据标准公式计算能效指标</div>
                 </div>
               </div>
