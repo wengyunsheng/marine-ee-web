@@ -128,7 +128,6 @@
           <template #header>
             <div class="card-header">
               <h3 class="card-title">快速开始评估</h3>
-              <el-icon><VideoPlay /></el-icon>
             </div>
           </template>
           <div class="quick-start-content">
@@ -168,7 +167,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { DataAnalysis, Calendar, TrendCharts, Setting, VideoPlay } from '@element-plus/icons-vue'
+import { DataAnalysis, Calendar, TrendCharts, Setting } from '@element-plus/icons-vue'
 import { Chart, ArcElement, Tooltip, Legend, DoughnutController } from 'chart.js'
 
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController)

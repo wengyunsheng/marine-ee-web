@@ -288,17 +288,15 @@ const handleAddModel = () => {
 .eval-wizard {
   display: flex;
   flex-direction: column;
-  height: 600px;
+  max-height: 80vh;
 }
 
 /* 步骤条样式 */
 .wizard-progress {
-  margin-bottom: 24px;
-  padding: 0 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8eaf0 100%);
+  margin-bottom: 20px;
+  padding: 12px 20px;
+  background: #f5f7fa;
   border-radius: 8px;
-  padding-top: 16px;
-  padding-bottom: 16px;
 }
 
 .wizard-progress :deep(.el-step__title) {
@@ -322,8 +320,8 @@ const handleAddModel = () => {
 }
 
 :deep(.el-dialog__header) {
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
-  padding: 20px 24px;
+  background: #409eff;
+  padding: 16px 24px;
   margin-right: 0;
 }
 
@@ -343,18 +341,19 @@ const handleAddModel = () => {
 }
 
 :deep(.el-dialog__body) {
-  padding: 24px;
-  background-color: #fafbfc;
+  padding: 20px;
+  background-color: #f5f7fa;
 }
 
 /* 内容区域 */
 .wizard-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
   background: #ffffff;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .wizard-content::-webkit-scrollbar {
@@ -379,41 +378,36 @@ const handleAddModel = () => {
 .wizard-footer {
   display: flex;
   justify-content: space-between;
-  padding: 20px;
-  margin-top: 20px;
-  border-top: 2px solid #e4e7ed;
-  background: #fafbfc;
+  padding: 16px 20px;
+  margin-top: 0;
+  border-top: 1px solid #e4e7ed;
+  background: #ffffff;
   margin-left: -20px;
   margin-right: -20px;
-  margin-bottom: -24px;
-  border-radius: 0 0 8px 8px;
+  margin-bottom: -20px;
 }
 
 .wizard-footer .el-button {
-  padding: 10px 24px;
+  padding: 8px 20px;
   font-size: 14px;
   font-weight: 500;
 }
 
 .wizard-footer .el-button--primary {
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  background: #409eff;
   border: none;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
 }
 
 .wizard-footer .el-button--primary:hover {
-  background: linear-gradient(135deg, #66b1ff 0%, #409eff 100%);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
+  background: #66b1ff;
 }
 
 .wizard-footer .el-button--success {
-  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  background: #67c23a;
   border: none;
-  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
 }
 
 .wizard-footer .el-button--success:hover {
-  background: linear-gradient(135deg, #85ce61 0%, #67c23a 100%);
-  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.4);
+  background: #85ce61;
 }
 </style>

@@ -20,6 +20,7 @@
               placeholder="请选择样机模型"
               style="width: 100%"
               filterable
+              clearable
             >
               <el-option 
                 v-for="model in modelOptions" 
@@ -78,8 +79,7 @@ const handleAddModel = () => {
 
 <style scoped>
 .step-card {
-  margin-bottom: 20px;
-  padding: 20px;
+  padding: 16px;
 }
 
 .step-card :deep(.el-card__body) {

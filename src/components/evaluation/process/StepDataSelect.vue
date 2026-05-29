@@ -10,31 +10,29 @@
       </div>
     </template>
 
-    <div class="data-selection">
-      <el-form label-width="100px">
-        <el-form-item label="能效数据">
-          <el-select 
-            :model-value="selectedHistoryData" 
-            @update:model-value="onDataChange"
-            placeholder="请选择能效数据"
-            style="width: 100%"
-            filterable
-          >
-            <el-option 
-              v-for="data in dataOptions" 
-              :key="data.id" 
-              :label="formatDataLabel(data)" 
-              :value="data.id"
-            />
-          </el-select>
-        </el-form-item>
-      </el-form>
-
-      <div class="import-section">
-        <el-button @click="showImportDialog = true" :icon="Upload">
+    <div class="data-row">
+        <el-form label-width="100px" style="flex: 1;">
+          <el-form-item label="能效数据">
+            <el-select 
+              :model-value="selectedHistoryData" 
+              @update:model-value="onDataChange"
+              placeholder="请选择能效数据"
+              style="width: 100%"
+              filterable
+              clearable
+            >
+              <el-option 
+                v-for="data in dataOptions" 
+                :key="data.id" 
+                :label="formatDataLabel(data)" 
+                :value="data.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <el-button @click="showImportDialog = true" :icon="Upload" style="flex-shrink: 0; margin-left: 12px;">
           导入能效数据
         </el-button>
-      </div>
     </div>
   </el-card>
 
@@ -129,8 +127,7 @@ const handleImport = () => {
 
 <style scoped>
 .step-card {
-  margin-bottom: 20px;
-  padding: 20px;
+  padding: 16px;
 }
 
 .step-card :deep(.el-card__body) {
@@ -167,16 +164,11 @@ const handleImport = () => {
   color: #606266;
 }
 
-.data-selection {
-  padding: 20px 0;
-}
-
-.import-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #e4e7ed;
+.data-row {
   display: flex;
-  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 0;
 }
 
 .upload-area {

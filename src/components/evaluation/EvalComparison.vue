@@ -34,7 +34,6 @@
           border 
           stripe 
           style="width: 100%"
-          height="500"
         >
           <el-table-column label="指标" prop="indicator" width="150" fixed="left" />
           <el-table-column 
@@ -253,8 +252,6 @@ const getHighlightClass = (row, index) => {
   
   return ''
 }
-
-
 </script>
 
 <style scoped>
