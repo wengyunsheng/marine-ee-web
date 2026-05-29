@@ -246,6 +246,12 @@ const handleEvalComplete = (evalData) => {
 <style scoped>
 .app-container {
   height: 100vh;
+  overflow: hidden;
+}
+
+/* 可视化页面不需要内边距 */
+.app-container:has(.visualization-container) .content {
+  padding: 0 0 0 0;
 }
 
 /* 侧边栏样式 */
@@ -350,6 +356,7 @@ const handleEvalComplete = (evalData) => {
 .main-container {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* 顶部导航 */
@@ -411,5 +418,6 @@ const handleEvalComplete = (evalData) => {
   flex: 1;
   padding: 20px;
   background-color: #f5f7fa;
+  overflow: hidden;
 }
 </style>

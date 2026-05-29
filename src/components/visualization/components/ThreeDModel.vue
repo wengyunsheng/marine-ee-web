@@ -487,7 +487,6 @@ defineExpose({
   background-color: #1e3a5f;
   cursor: grab;
   overflow: hidden;
-  min-height: 600px;
 }
 
 .three-d-container:active {
