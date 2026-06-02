@@ -32,21 +32,9 @@
               <el-icon><Setting /></el-icon>
               <span>系统管理</span>
             </template>
-            <el-menu-item index="device-type-management">
+            <el-menu-item index="device-management">
               <el-icon><Document /></el-icon>
-              <template #title>设备类型管理</template>
-            </el-menu-item>
-            <el-menu-item index="device-params">
-              <el-icon><Edit /></el-icon>
-              <template #title>设备参数管理</template>
-            </el-menu-item>
-            <el-menu-item index="efficiency-level-management">
-              <el-icon><TrophyBase /></el-icon>
-              <template #title>能效等级和能效基值管理</template>
-            </el-menu-item>
-            <el-menu-item index="model-management">
-              <el-icon><Tools /></el-icon>
-              <template #title>样机模型管理</template>
+              <template #title>设备管理</template>
             </el-menu-item>
             <el-menu-item index="history-data">
               <el-icon><Folder /></el-icon>
@@ -84,11 +72,11 @@
         <Visualization v-else-if="currentModule === 'visualization'" :global-state="globalState" />
         <template v-else-if="currentModule === 'system-management'">
           <SystemManagement v-if="!currentSystemSubModule" />
-          <ModelManagement v-else-if="currentSystemSubModule === 'model-management'" :global-state="globalState" :efficiency-data="globalState.efficiencyData" @switch-to-visualization="switchToVisualization" />
-          <DeviceTypeManagement v-else-if="currentSystemSubModule === 'device-type-management'" />
-          <EfficiencyLevelManagement v-else-if="currentSystemSubModule === 'efficiency-level-management'" />
+          <DeviceManagement v-else-if="currentSystemSubModule === 'device-management'" />
+
+
           <EfficiencyDataManagement v-else-if="currentSystemSubModule === 'history-data'" :models="globalState.models" :global-state="globalState" />
-          <DeviceParamsManagement v-else-if="currentSystemSubModule === 'device-params'" />
+
         </template>
       </el-main>
     </el-container>
@@ -102,9 +90,6 @@ import {
   View,
   Setting,
   Document,
-  Edit,
-  TrophyBase,
-  Tools,
   Folder,
   Fold,
   Expand
@@ -113,11 +98,8 @@ import {
 import Evaluation from './components/evaluation/Evaluation.vue'
 import Visualization from './components/visualization/Visualization.vue'
 import SystemManagement from './components/system/SystemManagement.vue'
-import ModelManagement from './components/system/model-management/ModelManagement.vue'
-import DeviceTypeManagement from './components/system/device-type-management/DeviceTypeManagement.vue'
-import EfficiencyLevelManagement from './components/system/efficiency-level-management/EfficiencyLevelManagement.vue'
+import DeviceManagement from './components/system/device-management/DeviceManagement.vue'
 import EfficiencyDataManagement from './components/system/efficiency-data-management/EfficiencyDataManagement.vue'
-import DeviceParamsManagement from './components/system/device-params-management/DeviceParamsManagement.vue'
 
 const currentModule = ref('evaluation')
 const currentEvalPage = ref('eval-overview')
@@ -182,10 +164,7 @@ const globalState = ref({
 
 
 const systemSubModuleNames = {
-  'device-type-management': '设备类型管理',
-  'device-params': '设备参数管理',
-  'efficiency-level-management': '能效等级和能效基值管理',
-  'model-management': '样机模型管理',
+  'device-management': '设备管理',
   'history-data': '能效数据管理'
 }
 
@@ -234,7 +213,7 @@ const switchToVisualization = () => {
 // 切换到系统管理
 const handleSwitchToSystem = () => {
   currentModule.value = 'system-management'
-  currentSystemSubModule.value = 'model-management'
+  currentSystemSubModule.value = 'history-data'
 }
 
 const handleEvalComplete = (evalData) => {

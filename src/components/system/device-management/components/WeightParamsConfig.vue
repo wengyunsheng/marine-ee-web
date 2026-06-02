@@ -1,0 +1,197 @@
+<template>
+  <el-dialog
+    v-model="visible"
+    :title="`加权参数配置 - ${deviceName}`"
+    width="900px"
+    @close="handleClose"
+  >
+    <div v-loading="loading">
+      <div v-for="cycle in cyclesList" :key="cycle.cycleCode" class="cycle-group">
+        <!-- 试验循环标题 -->
+        <div class="cycle-header">
+          <h3 class="cycle-title">
+            试验循环 <span class="cycle-code">{{ cycle.cycleCode }}</span>
+            <span class="cycle-name">- {{ cycle.cycleName }}</span>
+          </h3>
+        </div>
+        
+        <!-- 工况表格 -->
+        <el-table :data="cycle.conditions" border size="small" style="margin-bottom: 20px;">
+          <el-table-column prop="conditionNo" label="工况" min-width="80" align="center" />
+          <el-table-column prop="engineSpeed" label="发动机转速" min-width="100" align="center" />
+          <el-table-column prop="powerMode" label="功率模式" min-width="100" align="center" />
+          <el-table-column label="加权系数" min-width="150" align="center">
+            <template #default="scope">
+              <el-input-number
+                v-model="scope.row.weightCoefficient"
+                :min="0"
+                :max="1"
+                :step="0.01"
+                :precision="2"
+                style="width: 100%"
+              />
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+    
+    <template #footer>
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <el-button @click="handleClose">关闭</el-button>
+        <el-button type="primary" @click="batchSaveAllWeightParams">保存</el-button>
+      </div>
+    </template>
+  </el-dialog>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { ElMessage } from 'element-plus'
+
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  },
+  deviceName: {
+    type: String,
+    default: ''
+  },
+  deviceId: {
+    type: [Number, String],
+    default: null
+  }
+})
+
+const emit = defineEmits(['update:modelValue', 'success'])
+
+const visible = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
+})
+
+const loading = ref(false)
+const cyclesList = ref([])
+
+// 获取加权参数数据
+const fetchWeightParams = async () => {
+  loading.value = true
+  try {
+    const response = await fetch('/api/test-cycles/cycle-details')
+    const result = await response.json()
+    
+    if (result.code === 200 && result.data && Array.isArray(result.data) && result.data.length > 0) {
+      // 直接使用接口返回的试验循环列表
+      cyclesList.value = result.data.map(cycle => ({
+        ...cycle,
+        conditions: (cycle.conditions || []).map(condition => ({
+          ...condition,
+          weightCoefficient: condition.weightCoefficient || 0
+        }))
+      }))
+      console.log('试验循环数据:', cyclesList.value)
+    } else {
+      ElMessage.error(result.message || '获取试验循环数据失败')
+      cyclesList.value = []
+    }
+  } catch (error) {
+    ElMessage.error('获取试验循环数据失败')
+    console.error(error)
+    cyclesList.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// 批量保存所有试验循环的加权参数
+const batchSaveAllWeightParams = async () => {
+  // 校验每个试验循环的加权系数总和是否为1
+  for (const cycle of cyclesList.value) {
+    const sum = cycle.conditions.reduce((total, item) => total + item.weightCoefficient, 0)
+    // 允许0.01的误差
+    if (Math.abs(sum - 1) > 0.01) {
+      ElMessage.error(`试验循环${cycle.cycleCode}的加权系数总和为${sum.toFixed(2)}，必须等于1`)
+      return
+    }
+  }
+  
+  try {
+    // 构建所有试验循环的数据
+    const allCyclesData = cyclesList.value.map(cycle => ({
+      cycleCode: cycle.cycleCode,
+      items: cycle.conditions.map(param => ({
+        conditionNo: param.conditionNo,
+        weightCoefficient: param.weightCoefficient
+      }))
+    }))
+    
+    // 只调用一次接口
+    const response = await fetch('/api/test-cycles/batch-update-weight', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(allCyclesData)
+    })
+    const result = await response.json()
+    
+    if (result.code === 200) {
+      ElMessage.success('保存成功')
+      emit('success')
+      handleClose()
+    } else {
+      ElMessage.error(result.message || '保存失败')
+    }
+  } catch (error) {
+    ElMessage.error('保存失败')
+    console.error(error)
+  }
+}
+
+const handleClose = () => {
+  visible.value = false
+  cyclesList.value = []
+}
+
+// 暴露方法供父组件调用
+defineExpose({
+  fetchWeightParams
+})
+</script>
+
+<style scoped>
+.cycle-group {
+  margin-bottom: 24px;
+}
+
+.cycle-group:last-child {
+  margin-bottom: 0;
+}
+
+.cycle-header {
+  background: #f5f7fa;
+  padding: 12px 16px;
+  border-radius: 4px 4px 0 0;
+  border-left: 4px solid #409eff;
+  margin-bottom: 0;
+}
+
+.cycle-title {
+  margin: 0;
+  font-size: 16px;
+  color: #303133;
+  font-weight: 600;
+}
+
+.cycle-code {
+  color: #409eff;
+  font-weight: bold;
+}
+
+.cycle-name {
+  color: #606266;
+  font-weight: normal;
+  font-size: 14px;
+}
+</style>

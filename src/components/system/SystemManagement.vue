@@ -33,35 +33,11 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import DeviceTypeManagement from './device-type-management/DeviceTypeManagement.vue'
-import DeviceParamsManagement from './device-params-management/DeviceParamsManagement.vue'
-import ModelManagement from './model-management/ModelManagement.vue'
-import EfficiencyLevelManagement from './efficiency-level-management/EfficiencyLevelManagement.vue'
 import EfficiencyDataManagement from './efficiency-data-management/EfficiencyDataManagement.vue'
 
 const currentSubModule = ref(null)
 
 const modules = [
-  {
-    id: 'device-type',
-    title: '设备类型管理',
-    description: '管理船用设备的类型分类，支持添加、编辑、删除设备类型。'
-  },
-  {
-    id: 'device-params',
-    title: '设备参数管理',
-    description: '管理设备的技术参数模板和加权参数配置，支持按设备类型分类管理。'
-  },
-  {
-    id: 'model-management',
-    title: '样机模型管理',
-    description: '管理不同型号船型及船用设备的样机模型，支持建立三维模型与数据连接，构建不同船型能效评估样机模型。'
-  },
-  {
-    id: 'efficiency-level',
-    title: '能效等级和能效基值管理',
-    description: '管理设备能效等级标准和能效基值，设置不同等级的阈值和评估规则。'
-  },
   {
     id: 'history-data',
     title: '能效数据管理',
@@ -71,10 +47,6 @@ const modules = [
 
 const currentSubModuleComponent = computed(() => {
   const components = {
-    'device-type': DeviceTypeManagement,
-    'device-params': DeviceParamsManagement,
-    'model-management': ModelManagement,
-    'efficiency-level': EfficiencyLevelManagement,
     'history-data': EfficiencyDataManagement
   }
   return components[currentSubModule.value]
