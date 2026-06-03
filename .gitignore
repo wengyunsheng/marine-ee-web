@@ -3,6 +3,8 @@ dist/
 .env.local
 .DS_Store
 .qoder
+sql
+context
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

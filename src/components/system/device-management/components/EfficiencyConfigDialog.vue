@@ -147,8 +147,8 @@ const fetchEfficiencyData = async () => {
       // 设置表格列配置
       tableColumns.value = [
         { prop: 'emissionLevel', label: '排放等级', minWidth: 100 },
-        { type: 'range', label: '单缸功率区间', minField: 'powerRangeMin', maxField: 'powerRangeMax', unit: ' kW', minWidth: 160 },
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { type: 'range', label: '单缸功率区间 P/kW', minField: 'powerRangeMin', maxField: 'powerRangeMax', unit: ' kW', minWidth: 160 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 80 }
       ]
@@ -161,7 +161,7 @@ const fetchEfficiencyData = async () => {
         tableColumns.value = [
           { type: 'range', label: '蒸汽压力区间', minField: 'steamPressureMin', maxField: 'steamPressureMax', unit: ' bar', minWidth: 140 },
           { prop: 'steamType', label: '蒸汽类型', minWidth: 100 },
-          { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+          { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
           { prop: 'baseValue', label: '能效基值', minWidth: 100 },
           { label: '单位', minWidth: 80, defaultValue: 'g/kWh' }
         ]
@@ -172,7 +172,7 @@ const fetchEfficiencyData = async () => {
         tableColumns.value = [
           { type: 'range', label: '热源温度区间', minField: 'heatSourceTempMin', maxField: 'heatSourceTempMax', unit: '℃', minWidth: 120 },
           { type: 'range', label: '额定输出功率区间', minField: 'powerOutputMin', maxField: 'powerOutputMax', unit: ' kW', minWidth: 140 },
-          { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+          { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
           { prop: 'baseValueExpression', label: '能效基值', minWidth: 140 },
           { prop: 'baseValuePercent', label: '基值(%)', minWidth: 100 }
         ]
@@ -183,7 +183,7 @@ const fetchEfficiencyData = async () => {
       // 设置表格列配置
       tableColumns.value = [
         { type: 'range', label: '额定处理热容量', minField: 'heatCapacityMin', maxField: 'heatCapacityMax', unit: ' kW', minWidth: 160 },
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { label: '单位', minWidth: 80, defaultValue: '%' }
       ]
@@ -192,7 +192,7 @@ const fetchEfficiencyData = async () => {
       apiUrl = `/api/efficiency/disc-separator/list`
       // 设置表格列配置
       tableColumns.value = [
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { type: 'range', label: '能效值范围', minField: 'efficiencyValueMin', maxField: 'efficiencyValueMax', unit: ' kW·h/m³', minWidth: 160 },
         { prop: 'description', label: '说明', minWidth: 100 }
       ]
@@ -201,7 +201,7 @@ const fetchEfficiencyData = async () => {
       apiUrl = `/api/efficiency/ballast-water-treatment/list`
       // 设置表格列配置
       tableColumns.value = [
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 100 }
       ]
@@ -210,7 +210,7 @@ const fetchEfficiencyData = async () => {
       apiUrl = `/api/efficiency/windlass/list?windlassType=${deviceCode}`
       // 设置表格列配置
       tableColumns.value = [
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { label: '单位', minWidth: 80, defaultValue: '%' }
       ]
@@ -221,7 +221,7 @@ const fetchEfficiencyData = async () => {
       tableColumns.value = [
         { type: 'range', label: '工作半径', minField: 'workRadiusMin', maxField: 'workRadiusMax', unit: ' m', minWidth: 140 },
         { prop: 'loadRange', label: '载荷区间', minWidth: 100 },
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'thresholdExpression', label: '能效阈值', minWidth: 140 }
       ]
     } else if (parentCode.includes('generator')) {
@@ -233,7 +233,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'ratedPower', label: '额定功率', minWidth: 100 },
         { prop: 'rotorPoles', label: '转子极数', minWidth: 100 },
         { prop: 'rotorSpeed', label: '转子转速', minWidth: 100 },
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'efficiencyValue', label: '能效值', minWidth: 100 },
         { label: '单位', minWidth: 80, defaultValue: '%' }
       ]
@@ -244,7 +244,7 @@ const fetchEfficiencyData = async () => {
       tableColumns.value = [
         { type: 'range', label: '额定风量', minField: 'airFlowMin', maxField: 'airFlowMax', unit: ' CMH', minWidth: 140 },
         { prop: 'staticPressure', label: '机组全静压', minWidth: 120 },
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'efficiencyValue', label: '能效值', minWidth: 100 },
         { label: '单位', minWidth: 100, defaultValue: 'CMH/W' }
       ]
@@ -257,7 +257,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'productStandard', label: '产品标准', minWidth: 200 },
         { prop: 'unitType', label: '机组型式', minWidth: 100 },
         { type: 'range', label: '名义制冷量', minField: 'coolingCapacityMin', maxField: 'coolingCapacityMax', unit: ' kW', minWidth: 140 },
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'efficiencyValue', label: '能效值', minWidth: 100 }
       ]
     } else if (parentCode.includes('inert-gas')) {
@@ -265,7 +265,7 @@ const fetchEfficiencyData = async () => {
       apiUrl = `/api/efficiency/inert-gas/list`
       // 设置表格列配置
       tableColumns.value = [
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { type: 'range', label: '能效基值', minField: 'baseValueMin', maxField: 'baseValueMax', unit: ' kW·h/Nm³', minWidth: 160 },
         { prop: 'description', label: '说明', minWidth: 100 }
       ]
@@ -274,7 +274,7 @@ const fetchEfficiencyData = async () => {
       apiUrl = `/api/efficiency/co2-capture/list`
       // 设置表格列配置
       tableColumns.value = [
-        { type: 'level', prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+        { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { label: '单位', minWidth: 100, defaultValue: 'GJ/tCO₂' }
       ]
