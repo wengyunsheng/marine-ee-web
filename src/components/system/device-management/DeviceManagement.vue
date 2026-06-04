@@ -59,7 +59,7 @@
             <template v-else>
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
-                <el-button v-if="!isGearboxDevice(scope.row)" type="success" size="small" @click="openEfficiencyConfigModal(scope.row)">能效配置</el-button>
+                <el-button v-if="!isGearboxDevice(scope.row)" type="success" size="small" @click="openEfficiencyConfigModal(scope.row)">能效等级和能效基值</el-button>
                 <el-button type="danger" size="small" @click="deleteDevice(scope.row.id)">删除</el-button>
               </div>
             </template>

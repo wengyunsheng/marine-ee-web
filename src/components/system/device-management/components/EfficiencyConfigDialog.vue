@@ -1,15 +1,13 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="能效等级和能效基值管理"
+    :title="`能效等级和能效基值-${deviceData?.name || ''}`"
     width="60%"
     :close-on-click-modal="false"
     @open="handleOpen"
     @close="handleClose"
   >
     <div v-if="deviceData" class="efficiency-config-container">
-      <h3 style="margin-bottom: 16px;">设备：{{ deviceData.name }}</h3>
-      
       <div class="efficiency-content">
         <el-table 
           :data="efficiencyData" 
@@ -30,15 +28,23 @@
               align="center"
             >
               <template #default="scope">
-                <span v-if="scope.row[col.maxField] === null">
-                  ≥{{ scope.row[col.minField] }}{{ col.unit || '' }}
+                <!-- 只有最大值(min为0或null):显示 <max 或 variable<max -->
+                <span v-if="scope.row[col.maxField] !== null && (scope.row[col.minField] === 0 || scope.row[col.minField] === null)">
+                  <template v-if="col.variableName">{{ col.variableName }}&lt;{{ scope.row[col.maxField] }}</template>
+                  <template v-else>&lt;{{ scope.row[col.maxField] }}</template>
                 </span>
-                <span v-else-if="scope.row[col.minField] === 0">
-                  &lt;{{ scope.row[col.maxField] }}{{ col.unit || '' }}
+                <!-- 只有最小值(max为null):显示 ≥min 或 variable≥min -->
+                <span v-else-if="scope.row[col.maxField] === null && scope.row[col.minField] !== null">
+                  <template v-if="col.variableName">{{ col.variableName }}≥{{ scope.row[col.minField] }}</template>
+                  <template v-else>≥{{ scope.row[col.minField] }}</template>
                 </span>
-                <span v-else>
-                  {{ scope.row[col.minField] }}~{{ scope.row[col.maxField] }}{{ col.unit || '' }}
+                <!-- 正常区间:显示 min≤variable<max 或 min~max -->
+                <span v-else-if="scope.row[col.minField] !== null && scope.row[col.maxField] !== null">
+                  <template v-if="col.variableName">{{ scope.row[col.minField] }}≤{{ col.variableName }}&lt;{{ scope.row[col.maxField] }}</template>
+                  <template v-else>{{ scope.row[col.minField] }}~{{ scope.row[col.maxField] }}</template>
                 </span>
+                <!-- 其他情况:显示 - -->
+                <span v-else>-</span>
               </template>
             </el-table-column>
             
@@ -66,6 +72,18 @@
             >
               <template #default>
                 {{ col.defaultValue }}
+              </template>
+            </el-table-column>
+            
+            <!-- 带前缀的只读列(如≥) -->
+            <el-table-column 
+              v-else-if="col.prefix"
+              :label="col.label" 
+              :min-width="col.minWidth || 120" 
+              align="center"
+            >
+              <template #default="scope">
+                {{ col.prefix }}{{ scope.row[col.prop] }}
               </template>
             </el-table-column>
             
@@ -147,7 +165,7 @@ const fetchEfficiencyData = async () => {
       // 设置表格列配置
       tableColumns.value = [
         { prop: 'emissionLevel', label: '排放等级', minWidth: 100 },
-        { type: 'range', label: '单缸功率区间 P/kW', minField: 'powerRangeMin', maxField: 'powerRangeMax', unit: ' kW', minWidth: 160 },
+        { type: 'range', label: '单缸功率区间 P/kW', minField: 'powerRangeMin', maxField: 'powerRangeMax', variableName: 'P', unit: ' kW', minWidth: 180 },
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 80 }
@@ -159,22 +177,22 @@ const fetchEfficiencyData = async () => {
         apiUrl = `/api/efficiency/steam-turbine/list`
         // 设置表格列配置
         tableColumns.value = [
-          { type: 'range', label: '蒸汽压力区间', minField: 'steamPressureMin', maxField: 'steamPressureMax', unit: ' bar', minWidth: 140 },
+          { type: 'range', label: '蒸汽压力(barg)', minField: 'steamPressureMin', maxField: 'steamPressureMax', variableName: 'P', minWidth: 140 },
           { prop: 'steamType', label: '蒸汽类型', minWidth: 100 },
           { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
           { prop: 'baseValue', label: '能效基值', minWidth: 100 },
-          { label: '单位', minWidth: 80, defaultValue: 'g/kWh' }
+          { prop: 'unit', label: '单位', minWidth: 80 }
         ]
       } else {
         // 船用有机朗肯循环发电装置（默认）
         apiUrl = `/api/efficiency/organic-rankine/list`
         // 设置表格列配置
         tableColumns.value = [
-          { type: 'range', label: '热源温度区间', minField: 'heatSourceTempMin', maxField: 'heatSourceTempMax', unit: '℃', minWidth: 120 },
-          { type: 'range', label: '额定输出功率区间', minField: 'powerOutputMin', maxField: 'powerOutputMax', unit: ' kW', minWidth: 140 },
+          { type: 'range', label: '热源温度(°C)', minField: 'heatSourceTempMin', maxField: 'heatSourceTempMax', variableName: 'T', minWidth: 140 },
+          { type: 'range', label: '额定输出功率(kW)', minField: 'powerOutputMin', maxField: 'powerOutputMax', variableName: 'P', minWidth: 160 },
           { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
-          { prop: 'baseValueExpression', label: '能效基值', minWidth: 140 },
-          { prop: 'baseValuePercent', label: '基值(%)', minWidth: 100 }
+          { prop: 'baseValue', label: '能效基值', minWidth: 120 },
+          { prop: 'unit', label: '单位', minWidth: 120 }
         ]
       }
     } else if (parentCode.includes('incinerator')) {
@@ -182,10 +200,10 @@ const fetchEfficiencyData = async () => {
       apiUrl = `/api/efficiency/incinerator/list?incineratorType=${deviceCode}`
       // 设置表格列配置
       tableColumns.value = [
-        { type: 'range', label: '额定处理热容量', minField: 'heatCapacityMin', maxField: 'heatCapacityMax', unit: ' kW', minWidth: 160 },
+        { type: 'range', label: '额定处理热容量(kW)', minField: 'heatCapacityMin', maxField: 'heatCapacityMax', variableName: 'P', minWidth: 180 },
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
-        { label: '单位', minWidth: 80, defaultValue: '%' }
+        { prop: 'unit', label: '单位', minWidth: 80 }
       ]
     } else if (parentCode.includes('separator')) {
       // 船用碟式分离机
@@ -193,7 +211,7 @@ const fetchEfficiencyData = async () => {
       // 设置表格列配置
       tableColumns.value = [
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
-        { type: 'range', label: '能效值范围', minField: 'efficiencyValueMin', maxField: 'efficiencyValueMax', unit: ' kW·h/m³', minWidth: 160 },
+        { type: 'range', label: '能效值范围(kW·h/m³)', minField: 'efficiencyValueMin', maxField: 'efficiencyValueMax', variableName: 'η', minWidth: 180 },
         { prop: 'description', label: '说明', minWidth: 100 }
       ]
     } else if (parentCode.includes('ballast')) {
@@ -211,8 +229,8 @@ const fetchEfficiencyData = async () => {
       // 设置表格列配置
       tableColumns.value = [
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
-        { prop: 'baseValue', label: '能效基值', minWidth: 100 },
-        { label: '单位', minWidth: 80, defaultValue: '%' }
+        { prop: 'baseValue', label: '能效基值', minWidth: 120, prefix: '≥' },
+        { prop: 'unit', label: '单位', minWidth: 80 }
       ]
     } else if (parentCode.includes('crane')) {
       // 船用吊机
@@ -229,24 +247,24 @@ const fetchEfficiencyData = async () => {
       apiUrl = `/api/efficiency/generator/list?generatorType=${deviceCode}`
       // 设置表格列配置
       tableColumns.value = [
-        { prop: 'ratedCapacity', label: '额定容量', minWidth: 100 },
-        { prop: 'ratedPower', label: '额定功率', minWidth: 100 },
+        { prop: 'ratedCapacity', label: '额定容量(kVA)', minWidth: 120 },
+        { prop: 'ratedPower', label: '额定功率(kW)', minWidth: 120, variableName: 'P' },
         { prop: 'rotorPoles', label: '转子极数', minWidth: 100 },
-        { prop: 'rotorSpeed', label: '转子转速', minWidth: 100 },
+        { prop: 'rotorSpeed', label: '转子转速(1000r/min)', minWidth: 140 },
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
-        { prop: 'efficiencyValue', label: '能效值', minWidth: 100 },
-        { label: '单位', minWidth: 80, defaultValue: '%' }
+        { prop: 'baseValue', label: '能效基值', minWidth: 100 },
+        { prop: 'unit', label: '单位', minWidth: 80 }
       ]
     } else if (parentCode.includes('air-conditioner')) {
       // 船用组合式空调机组
       apiUrl = `/api/efficiency/ahu/list`
       // 设置表格列配置
       tableColumns.value = [
-        { type: 'range', label: '额定风量', minField: 'airFlowMin', maxField: 'airFlowMax', unit: ' CMH', minWidth: 140 },
-        { prop: 'staticPressure', label: '机组全静压', minWidth: 120 },
+        { type: 'range', label: '额定风量(CMH)', minField: 'airFlowMin', maxField: 'airFlowMax', variableName: 'L', minWidth: 160 },
+        { prop: 'staticPressure', label: '机组全静压(Pa)', minWidth: 140 },
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
-        { prop: 'efficiencyValue', label: '能效值', minWidth: 100 },
-        { label: '单位', minWidth: 100, defaultValue: 'CMH/W' }
+        { prop: 'baseValue', label: '能效基值', minWidth: 100 },
+        { prop: 'unit', label: '单位', minWidth: 100 }
       ]
     } else if (parentCode.includes('chiller')) {
       // 船用冷水机组
@@ -256,9 +274,10 @@ const fetchEfficiencyData = async () => {
         { prop: 'evaluationType', label: '评定类型', minWidth: 100 },
         { prop: 'productStandard', label: '产品标准', minWidth: 200 },
         { prop: 'unitType', label: '机组型式', minWidth: 100 },
-        { type: 'range', label: '名义制冷量', minField: 'coolingCapacityMin', maxField: 'coolingCapacityMax', unit: ' kW', minWidth: 140 },
+        { type: 'range', label: '名义制冷量(kW)', minField: 'coolingCapacityMin', maxField: 'coolingCapacityMax', variableName: 'CC', minWidth: 160 },
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
-        { prop: 'efficiencyValue', label: '能效值', minWidth: 100 }
+        { prop: 'baseValue', label: '能效基值', minWidth: 100 },
+        { prop: 'unit', label: '单位', minWidth: 100 }
       ]
     } else if (parentCode.includes('inert-gas')) {
       // 船用惰性气体系统
@@ -266,8 +285,8 @@ const fetchEfficiencyData = async () => {
       // 设置表格列配置
       tableColumns.value = [
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
-        { type: 'range', label: '能效基值', minField: 'baseValueMin', maxField: 'baseValueMax', unit: ' kW·h/Nm³', minWidth: 160 },
-        { prop: 'description', label: '说明', minWidth: 100 }
+        { type: 'range', label: '能效基值', minField: 'baseValueMin', maxField: 'baseValueMax', variableName: 'η', minWidth: 160 },
+        { prop: 'unit', label: '单位', minWidth: 120 }
       ]
     } else if (parentCode.includes('co2-capture')) {
       // 船用二氧化碳捕集设备
@@ -276,7 +295,7 @@ const fetchEfficiencyData = async () => {
       tableColumns.value = [
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
-        { label: '单位', minWidth: 100, defaultValue: 'GJ/tCO₂' }
+        { prop: 'unit', label: '单位', minWidth: 100 }
       ]
     } else {
       // 其他设备类型，未配置接口
