@@ -16,7 +16,7 @@
         </div>
         
         <!-- 工况表格 -->
-        <el-table :data="cycle.conditions" border size="small" style="margin-bottom: 20px;">
+        <el-table :data="cycle.conditions" border style="margin-bottom: 20px;">
           <el-table-column prop="conditionNo" label="工况" min-width="80" align="center" />
           <el-table-column prop="engineSpeed" label="发动机转速" min-width="100" align="center" />
           <el-table-column prop="powerMode" label="功率模式" min-width="100" align="center" />
@@ -117,7 +117,7 @@ defineExpose({
 }
 
 .cycle-header {
-  background: #f5f7fa;
+  background: rgba(30, 58, 95, 0.6);
   padding: 12px 16px;
   border-radius: 4px 4px 0 0;
   border-left: 4px solid #409eff;
@@ -127,7 +127,7 @@ defineExpose({
 .cycle-title {
   margin: 0;
   font-size: 16px;
-  color: #303133;
+  color: #e0e0e0;
   font-weight: 600;
 }
 
@@ -137,8 +137,22 @@ defineExpose({
 }
 
 .cycle-name {
-  color: #606266;
+  color: #b0b0b0;
   font-weight: normal;
   font-size: 14px;
+}
+
+/* 深色主题适配 - 弹窗内表格字体 */
+:deep(.el-table) {
+  font-size: 14px !important;
+}
+
+:deep(.el-table th) {
+  font-size: 14px !important;
+  font-weight: 600;
+}
+
+:deep(.el-table td) {
+  font-size: 14px !important;
 }
 </style>

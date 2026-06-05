@@ -4,7 +4,6 @@
     :title="`能效等级和能效基值-${deviceData?.name || ''}`"
     width="60%"
     :close-on-click-modal="false"
-    @open="handleOpen"
     @close="handleClose"
   >
     <div v-if="deviceData" class="efficiency-config-container">
@@ -321,12 +320,6 @@ const fetchEfficiencyData = async () => {
     tableColumns.value = []
   } finally {
     loading.value = false
-  }
-}
-
-const handleOpen = () => {
-  if (props.deviceData) {
-    fetchEfficiencyData()
   }
 }
 

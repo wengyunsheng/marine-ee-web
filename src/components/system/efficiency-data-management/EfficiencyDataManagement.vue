@@ -2,10 +2,6 @@
   <div class="efficiency-data-management-container">
     <div class="efficiency-data-controls">
       <div class="control-group">
-        <el-button type="primary" @click="openAddModal">
-          <el-icon><Plus /></el-icon>
-          新增能效数据
-        </el-button>
         <el-button @click="importData">导入能效数据</el-button>
         <el-button @click="exportData">导出能效数据</el-button>
       </div>
@@ -44,18 +40,10 @@
             {{ getModelName(scope.row.modelId) }}
           </template>
         </el-table-column>
-        <el-table-column prop="version" label="版本" width="80" align="center">
-          <template #default="scope">
-            <el-tag size="small">v{{ scope.row.version }}</el-tag>
-          </template>
-        </el-table-column>
         <el-table-column prop="dataSource" label="数据来源" width="120" />
-        <el-table-column label="操作" width="320" fixed="right">
+        <el-table-column label="操作" width="100" fixed="right">
           <template #default="scope">
-            <el-button type="primary" size="small" @click="viewData(scope.row)">查看</el-button>
-            <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
-            <el-button type="success" size="small" @click="viewOperatingData(scope.row)">工况数据</el-button>
-            <el-button type="danger" size="small" @click="deleteData(scope.row.id)">删除</el-button>
+            <el-button size="small" @click="deleteData(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -71,42 +59,13 @@
         />
       </div>
     </div>
-
-    <!-- 新增/编辑历史数据弹窗 -->
-    <EfficiencyDataForm
-      v-if="showFormModal"
-      :is-edit="isEditMode"
-      :form-data="formData"
-      :models="models"
-      @save="saveData"
-      @close="closeFormModal"
-    />
-
-    <!-- 查看历史数据弹窗 -->
-    <EfficiencyDataView 
-      v-if="showViewModal" 
-      :data="currentData"
-      :models="models"
-      @close="closeViewModal" 
-    />
-
-    <!-- 查看工况数据弹窗 -->
-    <OperatingDataView
-      v-if="showOperatingDataModal"
-      :data="currentOperatingData"
-      :models="models"
-      @close="closeOperatingDataModal"
-    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search } from '@element-plus/icons-vue'
-import EfficiencyDataForm from './components/EfficiencyDataForm.vue'
-import EfficiencyDataView from './components/EfficiencyDataView.vue'
-import OperatingDataView from './components/OperatingDataView.vue'
+import { Search } from '@element-plus/icons-vue'
 
 const props = defineProps({
   historyData: {
@@ -128,23 +87,6 @@ const emit = defineEmits(['delete'])
 const searchQuery = ref('')
 const modelFilter = ref('')
 const dataSourceFilter = ref('')
-const showFormModal = ref(false)
-const showViewModal = ref(false)
-const isEditMode = ref(false)
-const currentData = ref(null)
-const showOperatingDataModal = ref(false)
-const currentOperatingData = ref(null)
-
-const defaultFormData = {
-  dataDate: '',
-  modelId: '',
-  deviceType: '',
-  deviceName: '',
-  dataSource: '',
-  version: 1
-}
-
-const formData = ref({ ...defaultFormData })
 
 const localHistoryData = ref([
   {
@@ -274,75 +216,6 @@ const resetFilters = () => {
   console.log('重置筛选条件')
 }
 
-const openAddModal = () => {
-  isEditMode.value = false
-  formData.value = { ...defaultFormData }
-  showFormModal.value = true
-}
-
-const openEditModal = (data) => {
-  isEditMode.value = true
-  formData.value = { ...data }
-  showFormModal.value = true
-}
-
-const closeFormModal = () => {
-  showFormModal.value = false
-  formData.value = { ...defaultFormData }
-}
-
-const saveData = (data) => {
-  if (!data.dataDate || !data.modelId || !data.dataSource) {
-    ElMessage.warning('请填写所有必填项')
-    return
-  }
-
-  if (isEditMode.value) {
-    const index = localHistoryData.value.findIndex(d => d.id === data.id)
-    if (index !== -1) {
-      localHistoryData.value[index] = { ...data }
-    }
-  } else {
-    // 计算版本号：查找相同样机模型和数据日期的最大版本号
-    const existingVersions = localHistoryData.value
-      .filter(d => d.modelId === data.modelId && d.dataDate === data.dataDate)
-      .map(d => d.version || 0)
-    const maxVersion = existingVersions.length > 0 ? Math.max(...existingVersions) : 0
-    const newVersion = maxVersion + 1
-    
-    const newId = Math.max(...localHistoryData.value.map(d => d.id), 0) + 1
-    localHistoryData.value.push({
-      ...data,
-      id: newId,
-      version: newVersion
-    })
-  }
-  // 同步数据到全局状态
-  syncToGlobalState()
-  closeFormModal()
-}
-
-const viewData = (data) => {
-  console.log('查看历史数据:', data)
-  currentData.value = data
-  showViewModal.value = true
-}
-
-const closeViewModal = () => {
-  showViewModal.value = false
-  currentData.value = null
-}
-
-const viewOperatingData = (data) => {
-  currentOperatingData.value = data
-  showOperatingDataModal.value = true
-}
-
-const closeOperatingDataModal = () => {
-  showOperatingDataModal.value = false
-  currentOperatingData.value = null
-}
-
 const importData = () => {
   const input = document.createElement('input')
   input.type = 'file'
@@ -434,6 +307,7 @@ syncToGlobalState()
   min-height: calc(100vh - 120px);
   overflow-y: auto;
   box-sizing: border-box;
+  background-color: #1e3a5f;
 }
 
 .efficiency-data-controls {
@@ -466,7 +340,7 @@ syncToGlobalState()
   margin: 0 0 16px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: #e0e0e0;
 }
 
 .text-muted {

@@ -1,24 +1,8 @@
 <template>
   <div class="device-management-container">
     <div class="device-controls">
-      <div class="control-group">
-        <el-button type="primary" @click="openAddModal">
-          <el-icon><Plus /></el-icon> 新增设备
-        </el-button>
-      </div>
-
       <div class="search-filter">
-        <el-input
-          v-model="searchQuery"
-          placeholder="搜索设备名称"
-          clearable
-          style="width: 300px;"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-        <el-select v-model="categoryFilter" placeholder="全部类别" clearable style="width: 200px;">
+        <el-select v-model="categoryFilter" placeholder="全部设备类别" clearable style="width: 200px;">
           <el-option 
             v-for="item in parentOptions" 
             :key="item.code" 
@@ -26,6 +10,21 @@
             :value="item.code" 
           />
         </el-select>
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索设备名称"
+          clearable
+          style="width: 300px;"
+          @keyup.enter="handleSearch"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-button @click="handleSearch">
+          <el-icon><Search /></el-icon>
+          搜索
+        </el-button>
         <el-button @click="resetFilter">重置筛选</el-button>
       </div>
     </div>
@@ -33,12 +32,15 @@
     <div class="device-list-section">
       <h3>设备列表</h3>
       <el-table
-        :data="filteredTreeData"
+        ref="tableRef"
+        :data="treeData"
         style="width: 100%"
         row-key="id"
         border
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
         :default-expand-all="false"
+        v-loading="loading"
+        @row-click="handleRowClick"
       >
         <el-table-column prop="name" label="设备名称" min-width="280">
           <template #default="scope">
@@ -49,18 +51,13 @@
           <template #default="scope">
             <template v-if="scope.row.children">
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <el-button type="primary" size="small" @click="addChildDevice(scope.row)">新增子设备</el-button>
-                <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
-                <el-button type="success" size="small" @click="upload3DModel(scope.row)">上传3D模型</el-button>
-                <el-button v-if="isEngineCategory(scope.row)" type="info" size="small" @click="openWeightParamsModal(scope.row)">加权参数</el-button>
-                <el-button type="danger" size="small" @click="deleteCategory(scope.row)">删除</el-button>
+                <el-button size="small" @click="upload3DModel(scope.row)">上传3D模型</el-button>
+                <el-button v-if="isEngineCategory(scope.row)" size="small" @click="openWeightParamsModal(scope.row)">加权参数</el-button>
               </div>
             </template>
             <template v-else>
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <el-button type="warning" size="small" @click="openEditModal(scope.row)">编辑</el-button>
-                <el-button v-if="!isGearboxDevice(scope.row)" type="success" size="small" @click="openEfficiencyConfigModal(scope.row)">能效等级和能效基值</el-button>
-                <el-button type="danger" size="small" @click="deleteDevice(scope.row.id)">删除</el-button>
+                <el-button v-if="!isGearboxDevice(scope.row)" size="small" @click="openEfficiencyConfigModal(scope.row)">能效等级和能效基值</el-button>
               </div>
             </template>
           </template>
@@ -135,9 +132,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { Plus, Search, UploadFilled } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { Search, UploadFilled } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import DeviceForm from './components/DeviceForm.vue'
 import WeightParamsConfig from './components/WeightParamsConfig.vue'
 import EfficiencyConfigDialog from './components/EfficiencyConfigDialog.vue'
@@ -156,6 +153,7 @@ const isSubDeviceMode = ref(false)
 const isCategoryEditMode = ref(false)
 const loading = ref(false)
 const weightParamsConfigRef = ref(null)
+const tableRef = ref(null)
 
 const defaultFormData = {
   code: '',
@@ -171,48 +169,22 @@ const treeData = ref([])
 // 父设备选项（用于下拉筛选）
 const parentOptions = ref([])
 
-// 过滤树形数据
-const filteredTreeData = computed(() => {
-  let result = treeData.value
-
-  // 如果选择了类别过滤，只显示该类别
-  if (categoryFilter.value) {
-    result = result.filter(group => group.code === categoryFilter.value)
-  }
-
-  // 如果有搜索关键字，在子节点中搜索
-  if (searchQuery.value) {
-    const keyword = searchQuery.value.toLowerCase()
-    result = result.map(group => {
-      const filteredChildren = group.children?.filter(device =>
-        device.name.toLowerCase().includes(keyword)
-      ) || []
-      if (filteredChildren.length > 0) {
-        return { ...group, children: filteredChildren }
-      }
-      return null
-    }).filter(Boolean)
-  }
-
-  return result
-})
-
-// 获取类别名称
-const getCategoryName = (code) => {
-  const item = treeData.value.find(t => t.code === code)
-  return item ? item.name : code
-}
-
-// 从接口获取树形数据
-const fetchTreeData = async () => {
+// 从接口获取树形数据（支持搜索）
+const fetchTreeData = async (searchParams = {}) => {
   loading.value = true
   try {
+    // 构建请求参数，使用已有的tree接口
+    const requestBody = {
+      name: searchParams.name || undefined,
+      parentCode: searchParams.category || undefined
+    }
+    
     const response = await fetch('/api/devices/tree', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({})
+      body: JSON.stringify(requestBody)
     })
     const result = await response.json()
     if (result.code === 200) {
@@ -243,6 +215,21 @@ onMounted(() => {
   fetchParentOptions()
 })
 
+// 行点击事件 - 触发展开/收起
+const handleRowClick = (row, column, event) => {
+  // 如果点击的是操作列，不触发展开
+  if (column.label === '操作') {
+    return
+  }
+  
+  // 如果有子设备，切换展开状态
+  if (row.children && row.children.length > 0) {
+    nextTick(() => {
+      tableRef.value.toggleRowExpansion(row)
+    })
+  }
+}
+
 // 获取父设备选项
 const fetchParentOptions = async () => {
   try {
@@ -259,45 +246,24 @@ const fetchParentOptions = async () => {
   }
 }
 
-const openAddModal = () => {
-  isEditMode.value = false
-  isSubDeviceMode.value = false
-  formData.value = { ...defaultFormData }
-  showFormModal.value = true
+const handleSearch = () => {
+  // 调用后端搜索接口
+  const searchParams = {}
+  if (searchQuery.value) {
+    searchParams.name = searchQuery.value
+  }
+  if (categoryFilter.value) {
+    searchParams.category = categoryFilter.value
+  }
+  
+  fetchTreeData(searchParams)
 }
 
 const resetFilter = () => {
   searchQuery.value = ''
   categoryFilter.value = ''
-}
-
-const addChildDevice = (parentRow) => {
-  isEditMode.value = false
-  isSubDeviceMode.value = true
-  formData.value = { ...defaultFormData, category: parentRow.code }
-  showFormModal.value = true
-}
-
-const openEditModal = (device) => {
-  isEditMode.value = true
-  // 如果是父分类（有 children 属性）
-  if (device.children) {
-    isSubDeviceMode.value = false
-    isCategoryEditMode.value = true
-    formData.value = {
-      id: device.id,
-      code: device.code,
-      name: device.name,
-      modelFileId: device.modelFileId,
-      sort: device.sort
-    }
-  } else {
-    // 子设备编辑
-    isSubDeviceMode.value = false
-    isCategoryEditMode.value = false
-    formData.value = { ...device }
-  }
-  showFormModal.value = true
+  // 重新加载所有数据
+  fetchTreeData()
 }
 
 const closeFormModal = () => {
@@ -363,65 +329,6 @@ const saveDevice = async (data) => {
   }
 }
 
-const deleteDevice = async (deviceId) => {
-  try {
-    await ElMessageBox.confirm('确定要删除这个设备吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-    
-    const response = await fetch(`/api/devices/${deviceId}`, {
-      method: 'DELETE'
-    })
-    const result = await response.json()
-    
-    if (result.code === 200) {
-      ElMessage.success('删除成功')
-      fetchTreeData() // 刷新数据
-    } else {
-      ElMessage.error(result.message || '删除失败')
-    }
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败')
-      console.error(error)
-    }
-  }
-}
-
-const deleteCategory = async (categoryRow) => {
-  // 检查该分类下是否还有子设备
-  if (categoryRow.children && categoryRow.children.length > 0) {
-    ElMessage.warning(`请先删除该分类下的所有子设备（当前还有 ${categoryRow.children.length} 个）`)
-    return
-  }
-  
-  try {
-    await ElMessageBox.confirm(`确定要删除分类“${categoryRow.name}”吗？`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-    
-    const response = await fetch(`/api/devices/${categoryRow.id}`, {
-      method: 'DELETE'
-    })
-    const result = await response.json()
-    
-    if (result.code === 200) {
-      ElMessage.success('删除成功')
-      fetchTreeData() // 刷新数据
-    } else {
-      ElMessage.error(result.message || '删除失败')
-    }
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败')
-      console.error(error)
-    }
-  }
-}
 
 // 上传3D模型
 const upload3DModel = (categoryRow) => {
@@ -474,18 +381,6 @@ const isEngineCategory = (categoryRow) => {
   return categoryRow.code && categoryRow.code.includes('engine')
 }
 
-// 判断是否为船用齿轮箱类别（根据 code 判断）
-const isGearboxCategory = (categoryRow) => {
-  return categoryRow.code && categoryRow.code.includes('gearbox')
-}
-
-// 判断是否为船用发动机设备（根据 parentCode 判断）
-const isEngineDevice = (deviceRow) => {
-  if (!deviceRow.parentCode) return false
-  // 根据 parentCode 的值判断是否为发动机类型
-  return deviceRow.parentCode.includes('engine')
-}
-
 // 判断是否为船用齿轮箱设备（根据 parentCode 判断）
 const isGearboxDevice = (deviceRow) => {
   if (!deviceRow.parentCode) return false
@@ -505,10 +400,7 @@ const openWeightParamsModal = (categoryRow) => {
   }, 100)
 }
 
-const closeWeightParamsModal = () => {
-  showWeightParamsModal.value = false
-  currentCategory.value = null
-}
+
 
 // 打开能效配置弹窗
 const openEfficiencyConfigModal = (device) => {
@@ -524,14 +416,17 @@ const closeEfficiencyConfigModal = () => {
 </script>
 
 <style scoped>
+/* ==================== 容器布局 ==================== */
 .device-management-container {
   padding: 20px;
   height: 100%;
   min-height: calc(100vh - 120px);
   overflow-y: auto;
   box-sizing: border-box;
+  background-color: #1e3a5f;
 }
 
+/* ==================== 搜索控制区 ==================== */
 .device-controls {
   display: flex;
   justify-content: space-between;
@@ -541,12 +436,6 @@ const closeEfficiencyConfigModal = () => {
   gap: 16px;
 }
 
-.control-group {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
 .search-filter {
   display: flex;
   gap: 16px;
@@ -554,6 +443,11 @@ const closeEfficiencyConfigModal = () => {
   flex-wrap: wrap;
 }
 
+.search-filter > * {
+  margin: 0 !important;
+}
+
+/* ==================== 设备列表区 ==================== */
 .device-list-section {
   margin-bottom: 24px;
 }
@@ -562,30 +456,18 @@ const closeEfficiencyConfigModal = () => {
   margin: 0 0 16px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
-}
-
-:deep(.el-table__row--level-0) {
-  background-color: #f5f7fa !important;
-}
-
-:deep(.el-table__row--level-0:hover > td) {
-  background-color: #ecf0f5 !important;
+  color: #e0e0e0;
 }
 
 .device-category {
   display: none;
 }
 
-/* 响应式布局 */
+/* ==================== 响应式布局 ==================== */
 @media (max-width: 768px) {
   .device-controls {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .control-group {
-    width: 100%;
   }
 
   .search-filter {

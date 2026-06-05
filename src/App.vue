@@ -1,85 +1,45 @@
 <template>
   <el-container class="app-container">
-    <!-- 左侧边栏 -->
-    <el-aside :width="isSidebarCollapsed ? '64px' : '240px'" class="sidebar">
-      <div class="sidebar-header">
-        <h1 v-if="!isSidebarCollapsed" class="logo-text">船舶设备运行能效智能评估系统验证平台</h1>
-        <div v-else class="logo-icon">船舶设备</div>
+    <!-- 顶部平台名称 -->
+    <el-header class="platform-header">
+      <div class="header-content">
+        <h1 class="platform-title">船舶设备运行能效智能评估系统验证平台</h1>
       </div>
+    </el-header>
+    
+    <!-- 导航菜单 -->
+    <div class="menu-header">
+      <el-menu
+        :default-active="activeMenu"
+        class="top-menu"
+        mode="horizontal"
+        @select="handleMenuSelect"
+      >
+        <el-menu-item index="assessment-visualization">
+          <el-icon><DataAnalysis /></el-icon>
+          <span>能效评估和可视化</span>
+        </el-menu-item>
 
-      <div class="sidebar-menu-container">
-        <el-menu
-          :default-active="activeMenu"
-          class="sidebar-menu"
-          background-color="#4a6b8a"
-          text-color="#ffffff"
-          active-text-color="#ffd04b"
-          :collapse="isSidebarCollapsed"
-          @select="handleMenuSelect"
-        >
-          <el-menu-item index="evaluation">
-            <el-icon><DataAnalysis /></el-icon>
-            <template #title>能效评估与标准验证</template>
-          </el-menu-item>
-
-          <el-menu-item index="visualization">
-            <el-icon><View /></el-icon>
-            <template #title>样机模型可视化</template>
-          </el-menu-item>
-
-          <el-sub-menu index="system-management">
-            <template #title>
-              <el-icon><Setting /></el-icon>
-              <span>系统管理</span>
-            </template>
-            <el-menu-item index="device-management">
-              <el-icon><Document /></el-icon>
-              <template #title>设备管理</template>
-            </el-menu-item>
-            <el-menu-item index="history-data">
-              <el-icon><Folder /></el-icon>
-              <template #title>能效数据管理</template>
-            </el-menu-item>
-          </el-sub-menu>
-        </el-menu>
-      </div>
-    </el-aside>
+        <el-menu-item index="device-management">
+          <el-icon><Document /></el-icon>
+          <span>设备管理</span>
+        </el-menu-item>
+        
+        <el-menu-item index="history-data">
+          <el-icon><Folder /></el-icon>
+          <span>能效数据管理</span>
+        </el-menu-item>
+      </el-menu>
+    </div>
 
     <!-- 主内容区域 -->
-    <el-container class="main-container">
-      <!-- 顶部导航 -->
-      <el-header class="top-header">
-        <div class="header-left">
-          <el-icon class="collapse-icon" @click="toggleSidebar">
-            <Fold v-if="!isSidebarCollapsed" />
-            <Expand v-else />
-          </el-icon>
-          <el-breadcrumb separator="/">
-            <el-breadcrumb-item>船舶设备运行能效智能评估系统验证平台</el-breadcrumb-item>
-            <el-breadcrumb-item v-if="currentModule === 'evaluation'">能效评估与标准验证</el-breadcrumb-item>
-            <el-breadcrumb-item v-else-if="currentModule === 'visualization'">样机模型可视化</el-breadcrumb-item>
-            <el-breadcrumb-item v-else-if="currentModule === 'system-management' && !currentSystemSubModule">系统管理</el-breadcrumb-item>
-            <el-breadcrumb-item v-else-if="currentModule === 'system-management' && currentSystemSubModule">{{ systemSubModuleNames[currentSystemSubModule] }}</el-breadcrumb-item>
-          </el-breadcrumb>
-        </div>
-      </el-header>
-
-      <!-- 内容区域 -->
-      <el-main class="content">
-        <template v-if="currentModule === 'evaluation'">
-          <Evaluation v-if="currentEvalPage === 'eval-overview'" :global-state="globalState" @navigate="navigateEvalPage" @evalComplete="handleEvalComplete" @switchToSystem="handleSwitchToSystem" />
-        </template>
-        <Visualization v-else-if="currentModule === 'visualization'" :global-state="globalState" />
-        <template v-else-if="currentModule === 'system-management'">
-          <SystemManagement v-if="!currentSystemSubModule" />
-          <DeviceManagement v-else-if="currentSystemSubModule === 'device-management'" />
-
-
-          <EfficiencyDataManagement v-else-if="currentSystemSubModule === 'history-data'" :models="globalState.models" :global-state="globalState" />
-
-        </template>
-      </el-main>
-    </el-container>
+    <el-main class="content">
+      <AssessmentVisualization v-if="currentModule === 'assessment-visualization'" :global-state="globalState" />
+      <template v-else-if="currentModule === 'system-management'">
+        <DeviceManagement v-if="currentSystemSubModule === 'device-management'" />
+        <EfficiencyDataManagement v-else-if="currentSystemSubModule === 'history-data'" :models="globalState.models" :global-state="globalState" />
+      </template>
+    </el-main>
   </el-container>
 </template>
 
@@ -87,24 +47,16 @@
 import { ref, computed } from 'vue'
 import {
   DataAnalysis,
-  View,
-  Setting,
   Document,
-  Folder,
-  Fold,
-  Expand
+  Folder
 } from '@element-plus/icons-vue'
 
-import Evaluation from './components/evaluation/Evaluation.vue'
-import Visualization from './components/visualization/Visualization.vue'
-import SystemManagement from './components/system/SystemManagement.vue'
+import AssessmentVisualization from './components/AssessmentVisualization.vue'
 import DeviceManagement from './components/system/device-management/DeviceManagement.vue'
 import EfficiencyDataManagement from './components/system/efficiency-data-management/EfficiencyDataManagement.vue'
 
-const currentModule = ref('evaluation')
-const currentEvalPage = ref('eval-overview')
+const currentModule = ref('assessment-visualization')
 const currentSystemSubModule = ref('')
-const isSidebarCollapsed = ref(false)
 
 // 全局状态管理
 const globalState = ref({
@@ -162,15 +114,9 @@ const globalState = ref({
   efficiencyData: [] // 能效接入数据（全局共享，供样机模型查看关联数据）
 })
 
-
-const systemSubModuleNames = {
-  'device-management': '设备管理',
-  'history-data': '能效数据管理'
-}
-
 // 当前激活的菜单项
 const activeMenu = computed(() => {
-  if (currentModule.value === 'system-management' && currentSystemSubModule.value) {
+  if (currentSystemSubModule.value) {
     return currentSystemSubModule.value
   }
   return currentModule.value
@@ -178,47 +124,14 @@ const activeMenu = computed(() => {
 
 // 处理菜单选择
 const handleMenuSelect = (index) => {
-  if (index === 'evaluation' || index === 'visualization') {
-    switchModule(index)
-  } else {
-    // 系统管理子模块
-    switchSystemSubModule(index)
+  if (index === 'assessment-visualization') {
+    currentModule.value = index
+    currentSystemSubModule.value = ''
+  } else if (index === 'device-management' || index === 'history-data') {
+    // 系统管理子模块直接切换到对应模块
+    currentModule.value = 'system-management'
+    currentSystemSubModule.value = index
   }
-}
-
-const switchModule = (module) => {
-  currentModule.value = module
-  currentSystemSubModule.value = ''
-}
-
-// 切换系统子模块
-const switchSystemSubModule = (subModule) => {
-  currentModule.value = 'system-management'
-  currentSystemSubModule.value = subModule
-}
-
-const navigateEvalPage = (page) => {
-  currentEvalPage.value = page
-}
-
-const toggleSidebar = () => {
-  isSidebarCollapsed.value = !isSidebarCollapsed.value
-}
-
-const switchToVisualization = () => {
-  currentModule.value = 'visualization'
-  currentSystemSubModule.value = ''
-}
-
-// 切换到系统管理
-const handleSwitchToSystem = () => {
-  currentModule.value = 'system-management'
-  currentSystemSubModule.value = 'history-data'
-}
-
-const handleEvalComplete = (evalData) => {
-  // 评估完成后同步数据到全局状态
-  console.log('评估完成:', evalData)
 }
 </script>
 
@@ -233,170 +146,450 @@ const handleEvalComplete = (evalData) => {
   padding: 0 0 0 0;
 }
 
-/* 侧边栏样式 */
-.sidebar {
-  background: linear-gradient(180deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
-  transition: width 0.3s ease;
-  overflow-x: hidden;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-}
-
-.sidebar-header {
-  height: 60px;
+/* 顶部平台名称 */
+.platform-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 100%);
+  padding: 0;
+  height: 60px;
 }
 
-.logo-text {
-  font-size: 16px;
+.header-content {
+  width: 100%;
+  padding: 0 24px;
+}
+
+.platform-title {
+  font-size: 18px;
   font-weight: 600;
   color: white;
   margin: 0;
   text-align: center;
-  line-height: 1.4;
 }
 
-.logo-icon {
-  font-size: 14px;
-  font-weight: 600;
-  color: white;
-  text-align: center;
+/* 导航菜单 */
+.menu-header {
+  background: #4a6b8a;
+  padding: 0;
+  height: 50px;
 }
 
-.sidebar-menu-container {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+/* 顶部菜单样式 */
+:deep(.top-menu.el-menu--horizontal) {
+  border-bottom: none !important;
+  background: #4a6b8a;
+  height: 50px;
 }
 
-/* 侧边栏滚动条样式 */
-.sidebar-menu-container::-webkit-scrollbar {
-  width: 6px;
+:deep(.top-menu.el-menu--horizontal > ul) {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 50px;
 }
 
-.sidebar-menu-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
+:deep(.top-menu.el-menu--horizontal > .el-menu-item) {
+  height: 50px;
+  line-height: 50px;
+  color: #ffffff;
+  background: #4a6b8a;
 }
 
-.sidebar-menu-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-  transition: background 0.3s;
+:deep(.top-menu.el-menu--horizontal > .el-menu-item.is-active) {
+  color: #409eff !important;
+  background: rgba(64, 158, 255, 0.2) !important;
+  border-bottom: 2px solid #409eff !important;
 }
 
-.sidebar-menu-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+:deep(.top-menu.el-menu--horizontal > .el-menu-item:hover) {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.sidebar-menu {
-  border-right: none;
-}
-
-/* 覆盖 Element Plus 菜单样式 */
-:deep(.el-menu) {
-  background: transparent !important;
-}
-
-:deep(.el-menu-item) {
-  color: rgba(255, 255, 255, 0.85) !important;
-  border-left: 3px solid transparent;
-  transition: all 0.3s;
-}
-
-:deep(.el-menu-item:hover) {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
-  color: #ffffff !important;
-}
-
-:deep(.el-menu-item.is-active) {
-  background: linear-gradient(90deg, rgba(255, 208, 75, 0.2) 0%, rgba(255, 208, 75, 0.08) 100%) !important;
-  color: #ffd04b !important;
-  border-left: 3px solid #ffd04b;
-  font-weight: 600;
-}
-
-:deep(.el-sub-menu__title) {
-  color: rgba(255, 255, 255, 0.85) !important;
-  border-left: 3px solid transparent;
-  transition: all 0.3s;
-}
-
-:deep(.el-sub-menu__title:hover) {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
-  color: #ffffff !important;
-}
-
-/* 主容器样式 */
-.main-container {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* 顶部导航 */
-.top-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-bottom: 1px solid #e4e7ed;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  height: 60px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex: 1;
-}
-
-.collapse-icon {
-  font-size: 20px;
-  cursor: pointer;
-  color: #606266;
-  transition: color 0.3s;
-}
-
-.collapse-icon:hover {
-  color: #409eff;
-}
-
-/* 面包屑样式优化 */
-:deep(.el-breadcrumb) {
-  font-size: 15px;
-}
-
-:deep(.el-breadcrumb__inner) {
-  color: #606266;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-:deep(.el-breadcrumb__inner:hover) {
-  color: #409eff;
-}
-
-:deep(.el-breadcrumb__separator) {
-  color: #c0c4cc;
-  margin: 0 8px;
-}
-
-:deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
-  color: #303133;
-  font-weight: 600;
+:deep(.top-menu.el-menu--horizontal > .el-sub-menu .el-sub-menu__title) {
+  height: 50px;
+  line-height: 50px;
+  color: #ffffff;
+  background: #4a6b8a;
 }
 
 /* 内容区域 */
 .content {
   flex: 1;
-  padding: 20px;
+  padding: 0;
   background-color: #f5f7fa;
   overflow: hidden;
+}
+</style>
+
+<!-- 全局样式 - 按钮 -->
+<style>
+.el-button {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #e0e0e0 !important;
+}
+
+.el-button:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.el-button.el-button--primary {
+  background-color: #409eff !important;
+  border-color: #409eff !important;
+  color: #ffffff !important;
+}
+
+.el-button.el-button--primary:hover {
+  background-color: #66b1ff !important;
+  border-color: #66b1ff !important;
+}
+
+.el-button.el-button--success {
+  background-color: #67c23a !important;
+  border-color: #67c23a !important;
+  color: #ffffff !important;
+}
+
+.el-button.el-button--success:hover {
+  background-color: #85ce61 !important;
+  border-color: #85ce61 !important;
+}
+
+.el-button.el-button--info {
+  background-color: rgba(144, 147, 153, 0.3) !important;
+  border-color: rgba(144, 147, 153, 0.5) !important;
+  color: #e0e0e0 !important;
+}
+
+.el-button.el-button--info:hover {
+  background-color: rgba(144, 147, 153, 0.4) !important;
+  border-color: rgba(144, 147, 153, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.el-button.el-button--danger {
+  background-color: #f56c6c !important;
+  border-color: #f56c6c !important;
+  color: #ffffff !important;
+}
+
+.el-button.el-button--danger:hover {
+  background-color: #f78989 !important;
+  border-color: #f78989 !important;
+}
+
+/* ---- 表格 Table ---- */
+.el-table {
+  background-color: transparent !important;
+  color: #e0e0e0;
+  --el-table-border-color: rgba(255, 255, 255, 0.1) !important;
+  --el-table-border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-table::before {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  height: 1px !important;
+}
+
+.el-table th {
+  background-color: rgba(30, 58, 95, 0.9) !important;
+  color: #e0e0e0 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  font-weight: 600;
+}
+
+.el-table td {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #e0e0e0;
+}
+
+.el-table--border {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-table--border::after,
+.el-table--border::before {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-table__row {
+  background-color: transparent !important;
+}
+
+.el-table__row:hover > td {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.el-table__row--level-0 {
+  background-color: rgba(30, 58, 95, 0.6) !important;
+}
+
+.el-table__row--level-0:hover > td {
+  background-color: rgba(30, 58, 95, 0.8) !important;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.el-table__empty-text {
+  color: #b0b0b0 !important;
+}
+
+/* ---- 表格展开按钮 ---- */
+.el-table__expand-icon {
+  color: #409eff !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+  margin-right: 4px;
+}
+
+.el-table__expand-icon:hover {
+  color: #66b1ff !important;
+  background-color: rgba(64, 158, 255, 0.15) !important;
+  transform: scale(1.1);
+  border-radius: 4px;
+}
+
+.el-table__expand-icon .el-icon {
+  color: #409eff !important;
+  font-size: 18px !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ---- 表单组件 Form ---- */
+/* 输入框 Input */
+.el-input__wrapper {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: none !important;
+}
+
+.el-input__wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.el-input__wrapper.is-focus {
+  border-color: #409eff !important;
+}
+
+.el-input__inner {
+  color: #e0e0e0 !important;
+}
+
+.el-input__inner::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 选择器 Select */
+.el-select .el-input__wrapper {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.el-select .el-input__wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.el-select .el-input__wrapper.is-focus {
+  border-color: #409eff !important;
+}
+
+.el-select-dropdown {
+  background-color: #1e3a5f !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.el-select-dropdown__item {
+  color: #e0e0e0 !important;
+}
+
+.el-select-dropdown__item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-select-dropdown__item.is-selected {
+  color: #409eff !important;
+  background-color: rgba(64, 158, 255, 0.1) !important;
+}
+
+.el-select-dropdown__item.is-disabled {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 日期选择器 DatePicker */
+.el-date-editor .el-input__wrapper {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.el-picker-panel {
+  background-color: #1e3a5f !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #e0e0e0 !important;
+}
+
+.el-date-table td {
+  color: #e0e0e0 !important;
+}
+
+.el-date-table td.available:hover {
+  color: #409eff !important;
+}
+
+.el-date-table td.today span {
+  color: #409eff !important;
+  font-weight: bold !important;
+}
+
+.el-date-table td.current:not(.disabled) span {
+  background-color: #409eff !important;
+  color: #ffffff !important;
+}
+
+.el-picker-panel__icon-btn {
+  color: #e0e0e0 !important;
+}
+
+.el-picker-panel__icon-btn:hover {
+  color: #409eff !important;
+}
+
+/* 表单标签 */
+.el-form-item__label {
+  color: #e0e0e0 !important;
+}
+
+/* 下拉箭头图标 */
+.el-select .el-input__suffix {
+  color: #e0e0e0 !important;
+}
+
+.el-input__suffix {
+  color: #e0e0e0 !important;
+}
+
+/* ---- 加载 Loading ---- */
+.el-loading-mask {
+  background-color: rgba(30, 58, 95, 0.8) !important;
+}
+
+/* ---- 消息框 MessageBox ---- */
+.el-message-box {
+  background-color: #1e3a5f !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.el-message-box__title {
+  color: #e0e0e0 !important;
+}
+
+.el-message-box__content {
+  color: #b0b0b0 !important;
+}
+
+/* ---- 图标 Icon ---- */
+.el-icon {
+  color: inherit;
+}
+
+/* ---- 对话框 Dialog ---- */
+.el-dialog {
+  background-color: #1e3a5f !important;
+  border-radius: 4px;
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 20px 16px;
+}
+
+.el-dialog__title {
+  color: #e0e0e0 !important;
+  font-weight: 600;
+}
+
+.el-dialog__headerbtn .el-dialog__close {
+  color: #b0b0b0 !important;
+}
+
+.el-dialog__headerbtn:hover .el-dialog__close {
+  color: #e0e0e0 !important;
+}
+
+.el-dialog__body {
+  color: #e0e0e0;
+  padding: 20px;
+}
+
+.el-dialog__footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px 20px 20px;
+}
+
+/* ---- 上传组件 Upload ---- */
+.el-upload-dragger {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px;
+}
+
+.el-upload-dragger:hover {
+  border-color: #409eff !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.el-upload__text {
+  color: #e0e0e0 !important;
+}
+
+.el-upload__text em {
+  color: #409eff !important;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.el-upload__tip {
+  color: #b0b0b0 !important;
+  margin-top: 8px;
+}
+
+.el-icon--upload {
+  color: #409eff !important;
+  font-size: 48px;
+}
+
+/* ---- 消息提示 Message ---- */
+.el-message {
+  background-color: #1e3a5f !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #e0e0e0 !important;
+}
+
+.el-message--success {
+  border-left-color: #67c23a !important;
+}
+
+.el-message--warning {
+  border-left-color: #e6a23c !important;
+}
+
+.el-message--error {
+  border-left-color: #f56c6c !important;
+}
+
+.el-message--info {
+  border-left-color: #409eff !important;
 }
 </style>
