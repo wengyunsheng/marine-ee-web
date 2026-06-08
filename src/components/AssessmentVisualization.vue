@@ -52,11 +52,12 @@
 
           <!-- 工况数据展示区域 -->
           <div class="assessment-section conditions-section">
-            <div class="section-title">工况数据</div>
-            <div v-if="!conditionsData || conditionsData.length === 0" class="empty-hint">
-              <el-empty description="暂无工况数据，请先导入数据文件" :image-size="120" />
+            <div class="section-title">
+              工况数据
             </div>
-            <div v-else class="conditions-table-wrapper">
+            
+            <!-- 表格区域（始终显示） -->
+            <div class="conditions-table-wrapper">
               <el-table
                 :data="conditionsData"
                 style="width: 100%"
@@ -81,7 +82,6 @@
           <!-- 评估按钮 -->
           <div class="assessment-section">
             <el-button 
-              :disabled="!canEvaluate"
               :loading="evaluating"
               @click="startEvaluation"
             >
@@ -167,6 +167,7 @@
       v-model="showImportDialog"
       title="导入数据"
       width="600px"
+      :close-on-click-modal="false"
       @close="closeImportDialog"
     >
       <el-upload
@@ -243,6 +244,12 @@ const fetchCategoryOptions = async () => {
     const result = await response.json()
     if (result.code === 200) {
       categoryList.value = result.data || []
+      
+      // 页面加载时默认选中第一个类别
+      if (categoryList.value.length > 0 && !selectedCategoryId.value) {
+        selectedCategoryId.value = categoryList.value[0].code
+        handleCategoryChange(selectedCategoryId.value)
+      }
     } else {
       ElMessage.error(result.message || '获取类别列表失败')
     }
@@ -257,21 +264,68 @@ const handleCategoryChange = (categoryId) => {
   if (!categoryId) {
     // 清空类别时，重置所有状态
     modelParts.value = []
+    conditionsColumns.value = []
+    conditionsData.value = []
     return
   }
   
-  // 这里可以根据类别加载对应的设备或模型
-  // TODO: 根据categoryId加载对应的设备列表和3D模型
+  // 根据设备类别加载对应的工况表头
+  loadConditionsColumns(categoryId)
+}
+
+// 根据设备类别加载工况表头
+const loadConditionsColumns = (categoryId) => {
+  // 不同设备类型的工况字段配置
+  const columnConfig = {
+    'engine': [  // 船用发动机
+      { prop: 'load', label: '负荷(%)', minWidth: 100 },
+      { prop: 'speed', label: '转速(rpm)', minWidth: 120 },
+      { prop: 'torque', label: '扭矩(Nm)', minWidth: 120 },
+      { prop: 'power', label: '功率(kW)', minWidth: 120 },
+      { prop: 'fuelConsumption', label: '燃油消耗率(g/kWh)', minWidth: 160 },
+      { prop: 'exhaustTemp', label: '排气温度(℃)', minWidth: 140 },
+      { prop: 'coolantTemp', label: '冷却液温度(℃)', minWidth: 150 }
+    ],
+    'gearbox': [  // 齿轮箱
+      { prop: 'inputSpeed', label: '输入转速(rpm)', minWidth: 140 },
+      { prop: 'outputSpeed', label: '输出转速(rpm)', minWidth: 140 },
+      { prop: 'inputTorque', label: '输入扭矩(Nm)', minWidth: 140 },
+      { prop: 'outputTorque', label: '输出扭矩(Nm)', minWidth: 140 },
+      { prop: 'oilTemp', label: '油温(℃)', minWidth: 120 },
+      { prop: 'efficiency', label: '传动效率(%)', minWidth: 140 }
+    ],
+    'generator': [  // 发电机
+      { prop: 'voltage', label: '电压(V)', minWidth: 100 },
+      { prop: 'current', label: '电流(A)', minWidth: 100 },
+      { prop: 'frequency', label: '频率(Hz)', minWidth: 100 },
+      { prop: 'power', label: '功率(kW)', minWidth: 120 },
+      { prop: 'powerFactor', label: '功率因数', minWidth: 120 },
+      { prop: 'temperature', label: '绕组温度(℃)', minWidth: 140 }
+    ],
+    'boiler': [  // 焚烧炉/锅炉
+      { prop: 'steamPressure', label: '蒸汽压力(MPa)', minWidth: 140 },
+      { prop: 'steamTemp', label: '蒸汽温度(℃)', minWidth: 140 },
+      { prop: 'fuelRate', label: '燃料消耗率(kg/h)', minWidth: 160 },
+      { prop: 'combustionTemp', label: '燃烧温度(℃)', minWidth: 140 },
+      { prop: 'efficiency', label: '热效率(%)', minWidth: 120 }
+    ],
+    'default': [  // 默认配置
+      { prop: 'parameter1', label: '参数1', minWidth: 120 },
+      { prop: 'parameter2', label: '参数2', minWidth: 120 },
+      { prop: 'parameter3', label: '参数3', minWidth: 120 }
+    ]
+  }
+  
+  // 根据类别加载对应的表头，如果没有配置则使用默认
+  conditionsColumns.value = columnConfig[categoryId] || columnConfig['default']
+  
+  // 清空之前的数据
+  conditionsData.value = []
 }
 
 // 组件挂载时获取类别列表
 onMounted(() => {
   fetchCategoryOptions()
-})
-
-// 是否可以评估
-const canEvaluate = computed(() => {
-  return uploadedFile.value
 })
 
 // 部件点击处理
@@ -428,7 +482,7 @@ const getLevelType = (level) => {
 
 /* 左侧可视化面板 */
 .visualization-panel {
-  flex: 1.5;
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -459,7 +513,7 @@ const getLevelType = (level) => {
 }
 
 .assessment-section {
-  padding: 12px;
+  padding: 8px;
 }
 
 .section-title {
@@ -475,7 +529,7 @@ const getLevelType = (level) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .file-name {
@@ -494,14 +548,9 @@ const getLevelType = (level) => {
   margin-bottom: 8px;
 }
 
-.empty-hint {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .conditions-table-wrapper {
+  position: relative;
+  min-height: 200px;
   flex: 1;
   overflow: hidden;
 }

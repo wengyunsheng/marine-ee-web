@@ -3,6 +3,7 @@
     v-model="visible"
     title="加权参数"
     width="900px"
+    :close-on-click-modal="false"
     @close="handleClose"
   >
     <div v-loading="loading">

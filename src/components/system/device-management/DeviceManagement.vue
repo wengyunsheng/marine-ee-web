@@ -70,6 +70,7 @@
       v-model="showFormModal"
       :title="isEditMode ? (isCategoryEditMode ? '编辑分类' : '编辑设备') : (isSubDeviceMode ? '新增子设备' : '新增设备')"
       width="600px"
+      :close-on-click-modal="false"
       @close="closeFormModal"
     >
       <DeviceForm
@@ -88,6 +89,7 @@
       v-model="showUploadModal"
       :title="`上传3D模型 - ${currentCategory?.name || ''}`"
       width="600px"
+      :close-on-click-modal="false"
       @close="closeUploadModal"
     >
       <el-upload
