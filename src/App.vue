@@ -51,9 +51,9 @@ import {
   Folder
 } from '@element-plus/icons-vue'
 
-import AssessmentVisualization from './components/AssessmentVisualization.vue'
-import DeviceManagement from './components/system/device-management/DeviceManagement.vue'
-import EfficiencyDataManagement from './components/system/efficiency-data-management/EfficiencyDataManagement.vue'
+import AssessmentVisualization from './components/assessment-visualization/AssessmentVisualization.vue'
+import DeviceManagement from './components/device-management/DeviceManagement.vue'
+import EfficiencyDataManagement from './components/efficiency-data-management/EfficiencyDataManagement.vue'
 
 const currentModule = ref('assessment-visualization')
 const currentSystemSubModule = ref('')

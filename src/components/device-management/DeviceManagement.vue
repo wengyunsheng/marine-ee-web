@@ -22,8 +22,8 @@
           </template>
         </el-input>
         <el-button @click="handleSearch">
-          <el-icon><Search /></el-icon>
-          搜索
+          <Search />
+          查询
         </el-button>
         <el-button @click="resetFilter">重置筛选</el-button>
       </div>
@@ -85,35 +85,13 @@
     </el-dialog>
 
     <!-- 上传3D模型弹窗 -->
-    <el-dialog
+    <UploadModelDialog
       v-model="showUploadModal"
-      :title="`上传3D模型 - ${currentCategory?.name || ''}`"
-      width="600px"
-      :close-on-click-modal="false"
+      :category-id="currentCategory?.id"
+      :category-name="currentCategory?.name"
+      @success="fetchTreeData"
       @close="closeUploadModal"
-    >
-      <el-upload
-        class="upload-3d-model"
-        drag
-        action="/api/files/upload/3d-model"
-        :data="{ deviceId: currentCategory?.id }"
-        :on-success="handleUploadSuccess"
-        :on-error="handleUploadError"
-        :before-upload="beforeUpload"
-        accept=".obj,.fbx,.gltf,.glb,.stl,.png,.jpg,.jpeg"
-        name="file"
-      >
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-        <div class="el-upload__text">
-          拖拽文件到此处或<em>点击上传</em>
-        </div>
-        <template #tip>
-          <div class="el-upload__tip">
-            支持格式: OBJ, FBX, GLTF, GLB, STL，文件大小不超过100MB
-          </div>
-        </template>
-      </el-upload>
-    </el-dialog>
+    />
 
     <!-- 加权参数配置弹窗 -->
     <WeightParamsConfig
@@ -140,6 +118,7 @@ import { ElMessage } from 'element-plus'
 import DeviceForm from './components/DeviceForm.vue'
 import WeightParamsConfig from './components/WeightParamsConfig.vue'
 import EfficiencyConfigDialog from './components/EfficiencyConfigDialog.vue'
+import UploadModelDialog from './components/UploadModelDialog.vue'
 
 const searchQuery = ref('')
 const categoryFilter = ref('')
@@ -341,39 +320,6 @@ const upload3DModel = (categoryRow) => {
 const closeUploadModal = () => {
   showUploadModal.value = false
   currentCategory.value = null
-}
-
-const beforeUpload = (file) => {
-  const isValidType = ['.obj', '.fbx', '.gltf', '.glb', '.stl', '.png', '.jpg', '.jpeg'].some(ext => 
-    file.name.toLowerCase().endsWith(ext)
-  )
-  if (!isValidType) {
-    ElMessage.error('只支持上传 OBJ, FBX, GLTF, GLB, STL, PNG, JPG, JPEG 格式的文件')
-    return false
-  }
-  
-  const isLt100M = file.size / 1024 / 1024 < 100
-  if (!isLt100M) {
-    ElMessage.error('文件大小不能超过100MB')
-    return false
-  }
-  
-  return true
-}
-
-const handleUploadSuccess = (response) => {
-  if (response.code === 200) {
-    ElMessage.success('3D模型上传成功')
-    fetchTreeData() // 刷新数据
-    closeUploadModal()
-  } else {
-    ElMessage.error(response.message || '上传失败')
-  }
-}
-
-const handleUploadError = (error) => {
-  ElMessage.error('上传失败：' + (error.message || '网络错误'))
-  console.error(error)
 }
 
 // 判断是否为船用发动机类别（根据 code 判断）
