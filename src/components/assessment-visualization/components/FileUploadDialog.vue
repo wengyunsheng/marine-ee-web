@@ -62,39 +62,4 @@ const handleClose = () => {
 .upload-data-file {
   width: 100%;
 }
-
-.upload-data-file :deep(.el-upload-dragger) {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  border-radius: 4px;
-  padding: 40px 20px;
-}
-
-.upload-data-file :deep(.el-upload-dragger:hover) {
-  border-color: #409eff !important;
-  background-color: rgba(64, 158, 255, 0.1) !important;
-}
-
-.upload-data-file :deep(.el-icon--upload) {
-  font-size: 67px;
-  color: #409eff;
-  margin-bottom: 16px;
-}
-
-.upload-data-file :deep(.el-upload__text) {
-  color: #e0e0e0;
-  font-size: 14px;
-}
-
-.upload-data-file :deep(.el-upload__text em) {
-  color: #409eff;
-  font-style: normal;
-}
-
-.upload-data-file :deep(.el-upload__tip) {
-  color: #909399;
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: 8px;
-}
 </style>

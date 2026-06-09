@@ -9,9 +9,7 @@
       <div class="result-summary">
         <div class="summary-item">
           <span class="summary-label">综合能效等级</span>
-          <el-tag :type="getLevelType(evaluationResult.overallLevel)" size="large">
-            {{ evaluationResult.overallLevel }}级
-          </el-tag>
+          <span class="summary-level">{{ evaluationResult.overallLevel }}级</span>
         </div>
         <div class="summary-item">
           <span class="summary-label">能效评分</span>
@@ -21,9 +19,11 @@
       <el-divider />
       <div class="result-details">
         <div class="detail-card" v-for="(item, index) in evaluationResult.details" :key="index">
-          <div class="detail-name">{{ item.name }}</div>
+          <div class="detail-header">
+            <span class="detail-name">{{ item.name }}</span>
+            <span class="detail-level">{{ item.level }}级</span>
+          </div>
           <div class="detail-value">{{ item.value }}</div>
-          <el-tag :type="getLevelType(item.level)" size="small">{{ item.level }}级</el-tag>
         </div>
       </div>
     </div>
@@ -54,18 +54,6 @@ const visible = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 })
-
-// 获取等级类型
-const getLevelType = (level) => {
-  const levelMap = {
-    1: 'success',
-    2: '',
-    3: 'warning',
-    4: 'danger',
-    5: 'danger'
-  }
-  return levelMap[level] || 'info'
-}
 
 // 关闭弹窗
 const handleClose = () => {
@@ -107,6 +95,12 @@ const handleClose = () => {
   line-height: 1;
 }
 
+.summary-level {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
 .result-details {
   display: flex;
   flex-direction: column;
@@ -119,9 +113,6 @@ const handleClose = () => {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   padding: 16px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   transition: all 0.3s ease;
 }
 
@@ -131,18 +122,29 @@ const handleClose = () => {
   transform: translateX(4px);
 }
 
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
 .detail-name {
   font-size: 14px;
   color: #b0b0b0;
-  flex: 1;
+}
+
+.detail-level {
+  font-size: 14px;
+  color: #e0e0e0;
+  font-weight: 600;
 }
 
 .detail-value {
   font-size: 16px;
   font-weight: 600;
   color: #e0e0e0;
-  margin: 0 20px;
-  min-width: 120px;
   text-align: center;
+  padding: 8px 0;
 }
 </style>

@@ -5,20 +5,18 @@
     width="800px"
     :close-on-click-modal="false"
   >
-    <el-table 
-      v-if="testCondition && Object.keys(testCondition).length > 0" 
-      :data="[testCondition]" 
-      border 
-      stripe
-    >
-      <el-table-column prop="ambientTemp" label="环境温度(℃)" width="140" align="center" />
-      <el-table-column prop="ambientHumidity" label="环境湿度(%)" width="140" align="center" />
-      <el-table-column prop="ambientPressure" label="环境压力(kPa)" width="140" align="center" />
-      <el-table-column prop="exhaustTemp" label="排气温度(℃)" width="140" align="center" />
-      <el-table-column prop="coolantInlet" label="冷却水进口温度(℃)" width="160" align="center" />
-      <el-table-column prop="coolantOutlet" label="冷却水出口温度(℃)" width="160" align="center" />
-      <el-table-column prop="lubeOilTemp" label="润滑油温度(℃)" width="140" align="center" />
-    </el-table>
+    <div v-if="testCondition && Object.keys(testCondition).length > 0" class="test-condition-content">
+      <el-descriptions :column="3" border>
+        <el-descriptions-item label="环境温度">{{ testCondition.ambientTemp }}℃</el-descriptions-item>
+        <el-descriptions-item label="环境湿度">{{ testCondition.ambientHumidity }}%</el-descriptions-item>
+        <el-descriptions-item label="环境压力">{{ testCondition.ambientPressure }}kPa</el-descriptions-item>
+        <el-descriptions-item label="排气温度">{{ testCondition.exhaustTemp }}℃</el-descriptions-item>
+        <el-descriptions-item label="冷却水进口温度">{{ testCondition.coolantInlet }}℃</el-descriptions-item>
+        <el-descriptions-item label="冷却水出口温度">{{ testCondition.coolantOutlet }}℃</el-descriptions-item>
+        <el-descriptions-item label="润滑油温度">{{ testCondition.lubeOilTemp }}℃</el-descriptions-item>
+      </el-descriptions>
+    </div>
+    <el-empty v-else description="暂无测试条件数据" />
     <template #footer>
       <el-button @click="visible = false">关闭</el-button>
     </template>

@@ -431,7 +431,7 @@ defineExpose({
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 12px 20px;
+  padding: 8px;
   background: transparent;
   position: absolute;
   top: 0;

@@ -592,4 +592,103 @@ const handleMenuSelect = (index) => {
 .el-message--info {
   border-left-color: #409eff !important;
 }
+
+/* ---- 描述列表 Descriptions ---- */
+.el-descriptions {
+  background-color: transparent !important;
+  --el-descriptions-table-border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-descriptions__label {
+  color: #e0e0e0 !important;
+  font-weight: 500 !important;
+  background-color: rgba(30, 58, 95, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-descriptions__content {
+  color: #e0e0e0 !important;
+  background-color: rgba(30, 58, 95, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-descriptions__header {
+  margin-bottom: 16px;
+}
+
+.el-descriptions__body {
+  background-color: transparent !important;
+}
+
+/* ---- 搜索筛选栏 Search Filter Bar ---- */
+.search-filter-bar {
+  background: rgba(30, 58, 95, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.search-filter-bar .el-form {
+  margin-bottom: 0 !important;
+}
+
+.search-filter-bar .el-form-item {
+  margin-bottom: 0 !important;
+  margin-right: 12px !important;
+}
+
+/* ---- 数据展示区域 Data Display Section ---- */
+.assessment-section {
+  background: rgba(30, 58, 95, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0e0e0 !important;
+  margin-bottom: 12px;
+  padding-left: 8px;
+  border-left: 3px solid #409eff;
+}
+
+/* ---- 空状态 Empty State ---- */
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: #909399;
+  font-size: 14px;
+}
+
+/* ---- 评估结果详情卡片 Evaluation Result Detail Card ---- */
+.detail-card {
+  background: rgba(30, 58, 95, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 8px;
+  padding: 16px 20px;
+  transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+  background: rgba(30, 58, 95, 0.8) !important;
+  border-color: rgba(64, 158, 255, 0.4) !important;
+  transform: translateX(4px);
+}
+
+.detail-name {
+  font-size: 14px;
+  color: #b0b0b0 !important;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e0e0e0 !important;
+  margin: 0 20px;
+  min-width: 120px;
+  text-align: center;
+}
 </style>

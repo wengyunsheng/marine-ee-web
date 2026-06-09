@@ -40,29 +40,52 @@
       <!-- 右侧:能效评估 -->
       <div class="assessment-panel" :style="{ width: rightWidth + 'px' }">
         <div class="panel-content">
-          <!-- 顶部操作区（Tab外面） -->
+          <!-- 右侧所有内容包裹在一个卡片中 -->
           <div class="assessment-section">
+            <!-- 顶部操作区 -->
             <div class="action-bar">
               <el-button @click="handleOpenImportDialog">
                 导入数据
               </el-button>
               <span v-if="importedFileName" class="file-name">{{ importedFileName }}</span>
             </div>
+            
+            <!-- 搜索筛选区 -->
+            <div class="search-filter-bar">
+              <el-form :inline="true" :model="searchForm">
+                <el-form-item label="品牌">
+                  <el-input 
+                    v-model="searchForm.brand" 
+                    placeholder="请输入品牌"
+                    clearable
+                    style="width: 180px;"
+                  />
+                </el-form-item>
+                <el-form-item label="型号">
+                  <el-input 
+                    v-model="searchForm.model" 
+                    placeholder="请输入型号"
+                    clearable
+                    style="width: 220px;"
+                  />
+                </el-form-item>
+                <el-form-item>
+                  <el-button @click="handleSearch">查询</el-button>
+                  <el-button @click="handleReset">重置筛选</el-button>
+                </el-form-item>
+              </el-form>
+            </div>
+            
+            <!-- 数据展示区 -->
+            <DataDisplaySection
+              :engine-list="basicInfoData.engineList"
+              :evaluating="evaluating"
+              :evaluating-row-id="evaluatingRow"
+              @view-test-condition="viewTestCondition"
+              @view-conditions-data="viewConditionsData"
+              @start-evaluation="startEvaluation"
+            />
           </div>
-
-          <!-- 搜索区域（Tab外面，共用于基本信息和工况数据） -->
-          <!-- 数据展示区 -->
-          <DataDisplaySection
-            :engine-list="basicInfoData.engineList"
-            :evaluating="evaluating"
-            :evaluating-row-id="evaluatingRow"
-            :search-form="searchForm"
-            @search="handleSearch"
-            @reset="handleReset"
-            @view-test-condition="viewTestCondition"
-            @view-conditions-data="viewConditionsData"
-            @start-evaluation="startEvaluation"
-          />
         </div>
       </div>
     </div>
@@ -474,11 +497,8 @@ const fetchConditionsData = async () => {
 }
 
 // 搜索处理
-const handleSearch = (searchParams) => {
-  // 更新搜索表单
-  if (searchParams) {
-    searchForm.value = { ...searchParams }
-  }
+const handleSearch = () => {
+  // 直接使用 searchForm.value 进行查询
   fetchConditionsData()
 }
 
@@ -541,29 +561,102 @@ const startEvaluation = async (row) => {
   evaluatingRow.value = row.id
   
   try {
-    // TODO: 调用后端能效评估接口
-    // const response = await api.post('/api/evaluation', { engineId: row.id })
+    // 判断是否已经评估过（支持多种类型：boolean、数字、字符串）
+    const isEvaluated = row.is_evaluated === 1 || row.is_evaluated === true || 
+                        row.isEvaluated === 1 || row.isEvaluated === true ||
+                        row.is_evaluated === '1' || row.isEvaluated === '1'
     
-    // 模拟评估过程
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    console.log('行数据:', row)
+    console.log('is_evaluated 值:', row.is_evaluated, '类型:', typeof row.is_evaluated)
+    console.log('是否已评估:', isEvaluated)
     
-    // 模拟评估结果
-    evaluationResult.value = {
-      overallLevel: 2,
-      score: 87.5,
-      details: [
-        { name: '燃油消耗率', value: '195 g/kWh', level: 2 },
-        { name: '热效率', value: '45.2%', level: 2 },
-        { name: '排放指数', value: '0.85', level: 1 },
-        { name: '运行稳定性', value: '92.5%', level: 1 }
-      ]
+    if (isEvaluated) {
+      // 已评估：调用 GET 接口查看结果
+      console.log('调用 GET 接口查看评估结果')
+      const response = await fetch(`/api/engine/evaluate/${row.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      const result = await response.json()
+      
+      if (result.code === 200 && result.data) {
+        // 根据接口返回数据构建评估结果
+        evaluationResult.value = {
+          overallLevel: result.data.efficiencyLevel,
+          score: result.data.baseValue,
+          details: [
+            { 
+              name: '能效指数', 
+              value: result.data.efficiencyIndex.toFixed(2), 
+              level: result.data.efficiencyLevel 
+            },
+            { 
+              name: '能效等级', 
+              value: result.data.levelDescription, 
+              level: result.data.efficiencyLevel 
+            },
+            { 
+              name: '评估结果', 
+              value: result.data.passed ? '通过' : '未通过', 
+              level: result.data.passed ? 1 : 3 
+            }
+          ]
+        }
+        
+        // 打开评估结果弹窗
+        showEvaluationResultDialog.value = true
+      } else {
+        throw new Error(result.message || '获取评估结果失败')
+      }
+    } else {
+      // 未评估：调用 POST 接口进行评估
+      const response = await fetch(`/api/engine/evaluate/${row.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      const result = await response.json()
+      
+      if (result.code === 200 && result.data) {
+        // 根据接口返回数据构建评估结果
+        evaluationResult.value = {
+          overallLevel: result.data.efficiencyLevel,
+          score: result.data.baseValue,
+          details: [
+            { 
+              name: '能效指数', 
+              value: result.data.efficiencyIndex.toFixed(2), 
+              level: result.data.efficiencyLevel 
+            },
+            { 
+              name: '能效等级', 
+              value: result.data.levelDescription, 
+              level: result.data.efficiencyLevel 
+            },
+            { 
+              name: '评估结果', 
+              value: result.data.passed ? '通过' : '未通过', 
+              level: result.data.passed ? 1 : 3 
+            }
+          ]
+        }
+        
+        // 打开评估结果弹窗
+        showEvaluationResultDialog.value = true
+        
+        // 刷新数据列表，更新评估状态（这样下次点击就知道已评估过了）
+        await fetchConditionsData()
+      } else {
+        throw new Error(result.message || '评估失败')
+      }
     }
-    
-    // 打开评估结果弹窗
-    showEvaluationResultDialog.value = true
-    ElMessage.success('能效评估完成')
   } catch (error) {
-    ElMessage.error('评估失败: ' + error.message)
+    ElMessage.error('操作失败: ' + error.message)
   } finally {
     evaluating.value = false
     evaluatingRow.value = null
@@ -665,6 +758,7 @@ const startEvaluation = async (row) => {
   flex: 1;
   overflow-y: auto;
   padding: 0 8px;
+  max-height: calc(100vh - 250px); /* 设置最大高度 */
 }
 
 .action-bar {
@@ -770,11 +864,6 @@ const startEvaluation = async (row) => {
 /* 部件详情弹窗 */
 .part-detail {
   padding: 10px 0;
-}
-
-.section-title {
-  margin-top: 16px;
-  margin-bottom: 8px;
 }
 
 .positive {
