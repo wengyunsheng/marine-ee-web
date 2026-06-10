@@ -9,7 +9,6 @@
       :data="conditionsData"
       style="width: 100%"
       border
-      stripe
       max-height="500"
     >
       <el-table-column type="index" label="序号" width="60" align="center" />
@@ -24,9 +23,9 @@
         <el-table-column prop="power" label="功率(kW)" width="110" align="center" />
         <el-table-column prop="speed" label="转速(rpm)" width="110" align="center" />
         <el-table-column prop="bsfc" label="燃油消耗率(g/kWh)" width="150" align="center" />
-        <el-table-column prop="bspc" label="活塞平均速度(m/s)" width="160" align="center" />
-        <el-table-column prop="bsgc" label="缸内平均压力(MPa)" width="160" align="center" />
-        <el-table-column prop="bsec" label="比能耗(MJ/kWh)" width="140" align="center" />
+        <el-table-column prop="bspc" label="燃油消耗率(g/kWh)" width="160" align="center" />
+        <el-table-column prop="bsgc" label="燃气消耗率(g/kWh)" width="160" align="center" />
+        <el-table-column prop="bsec" label="能量消耗率(kJ/kWh)" width="140" align="center" />
       </template>
       
       <!-- 其他设备通用列 -->

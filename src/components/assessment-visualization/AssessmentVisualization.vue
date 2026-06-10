@@ -120,7 +120,7 @@
         </el-descriptions>
 
         <div class="section-title">工况数据</div>
-        <el-table :data="currentPartData.conditions" border stripe max-height="250">
+        <el-table :data="currentPartData.conditions" border max-height="250">
           <el-table-column prop="load" label="负荷" width="100" />
           <el-table-column prop="currentValue" label="当前值" width="120" />
           <el-table-column prop="baselineValue" label="基准值" width="120" />
@@ -164,7 +164,7 @@
       v-model="showConditionsDialog"
       :conditions-data="conditionsData"
       :conditions-columns="conditionsColumns"
-      :device-code="selectedDevice?.code || ''"
+      :device-code="selectedDevice?.parentCode || ''"
     />
   </div>
 </template>
@@ -643,12 +643,7 @@ const startEvaluation = async (row) => {
           details: [
             { 
               name: '能效指数', 
-              value: result.data.efficiencyIndex.toFixed(2), 
-              level: result.data.efficiencyLevel 
-            },
-            { 
-              name: '能效等级', 
-              value: `${result.data.efficiencyLevel}级`, 
+              value: `${result.data.efficiencyIndex.toFixed(2)}%`, 
               level: result.data.efficiencyLevel 
             },
             { 
@@ -686,12 +681,7 @@ const startEvaluation = async (row) => {
           details: [
             { 
               name: '能效指数', 
-              value: result.data.efficiencyIndex.toFixed(2), 
-              level: result.data.efficiencyLevel 
-            },
-            { 
-              name: '能效等级', 
-              value: `${result.data.efficiencyLevel}级`, 
+              value: `${result.data.efficiencyIndex.toFixed(2)}%`, 
               level: result.data.efficiencyLevel 
             },
             { 

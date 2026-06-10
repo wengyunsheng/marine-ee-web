@@ -11,8 +11,7 @@
         <el-table 
           :data="efficiencyData" 
           style="width: 100%" 
-          border 
-          stripe
+          border
           v-loading="loading"
         >
           <el-table-column type="index" label="序号" width="60" align="center" />
