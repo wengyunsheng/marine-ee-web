@@ -243,7 +243,7 @@ const handleMenuSelect = (index) => {
 }
 
 .el-table__row:hover > td {
-  background-color: rgba(255, 255, 255, 0.08) !important;
+  background-color: #2a4a7f !important;
 }
 
 .el-table__row--level-0 {
@@ -251,48 +251,11 @@ const handleMenuSelect = (index) => {
 }
 
 .el-table__row--level-0:hover > td {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-.el-table--striped .el-table__body tr.el-table__row--striped td {
-  background-color: #1e3a5f !important;
+  background-color: #2a4a7f !important;
 }
 
 .el-table__empty-text {
   color: #b0b0b0 !important;
-}
-
-/* ---- 表格固定列 Fixed Columns ---- */
-.el-table__fixed-right {
-  background: #1e3a5f !important;
-  background-color: #1e3a5f !important;
-}
-
-.el-table__fixed-right::before {
-  background-color: #1e3a5f !important;
-}
-
-.el-table__fixed-right .el-table__cell,
-.el-table__fixed-right td,
-.el-table__fixed-right th,
-.el-table__fixed-right tr,
-.el-table__fixed-right .el-table__row,
-.el-table__fixed-right tbody,
-.el-table__fixed-right thead {
-  background-color: #1e3a5f !important;
-  background: #1e3a5f !important;
-}
-
-/* 固定列悬停时也保持完全不透明 */
-.el-table__fixed-right .el-table__row:hover > td {
-  background-color: #1e3a5f !important;
-  background: #1e3a5f !important;
-}
-
-/* 最强力的选择器 - 覆盖所有可能的子元素 */
-.el-table__fixed-right .el-table__row td {
-  background-color: #1e3a5f !important;
-  background: #1e3a5f !important;
 }
 
 /* ---- 表格展开按钮 ---- */

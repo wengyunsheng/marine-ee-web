@@ -804,8 +804,19 @@ const startEvaluation = async (row) => {
   border-radius: 4px;
 }
 
+.assessment-panel .panel-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
 .assessment-section {
   padding: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 /* 数据展示区域 */

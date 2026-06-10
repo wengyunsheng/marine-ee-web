@@ -5,7 +5,7 @@
       <!-- 发动机基本信息列表 -->
       <div v-if="deviceType === 'engine' && engineList && engineList.length > 0" class="assessment-section">
         <div class="section-title">发动机信息</div>
-        <el-table :data="engineList" border stripe>
+        <el-table :data="engineList" border>
           <el-table-column type="index" label="序号" width="60" align="center" />
           <el-table-column prop="brand" label="品牌" width="120" />
           <el-table-column prop="model" label="型号" width="180" />
@@ -112,56 +112,5 @@ const handleStartEvaluation = (row) => {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0; /* 允许滚动 */
-}
-
-/* 表格样式 - 由于已在全局定义，这里只需要保留特定于组件的样式 */
-.data-display-wrapper :deep(.el-table) {
-  background-color: #1e3a5f;
-  color: #e0e0e0;
-}
-</style>
-
-<style>
-/* 固定列完全不透明背景 - 全局样式 */
-.el-table__fixed-right {
-  background: #1e3a5f !important;
-  background-color: #1e3a5f !important;
-}
-
-/* 固定列所有层级都完全不透明 */
-.el-table__fixed-right *,
-.el-table__fixed-right *:before,
-.el-table__fixed-right *:after {
-  background-color: #1e3a5f !important;
-  background: #1e3a5f !important;
-}
-
-/* 固定列容器和包装器 */
-.el-table__fixed-right,
-.el-table__fixed-right::before,
-.el-table__fixed-right::after,
-.el-table__fixed-right .el-table__header-wrapper,
-.el-table__fixed-right .el-table__body-wrapper,
-.el-table__fixed-right .el-table__fixed-body-wrapper,
-.el-table__fixed-right .el-table__header,
-.el-table__fixed-right .el-table__body,
-.el-table__fixed-right table,
-.el-table__fixed-right thead,
-.el-table__fixed-right tbody,
-.el-table__fixed-right tr,
-.el-table__fixed-right .el-table__row,
-.el-table__fixed-right .el-table__cell,
-.el-table__fixed-right td,
-.el-table__fixed-right th {
-  background-color: #1e3a5f !important;
-  background: #1e3a5f !important;
-}
-
-/* 悬停时也保持完全不透明 */
-.el-table__fixed-right .el-table__row:hover,
-.el-table__fixed-right .el-table__row:hover > td,
-.el-table__fixed-right .el-table__row:hover > .el-table__cell {
-  background-color: #1e3a5f !important;
-  background: #1e3a5f !important;
 }
 </style>
