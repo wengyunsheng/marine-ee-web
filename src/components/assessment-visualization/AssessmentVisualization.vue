@@ -51,7 +51,6 @@
               <el-button @click="handleOpenImportDialog">
                 导入数据
               </el-button>
-              <span v-if="importedFileName" class="file-name">{{ importedFileName }}</span>
             </div>
             
             <!-- 搜索筛选区 -->
@@ -205,7 +204,6 @@ const selectedDevice = computed(() => {  // 根据ID从categoryList中查找完�
   
   return findDevice(categoryList.value, selectedDeviceId.value)
 })
-const importedFileName = ref('')
 const evaluating = ref(false)
 const evaluationResult = ref(null)
 const showImportDialog = ref(false)
@@ -401,8 +399,6 @@ const handleFileChange = async (file) => {
     loadingMsg.close()
     
     if (result.code === 200) {
-      importedFileName.value = file.name
-          
       // 如果是发动机,保存返回的 engineId
       if (selectedDevice.value.code === 'engine' && result.data) {
         // 尝试多种可能的字段名
@@ -427,9 +423,13 @@ const handleFileChange = async (file) => {
 const getImportApiUrl = (deviceObj) => {
   if (!deviceObj) return '/api/device/import'
   
-  const { code, parentCode } = deviceObj
+  const { code, parentCode, id } = deviceObj
   
-  // 根据 code 和 parentCode 组合判断接口
+  // 根据 parentCode 判断接口(子设备的 parentCode 指向父级类别)
+  // 如果 parentCode 为 null,说明是顶级分类,使用 code
+  const categoryCode = parentCode || code
+  
+  // 根据类别编码映射到对应的接口
   const apiMap = {
     'engine': '/api/engine/import',           // 船用发动机
     'gearbox': '/api/gearbox/import',         // 船用齿轮箱
@@ -448,8 +448,15 @@ const getImportApiUrl = (deviceObj) => {
     'default': '/api/device/import'
   }
   
-  // 优先使用 code 匹配，如果没有则使用 default
-  return apiMap[code] || apiMap['default']
+  // 优先使用 categoryCode 匹配，如果没有则使用 default
+  let apiUrl = apiMap[categoryCode] || apiMap['default']
+  
+  // 如果是发动机,需要在URL中传递deviceId参数
+  if (categoryCode === 'engine' && id) {
+    apiUrl += `?deviceId=${id}`
+  }
+  
+  return apiUrl
 }
 
 // 获取工况数据

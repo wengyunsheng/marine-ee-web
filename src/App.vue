@@ -94,7 +94,7 @@ const handleMenuSelect = (index) => {
 
 /* 导航菜单 */
 .menu-header {
-  background: #4a6b8a;
+  background: #1a3658;
   padding: 0;
   height: 50px;
 }
@@ -102,7 +102,7 @@ const handleMenuSelect = (index) => {
 /* 顶部菜单样式 */
 :deep(.top-menu.el-menu--horizontal) {
   border-bottom: none !important;
-  background: #4a6b8a;
+  background: #1a3658;
   height: 50px;
 }
 
@@ -116,13 +116,13 @@ const handleMenuSelect = (index) => {
   height: 50px;
   line-height: 50px;
   color: #ffffff;
-  background: #4a6b8a;
+  background: #1a3658;
 }
 
 :deep(.top-menu.el-menu--horizontal > .el-menu-item.is-active) {
-  color: #409eff !important;
-  background: rgba(64, 158, 255, 0.2) !important;
-  border-bottom: 2px solid #409eff !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-bottom: 2px solid #ffffff !important;
 }
 
 :deep(.top-menu.el-menu--horizontal > .el-menu-item:hover) {
@@ -133,7 +133,7 @@ const handleMenuSelect = (index) => {
   height: 50px;
   line-height: 50px;
   color: #ffffff;
-  background: #4a6b8a;
+  background: #1a3658;
 }
 
 /* 内容区域 */
@@ -218,7 +218,7 @@ const handleMenuSelect = (index) => {
 }
 
 .el-table th {
-  background-color: rgba(30, 58, 95, 0.9) !important;
+  background-color: #1e3a5f !important;
   color: #e0e0e0 !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
   font-weight: 600;
@@ -243,19 +243,19 @@ const handleMenuSelect = (index) => {
 }
 
 .el-table__row:hover > td {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .el-table__row--level-0 {
-  background-color: rgba(30, 58, 95, 0.6) !important;
+  background-color: #1e3a5f !important;
 }
 
 .el-table__row--level-0:hover > td {
-  background-color: rgba(30, 58, 95, 0.8) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .el-table--striped .el-table__body tr.el-table__row--striped td {
-  background-color: rgba(255, 255, 255, 0.02) !important;
+  background-color: #1e3a5f !important;
 }
 
 .el-table__empty-text {
