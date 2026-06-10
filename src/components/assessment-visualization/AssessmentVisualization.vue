@@ -116,7 +116,7 @@
               {{ currentPartData.efficiencyLevel }}级
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="能效评分">{{ currentPartData.efficiencyScore }}</el-descriptions-item>
+          <el-descriptions-item label="能效基值">{{ currentPartData.efficiencyScore }}</el-descriptions-item>
         </el-descriptions>
 
         <div class="section-title">工况数据</div>
@@ -638,11 +638,19 @@ const startEvaluation = async (row) => {
       if (result.code === 200 && result.data) {
         // 根据接口返回数据构建评估结果
         evaluationResult.value = {
-          overallLevel: result.data.efficiencyLevel,
-          score: result.data.baseValue,
           details: [
             { 
-              name: '能效指数', 
+              name: '能效等级', 
+              value: `${result.data.efficiencyLevel}级`, 
+              level: result.data.efficiencyLevel 
+            },
+            { 
+              name: '能效基值', 
+              value: `${result.data.baseValue}%`, 
+              level: result.data.efficiencyLevel 
+            },
+            { 
+              name: '能效指标', 
               value: `${result.data.efficiencyIndex.toFixed(2)}%`, 
               level: result.data.efficiencyLevel 
             },
@@ -676,11 +684,19 @@ const startEvaluation = async (row) => {
       if (result.code === 200 && result.data) {
         // 根据接口返回数据构建评估结果
         evaluationResult.value = {
-          overallLevel: result.data.efficiencyLevel,
-          score: result.data.baseValue,
           details: [
             { 
-              name: '能效指数', 
+              name: '能效等级', 
+              value: `${result.data.efficiencyLevel}级`, 
+              level: result.data.efficiencyLevel 
+            },
+            { 
+              name: '能效基值', 
+              value: `${result.data.baseValue}%`, 
+              level: result.data.efficiencyLevel 
+            },
+            { 
+              name: '能效指标', 
               value: `${result.data.efficiencyIndex.toFixed(2)}%`, 
               level: result.data.efficiencyLevel 
             },

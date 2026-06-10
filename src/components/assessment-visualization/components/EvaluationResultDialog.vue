@@ -6,17 +6,6 @@
     :close-on-click-modal="false"
   >
     <div v-if="evaluationResult" class="evaluation-result-content">
-      <div class="result-summary">
-        <div class="summary-item">
-          <span class="summary-label">综合能效等级</span>
-          <span class="summary-level">{{ evaluationResult.overallLevel }}级</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">能效评分</span>
-          <span class="summary-score">{{ evaluationResult.score }}</span>
-        </div>
-      </div>
-      <el-divider />
       <div class="result-details">
         <div class="detail-card" v-for="(item, index) in evaluationResult.details" :key="index">
           <div class="detail-name">{{ item.name }}</div>
@@ -63,39 +52,6 @@ const handleClose = () => {
 /* 评估结果弹窗样式 */
 .evaluation-result-content {
   padding: 10px 0;
-}
-
-.result-summary {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 20px 0;
-}
-
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.summary-label {
-  font-size: 14px;
-  color: #b0b0b0;
-  font-weight: 500;
-}
-
-.summary-score {
-  font-size: 36px;
-  font-weight: 700;
-  color: #409eff;
-  line-height: 1;
-}
-
-.summary-level {
-  font-size: 16px;
-  font-weight: 600;
-  color: #e0e0e0;
 }
 
 .result-details {
