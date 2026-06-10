@@ -10,6 +10,8 @@
       style="width: 100%"
       border
       max-height="500"
+      highlight-current-row
+      @row-click="handleRowClick"
     >
       <el-table-column type="index" label="序号" width="60" align="center" />
       
@@ -69,10 +71,19 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'condition-change'])
 
 const visible = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 })
+
+// 处理行点击事件
+const handleRowClick = (row, column, event) => {
+  // 找到当前行在数组中的索引
+  const index = props.conditionsData.findIndex(item => item === row)
+  if (index !== -1) {
+    emit('condition-change', index)
+  }
+}
 </script>

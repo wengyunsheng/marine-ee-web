@@ -31,7 +31,9 @@
           <div class="model-display">
             <ThreeDModel 
               ref="threeDModelRef" 
-              :model-parts="modelParts" 
+              :model-parts="modelParts"
+              :conditions-data="currentConditionsData"
+              :all-conditions="conditionsData"
               @part-click="handlePartClick"
             />
           </div>
@@ -165,6 +167,7 @@
       :conditions-data="conditionsData"
       :conditions-columns="conditionsColumns"
       :device-code="selectedDevice?.parentCode || ''"
+      @condition-change="handleConditionChange"
     />
   </div>
 </template>
@@ -181,6 +184,15 @@ import DataDisplaySection from './components/DataDisplaySection.vue'
 
 // 可视化相关
 const threeDModelRef = ref(null)
+
+// 直接加载外部3D模型（通过modelFilePath）
+const loadExternalModel = async (modelFilePath) => {
+  if (!threeDModelRef.value || !modelFilePath) return
+  
+  // 直接调用ThreeDModel组件的loadExternalModel方法
+  // ThreeDModel内部会自动处理Windows路径转换并显示加载结果提示
+  threeDModelRef.value.loadExternalModel(modelFilePath)
+}
 const modelParts = ref([])
 const showPartDialog = ref(false)
 const currentPartData = ref(null)
@@ -215,6 +227,14 @@ const evaluatingRow = ref(null)  // 当前评估的行ID
 const conditionsData = ref([])
 const conditionsColumns = ref([])
 const basicInfoData = ref({})  // 基本信息数据
+const currentConditionIndex = ref(0)  // 当前选中的工况索引（用于3D动画展示）
+// 当前选中的工况数据（用于3D动画展示）
+const currentConditionsData = computed(() => {
+  if (conditionsData.value && conditionsData.value.length > 0) {
+    return conditionsData.value[currentConditionIndex.value] || conditionsData.value[0]
+  }
+  return null
+})
 const searchForm = ref({  // 搜索表单
   brand: '',
   model: ''
@@ -281,6 +301,18 @@ const handleCategoryChange = (deviceObj) => {
   
   // 自动查询数据
   fetchConditionsData()
+}
+
+// 根据 code 递归查找设备对象（用于查找父设备）
+const findDeviceByCode = (nodes, code) => {
+  for (const node of nodes) {
+    if (node.code === code) return node
+    if (node.children && node.children.length > 0) {
+      const found = findDeviceByCode(node.children, code)
+      if (found) return found
+    }
+  }
+  return null
 }
 
 // 组件挂载时获取类别列表
@@ -513,6 +545,26 @@ const fetchConditionsData = async () => {
           
           // 工况数据：暂时为空，点击按钮后再加载对应发动机的工况数据
           conditionsData.value = []
+          
+          // 尝试加载父设备的3D模型（只有父设备才有modelFileUrl）
+          // selectedDevice.value 可能是子设备，需要通过 parentCode 查找父设备
+          
+          // 判断当前设备是否是子设备（有 parentCode 且不为 null）
+          let deviceToLoad = selectedDevice.value
+          if (selectedDevice.value && selectedDevice.value.parentCode) {
+            // 当前是子设备，需要查找父设备
+            const parentDevice = findDeviceByCode(categoryList.value, selectedDevice.value.parentCode)
+            if (parentDevice) {
+              deviceToLoad = parentDevice
+            }
+          }
+          
+          // 注意：字段名是 modelFileUrl 而不是 modelFilePath
+          
+          if (deviceToLoad && deviceToLoad.modelFileUrl) {
+            // modelFileUrl已经是相对路径，可以直接使用
+            loadExternalModel(deviceToLoad.modelFileUrl)
+          }
         } else {
           // 确保即使没有数据也初始化为空数组
           basicInfoData.value = {
@@ -524,6 +576,12 @@ const fetchConditionsData = async () => {
       } else {
         // 其他设备：直接使用返回的数据
         conditionsData.value = result.data
+        
+        // 如果有modelFilePath，加载3D模型
+        if (selectedDevice.value.modelFilePath) {
+          // modelFilePath是服务器路径，需要转换为URL
+          loadExternalModel(selectedDevice.value.modelFilePath)
+        }
       }
     } else {
       conditionsData.value = []
@@ -567,7 +625,13 @@ const viewTestCondition = (row) => {
 const viewConditionsData = (row) => {
   // 将当前行的performanceCurves数据设置到弹窗
   conditionsData.value = row.performanceCurves || []
+  currentConditionIndex.value = 0  // 重置为第一个工况
   showConditionsDialog.value = true
+}
+
+// 处理工况切换
+const handleConditionChange = (index) => {
+  currentConditionIndex.value = index
 }
 
 // 根据设备类型获取查询接口URL

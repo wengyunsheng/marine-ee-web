@@ -34,6 +34,45 @@
       <div class="three-d-background"></div>
       <div class="three-d-model" ref="modelContainer"></div>
       <div class="glow-effect"></div>
+      
+      <!-- 工况数据悬浮面板 -->
+      <div v-if="conditionsData && conditionsData.speed" class="hud-panel">
+        <div class="hud-header">
+          <div class="hud-title">实时工况</div>
+          <el-select 
+            v-model="currentConditionIndex" 
+            size="small"
+            class="condition-selector"
+            @change="handleConditionChange"
+          >
+            <el-option
+              v-for="(item, index) in allConditions"
+              :key="index"
+              :label="`${(item.loadFactor * 100).toFixed(0)}%负荷`"
+              :value="index"
+            />
+          </el-select>
+        </div>
+        <div class="hud-content">
+          <div class="hud-item">
+            <span class="hud-label">负荷</span>
+            <span class="hud-value">{{ (conditionsData.loadFactor * 100).toFixed(0) }}%</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">功率</span>
+            <span class="hud-value">{{ conditionsData.power }} kW</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">转速</span>
+            <span class="hud-value">{{ conditionsData.speed.toFixed(1) }} rpm</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">燃油消耗率</span>
+            <span class="hud-value">{{ conditionsData.bsfc }} g/kWh</span>
+          </div>
+        </div>
+      </div>
+      
       <div class="holographic-overlay">
         <div class="holographic-grid"></div>
         <div 
@@ -65,15 +104,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader'
 import { ZoomIn, ZoomOut, RefreshRight, PriceTag, Camera } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   modelParts: {
     type: Array,
     required: true
+  },
+  conditionsData: {
+    type: Object,
+    default: null
+  },
+  allConditions: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -88,6 +141,245 @@ let camera = null
 let renderer = null
 let controls = null
 let animationId = null
+
+// 动画相关变量
+
+// 外部模型加载相关
+const loadedModel = ref(null)  // 存储加载的外部模型
+
+// 工况切换相关
+const currentConditionIndex = ref(0)
+const allConditions = ref([])  // 存储所有工况数据
+
+// 处理工况切换
+const handleConditionChange = (index) => {
+  currentConditionIndex.value = index
+}
+
+// 监听 allConditions 变化，更新下拉选项
+watch(() => props.allConditions, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    allConditions.value = newVal
+  }
+}, { immediate: true })
+
+// 加载外部3D模型文件
+const loadExternalModel = async (url) => {
+  if (!scene || !url) return
+  
+  // 清除之前加载的模型
+  if (loadedModel.value) {
+    scene.remove(loadedModel.value)
+    loadedModel.value = null
+  }
+  
+  let modelUrl = url
+  
+  // 处理服务器文件路径
+  // 如果是相对路径（以 / 开头），直接使用
+  // 如果是绝对URL（http:// 或 https://），直接使用
+  // 如果是Windows本地路径（包含 \ 或以 D: C: 开头），需要转换
+  if (url.includes('\\') || url.startsWith('D:') || url.startsWith('C:')) {
+    // Windows路径格式: D:\\uploads\\3d-models\\2026\\06\\10\\engine.STL
+    const normalizedPath = url.replace(/\\/g, '/')
+    const pathParts = normalizedPath.split('/')
+    const fileName = pathParts[pathParts.length - 1]
+    
+    if (normalizedPath.includes('/uploads/')) {
+      const uploadIndex = normalizedPath.indexOf('/uploads/')
+      const relativePath = normalizedPath.substring(uploadIndex + 1)
+      modelUrl = `/api/${relativePath}`
+    } else {
+      modelUrl = `/models/${fileName}`
+    }
+  } else if (url.startsWith('/')) {
+    // 相对路径，直接使用（例如: /uploads/2026/06/10/engine.STL）
+    modelUrl = url
+  }
+  
+  const fileExtension = modelUrl.split('.').pop().toLowerCase()
+  
+  try {
+    switch (fileExtension) {
+      case 'glb':
+      case 'gltf':
+        await loadGLTF(modelUrl)
+        break
+      case 'obj':
+        await loadOBJ(modelUrl)
+        break
+      case 'fbx':
+        await loadFBX(modelUrl)
+        break
+      case 'stl':
+        await loadSTL(modelUrl)
+        break
+      default:
+        ElMessage.warning(`不支持的文件格式: .${fileExtension}`)
+        return
+    }
+    
+    // 只在真正成功时显示成功消息
+    ElMessage.success('3D模型加载成功')
+  } catch (error) {
+    ElMessage.error('加载3D模型失败: ' + error.message)
+  }
+}
+
+// 加载GLTF/GLB格式
+const loadGLTF = (url) => {
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader()
+    loader.load(
+      url,
+      (gltf) => {
+        loadedModel.value = gltf.scene
+        scene.add(gltf.scene)
+        
+        // 自动调整相机位置以适应模型
+        try {
+          fitCameraToObject(camera, gltf.scene, controls)
+        } catch (e) {
+          // 忽略相机调整错误，不影响模型显示
+        }
+        resolve(gltf)
+      },
+      undefined,
+      (error) => reject(error)
+    )
+  })
+}
+
+// 加载OBJ格式（需要同时加载MTL材质文件）
+const loadOBJ = async (url) => {
+  return new Promise((resolve, reject) => {
+    const mtlUrl = url.replace('.obj', '.mtl')
+    const mtlLoader = new MTLLoader()
+    
+    mtlLoader.load(
+      mtlUrl,
+      (materials) => {
+        materials.preload()
+        const objLoader = new OBJLoader()
+        objLoader.setMaterials(materials)
+        
+        objLoader.load(
+          url,
+          (object) => {
+            loadedModel.value = object
+            scene.add(object)
+            try {
+              fitCameraToObject(camera, object, controls)
+            } catch (e) {
+              // 忽略相机调整错误，不影响模型显示
+            }
+            resolve(object)
+          },
+          undefined,
+          (error) => reject(error)
+        )
+      },
+      undefined,
+      (error) => {
+        // 如果没有MTL文件，直接加载OBJ
+        const objLoader = new OBJLoader()
+        objLoader.load(
+          url,
+          (object) => {
+            loadedModel.value = object
+            scene.add(object)
+            try {
+              fitCameraToObject(camera, object, controls)
+            } catch (e) {
+              // 忽略相机调整错误，不影响模型显示
+            }
+            resolve(object)
+          },
+          undefined,
+          (error) => reject(error)
+        )
+      }
+    )
+  })
+}
+
+// 加载FBX格式
+const loadFBX = (url) => {
+  return new Promise((resolve, reject) => {
+    const loader = new FBXLoader()
+    loader.load(
+      url,
+      (object) => {
+        loadedModel.value = object
+        scene.add(object)
+        try {
+          fitCameraToObject(camera, object, controls)
+        } catch (e) {
+          // 忽略相机调整错误，不影响模型显示
+        }
+        resolve(object)
+      },
+      undefined,
+      (error) => reject(error)
+    )
+  })
+}
+
+// 加载STL格式
+const loadSTL = (url) => {
+  return new Promise((resolve, reject) => {
+    const loader = new STLLoader()
+    
+    loader.load(
+      url,
+      (geometry) => {
+        const material = new THREE.MeshStandardMaterial({ 
+          color: 0x63b3ed,
+          metalness: 0.7,
+          roughness: 0.3
+        })
+        const mesh = new THREE.Mesh(geometry, material)
+        loadedModel.value = mesh
+        scene.add(mesh)
+        
+        // 安全地调整相机位置
+        try {
+          fitCameraToObject(camera, mesh, controls)
+        } catch (e) {
+          // 忽略相机调整错误，不影响模型显示
+        }
+        
+        resolve(mesh)
+      },
+      (progress) => {
+        // 加载进度（静默处理）
+      },
+      (error) => {
+        reject(error)
+      }
+    )
+  })
+}
+
+// 自动调整相机位置以适应模型大小
+const fitCameraToObject = (camera, object, controls) => {
+  const box = new THREE.Box3().setFromObject(object)
+  const size = box.getSize(new THREE.Vector3())
+  const center = box.getCenter(new THREE.Vector3())
+  
+  const maxDim = Math.max(size.x, size.y, size.z)
+  const fov = camera.fov * (Math.PI / 180)
+  let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2))
+  cameraZ *= 2.5  // 留出一些边距
+  
+  camera.position.set(center.x, center.y + cameraZ * 0.5, center.z + cameraZ)
+  camera.lookAt(center)
+  
+  if (controls) {
+    controls.target.copy(center)
+    controls.update()
+  }
+}
 
 const getLevelTagType = (level) => {
   if (level === '1') return 'success'
@@ -184,121 +476,6 @@ const onWindowResize = () => {
   }
 }
 
-const createShipEngineModel = () => {
-  if (!scene) return
-
-  const darkGray = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.7, roughness: 0.3 })
-  const lightGray = new THREE.MeshStandardMaterial({ color: 0xa0aec0, metalness: 0.6, roughness: 0.4 })
-  const steelBlue = new THREE.MeshStandardMaterial({ color: 0x63b3ed, metalness: 0.8, roughness: 0.2 })
-  const copper = new THREE.MeshStandardMaterial({ color: 0xed8936, metalness: 0.9, roughness: 0.3 })
-  const black = new THREE.MeshStandardMaterial({ color: 0x2d3748, metalness: 0.5, roughness: 0.5 })
-  const red = new THREE.MeshStandardMaterial({ color: 0xf56565, metalness: 0.7, roughness: 0.3 })
-  const golden = new THREE.MeshStandardMaterial({ color: 0xf6ad55, metalness: 0.9, roughness: 0.2 })
-
-  // 底座
-  const basePlate = new THREE.Mesh(new THREE.BoxGeometry(6, 0.3, 3), lightGray)
-  basePlate.position.y = -1.8
-  basePlate.receiveShadow = true
-  scene.add(basePlate)
-
-  // 框架
-  const frameLeft = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 2.8), darkGray)
-  frameLeft.position.set(-2.4, -0.35, 0)
-  frameLeft.castShadow = true
-  scene.add(frameLeft)
-
-  const frameRight = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 2.8), darkGray)
-  frameRight.position.set(2.4, -0.35, 0)
-  frameRight.castShadow = true
-  scene.add(frameRight)
-
-  // 气缸
-  const cylinderCount = 6
-  const cylinderSpacing = 0.8
-  const startX = -((cylinderCount - 1) * cylinderSpacing) / 2
-
-  for (let i = 0; i < cylinderCount; i++) {
-    const cylinderX = startX + i * cylinderSpacing
-    
-    const cylinderBlock = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 1.8), steelBlue)
-    cylinderBlock.position.set(cylinderX, 0.5, 0)
-    cylinderBlock.castShadow = true
-    scene.add(cylinderBlock)
-
-    const cylinderHead = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.32, 0.3, 32), darkGray)
-    cylinderHead.position.set(cylinderX, 1.2, 0)
-    cylinderHead.castShadow = true
-    scene.add(cylinderHead)
-
-    const exhaustPort = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.25, 16), copper)
-    exhaustPort.position.set(cylinderX, 1.4, 0)
-    exhaustPort.castShadow = true
-    scene.add(exhaustPort)
-
-    const coolingFin = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 1.6), lightGray)
-    coolingFin.position.set(cylinderX, 0.9, 0)
-    scene.add(coolingFin)
-  }
-
-  // 曲轴箱
-  const crankcase = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1, 2.2), darkGray)
-  crankcase.position.set(0, -0.8, 0)
-  crankcase.castShadow = true
-  scene.add(crankcase)
-
-  // 曲轴箱盖
-  const crankshaftCover = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.3, 32), lightGray)
-  crankshaftCover.position.set(2.7, -0.8, 0)
-  crankshaftCover.rotation.z = Math.PI / 2
-  crankshaftCover.castShadow = true
-  scene.add(crankshaftCover)
-
-  // 涡轮增压器
-  const turboHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 0.6, 32), darkGray)
-  turboHousing.position.set(0, 1.8, 1.2)
-  turboHousing.castShadow = true
-  scene.add(turboHousing)
-
-  const turboFan = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 32), copper)
-  turboFan.position.set(0, 1.8, 1.6)
-  turboFan.castShadow = true
-  scene.add(turboFan)
-
-  // 排气歧管
-  const exhaustManifold = new THREE.Mesh(new THREE.BoxGeometry(5, 0.25, 0.3), copper)
-  exhaustManifold.position.set(0, 1.55, 1)
-  exhaustManifold.castShadow = true
-  scene.add(exhaustManifold)
-
-  // 进气管
-  const intakePipe = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1.5, 16), lightGray)
-  intakePipe.position.set(0, 1, 1.3)
-  intakePipe.rotation.x = Math.PI / 2
-  scene.add(intakePipe)
-
-  // 燃油喷射器
-  const fuelInjection = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.05, 0.4, 16), black)
-  fuelInjection.position.set(startX + 2 * cylinderSpacing, 1.35, -0.6)
-  scene.add(fuelInjection)
-
-  // 油底壳
-  const oilPan = new THREE.Mesh(new THREE.BoxGeometry(5, 0.4, 2), darkGray)
-  oilPan.position.set(0, -1.5, 0)
-  oilPan.receiveShadow = true
-  scene.add(oilPan)
-
-  // 安装支架
-  const mountingBracket = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.15, 3.2), black)
-  mountingBracket.position.set(0, -1.95, 0)
-  mountingBracket.receiveShadow = true
-  scene.add(mountingBracket)
-
-  // 发光效果
-  const glowGeometry = new THREE.BoxGeometry(5.5, 3.5, 2.5)
-  const glowMaterial = new THREE.MeshBasicMaterial({ color: 0x2c3e50, transparent: true, opacity: 0.2 })
-  const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial)
-  scene.add(glowMesh)
-}
 
 const initThreeScene = () => {
   if (!threeContainer.value || !modelContainer.value) return
@@ -352,8 +529,6 @@ const initThreeScene = () => {
   rimLight.position.set(0, -5, 10)
   scene.add(rimLight)
 
-  createShipEngineModel()
-
   const gridHelper = new THREE.GridHelper(20, 20, 0x4a90d9, 0x2d5a8a)
   scene.add(gridHelper)
 
@@ -364,9 +539,11 @@ const initThreeScene = () => {
 
 const animate = () => {
   animationId = requestAnimationFrame(animate)
+  
   if (controls) {
     controls.update()
   }
+  
   if (renderer && scene && camera) {
     renderer.render(scene, camera)
   }
@@ -386,6 +563,23 @@ const cleanThreeScene = () => {
     controls.dispose()
   }
   if (scene) {
+    // 清理外部加载的模型
+    if (loadedModel.value) {
+      scene.remove(loadedModel.value)
+      loadedModel.value.traverse((object) => {
+        if (object.geometry) object.geometry.dispose()
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(material => material.dispose())
+          } else {
+            object.material.dispose()
+          }
+        }
+      })
+      loadedModel.value = null
+    }
+    
+    // 清理硬编码模型的几何体和材质
     scene.traverse((object) => {
       if (object.geometry) object.geometry.dispose()
       if (object.material) {
@@ -414,7 +608,8 @@ defineExpose({
   zoomOut,
   rotateModel,
   toggleLabels,
-  captureScreen
+  captureScreen,
+  loadExternalModel
 })
 </script>
 
@@ -630,5 +825,115 @@ defineExpose({
 
 .holographic-fill.error {
   background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+/* HUD悬浮面板样式 */
+.hud-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid rgba(59, 130, 246, 0.6);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  min-width: 220px;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.3);
+  animation: hudFadeIn 0.5s ease-out;
+}
+
+@keyframes hudFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hud-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #60a5fa;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+  padding-bottom: 8px;
+}
+
+.hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.condition-selector {
+  width: 120px;
+}
+
+.condition-selector :deep(.el-input__inner) {
+  background-color: rgba(30, 58, 95, 0.8);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #fff;
+  height: 28px;
+  line-height: 28px;
+}
+
+.condition-selector :deep(.el-input__inner:hover) {
+  border-color: #3b82f6;
+  background-color: rgba(30, 58, 95, 0.9);
+}
+
+.condition-selector :deep(.el-select-dropdown) {
+  background-color: rgba(30, 58, 95, 0.95);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.condition-selector :deep(.el-select-dropdown__item) {
+  color: #fff;
+}
+
+.condition-selector :deep(.el-select-dropdown__item.hover),
+.condition-selector :deep(.el-select-dropdown__item:hover) {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+.hud-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hud-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hud-item:last-child {
+  border-bottom: none;
+}
+
+.hud-label {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.hud-value {
+  font-size: 15px;
+  color: #fff;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 </style>
