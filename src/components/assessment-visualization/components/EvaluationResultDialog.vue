@@ -19,10 +19,7 @@
       <el-divider />
       <div class="result-details">
         <div class="detail-card" v-for="(item, index) in evaluationResult.details" :key="index">
-          <div class="detail-header">
-            <span class="detail-name">{{ item.name }}</span>
-            <span class="detail-level">{{ item.level }}级</span>
-          </div>
+          <div class="detail-name">{{ item.name }}</div>
           <div class="detail-value">{{ item.value }}</div>
         </div>
       </div>
@@ -122,22 +119,10 @@ const handleClose = () => {
   transform: translateX(4px);
 }
 
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
 .detail-name {
   font-size: 14px;
   color: #b0b0b0;
-}
-
-.detail-level {
-  font-size: 14px;
-  color: #e0e0e0;
-  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .detail-value {

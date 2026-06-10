@@ -619,17 +619,13 @@ const closeImportDialog = () => {
 
 // 开始评估
 const startEvaluation = async (row) => {
-  evaluating.value = true
-  evaluatingRow.value = row.id
-  
   try {
-    // 判断是否已经评估过(支持多种类型:boolean、数字、字符串)
-    const isEvaluated = row.is_evaluated === 1 || row.is_evaluated === true || 
-                        row.isEvaluated === 1 || row.isEvaluated === true ||
-                        row.is_evaluated === '1' || row.isEvaluated === '1'
+    // 判断是否已经评估过
+    // 后端返回字段: isEvaluated (Boolean)
+    const isEvaluated = row.isEvaluated === true
         
     if (isEvaluated) {
-      // 已评估:调用 GET 接口查看结果
+      // 已评估:调用 GET 接口查看结果(不显示评估中)
       const response = await fetch(`/api/engine/evaluate/${row.id}`, {
         method: 'GET',
         headers: {
@@ -652,7 +648,7 @@ const startEvaluation = async (row) => {
             },
             { 
               name: '能效等级', 
-              value: result.data.levelDescription, 
+              value: `${result.data.efficiencyLevel}级`, 
               level: result.data.efficiencyLevel 
             },
             { 
@@ -669,7 +665,10 @@ const startEvaluation = async (row) => {
         throw new Error(result.message || '获取评估结果失败')
       }
     } else {
-      // 未评估：调用 POST 接口进行评估
+      // 未评估：调用 POST 接口进行评估(显示评估中)
+      evaluating.value = true
+      evaluatingRow.value = row.id
+      
       const response = await fetch(`/api/engine/evaluate/${row.id}`, {
         method: 'POST',
         headers: {
@@ -692,7 +691,7 @@ const startEvaluation = async (row) => {
             },
             { 
               name: '能效等级', 
-              value: result.data.levelDescription, 
+              value: `${result.data.efficiencyLevel}级`, 
               level: result.data.efficiencyLevel 
             },
             { 
@@ -715,8 +714,11 @@ const startEvaluation = async (row) => {
   } catch (error) {
     ElMessage.error('操作失败: ' + error.message)
   } finally {
-    evaluating.value = false
-    evaluatingRow.value = null
+    // 只有未评估时才需要重置评估中状态
+    if (!row.isEvaluated) {
+      evaluating.value = false
+      evaluatingRow.value = null
+    }
   }
 }
 </script>
