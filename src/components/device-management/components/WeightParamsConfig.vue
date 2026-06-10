@@ -83,14 +83,12 @@ const fetchWeightParams = async () => {
           weightCoefficient: condition.weightCoefficient || 0
         }))
       }))
-      console.log('试验循环数据:', cyclesList.value)
     } else {
       ElMessage.error(result.message || '获取试验循环数据失败')
       cyclesList.value = []
     }
   } catch (error) {
     ElMessage.error('获取试验循环数据失败')
-    console.error(error)
     cyclesList.value = []
   } finally {
     loading.value = false

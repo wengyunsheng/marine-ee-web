@@ -15,7 +15,7 @@
       <el-table-column type="index" label="序号" width="60" align="center" />
       
       <!-- 发动机工况数据列 -->
-      <template v-if="categoryId === 'engine'">
+      <template v-if="deviceCode === 'engine'">
         <el-table-column prop="loadFactor" label="负荷因子" width="100" align="center">
           <template #default="{ row }">
             {{ (row.loadFactor * 100).toFixed(0) }}%
@@ -64,7 +64,7 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  categoryId: {
+  deviceCode: {
     type: String,
     default: ''
   }

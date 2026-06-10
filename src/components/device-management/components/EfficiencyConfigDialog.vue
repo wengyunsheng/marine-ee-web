@@ -151,10 +151,7 @@ const fetchEfficiencyData = async () => {
     let apiUrl = ''
     const parentCode = props.deviceData.parentCode || ''
     
-    console.log('设备信息:', props.deviceData)
-    console.log('parentCode:', parentCode)
-    
-    // 根据 parentCode 的值判断设备类型，调用对应接口
+    // 根据 parentCode 的值判断设备类型,调用对应接口
     const deviceName = props.deviceData.name || ''
     const deviceCode = props.deviceData.code || ''
     
@@ -315,7 +312,6 @@ const fetchEfficiencyData = async () => {
     }
   } catch (error) {
     ElMessage.error('获取数据失败')
-    console.error(error)
     efficiencyData.value = []
     tableColumns.value = []
   } finally {

@@ -12,15 +12,11 @@
         </el-select>
         <el-input
           v-model="searchQuery"
-          placeholder="搜索设备名称"
+          placeholder="请输入设备名称"
           clearable
-          style="width: 300px;"
+          style="flex: 1; min-width: 200px; max-width: 400px;"
           @keyup.enter="handleSearch"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
+        />
         <el-button @click="handleSearch">
           <Search />
           查询
@@ -65,25 +61,6 @@
       </el-table>
     </div>
 
-    <!-- 新增/编辑设备弹窗 -->
-    <el-dialog
-      v-model="showFormModal"
-      :title="isEditMode ? (isCategoryEditMode ? '编辑分类' : '编辑设备') : (isSubDeviceMode ? '新增子设备' : '新增设备')"
-      width="600px"
-      :close-on-click-modal="false"
-      @close="closeFormModal"
-    >
-      <DeviceForm
-        :is-edit="isEditMode"
-        :is-sub-device="isSubDeviceMode"
-        :is-category-edit="isCategoryEditMode"
-        :form-data="formData"
-        :parent-options="parentOptions"
-        @save="saveDevice"
-        @close="closeFormModal"
-      />
-    </el-dialog>
-
     <!-- 上传3D模型弹窗 -->
     <UploadModelDialog
       v-model="showUploadModal"
@@ -112,10 +89,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { Search, UploadFilled } from '@element-plus/icons-vue'
+import { ref, onMounted, nextTick } from 'vue'
+import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import DeviceForm from './components/DeviceForm.vue'
 import WeightParamsConfig from './components/WeightParamsConfig.vue'
 import EfficiencyConfigDialog from './components/EfficiencyConfigDialog.vue'
 import UploadModelDialog from './components/UploadModelDialog.vue'
@@ -123,27 +99,14 @@ import UploadModelDialog from './components/UploadModelDialog.vue'
 const searchQuery = ref('')
 const categoryFilter = ref('')
 
-const showFormModal = ref(false)
 const showUploadModal = ref(false)
 const showWeightParamsModal = ref(false)
 const showEfficiencyConfigModal = ref(false)
-const isEditMode = ref(false)
 const currentCategory = ref(null)
 const currentDevice = ref(null)
-const isSubDeviceMode = ref(false)
-const isCategoryEditMode = ref(false)
 const loading = ref(false)
 const weightParamsConfigRef = ref(null)
 const tableRef = ref(null)
-
-const defaultFormData = {
-  code: '',
-  name: '',
-  category: '',
-  sort: 0
-}
-
-const formData = ref({ ...defaultFormData })
 
 // 树形数据（从接口获取）
 const treeData = ref([])
@@ -184,7 +147,6 @@ const fetchTreeData = async (searchParams = {}) => {
     }
   } catch (error) {
     ElMessage.error('获取数据失败')
-    console.error(error)
   } finally {
     loading.value = false
   }
@@ -223,7 +185,6 @@ const fetchParentOptions = async () => {
     }
   } catch (error) {
     ElMessage.error('获取父设备选项失败')
-    console.error(error)
   }
 }
 
@@ -245,69 +206,6 @@ const resetFilter = () => {
   categoryFilter.value = ''
   // 重新加载所有数据
   fetchTreeData()
-}
-
-const closeFormModal = () => {
-  showFormModal.value = false
-  formData.value = { ...defaultFormData }
-  isCategoryEditMode.value = false
-}
-
-const saveDevice = async (data) => {
-  if (!data.code) {
-    ElMessage.warning('请填写设备编码')
-    return
-  }
-  if (!data.name) {
-    ElMessage.warning('请填写设备名称')
-    return
-  }
-
-  try {
-    if (isEditMode.value) {
-      // 编辑模式 - 父类和子类都使用同一个接口
-      const response = await fetch('/api/devices', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-      const result = await response.json()
-      
-      if (result.code === 200) {
-        ElMessage.success('修改成功')
-        fetchTreeData() // 刷新数据
-      } else {
-        ElMessage.error(result.message || '修改失败')
-      }
-    } else {
-      // 新增模式 - 父类和子类都使用同一个接口
-      const requestData = isSubDeviceMode.value
-        ? { ...data, parentCode: data.category }
-        : { ...data }
-      
-      const response = await fetch('/api/devices', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-      })
-      const result = await response.json()
-      
-      if (result.code === 200) {
-        ElMessage.success('创建成功')
-        fetchTreeData() // 刷新数据
-      } else {
-        ElMessage.error(result.message || '创建失败')
-      }
-    }
-    closeFormModal()
-  } catch (error) {
-    ElMessage.error('操作失败')
-    console.error(error)
-  }
 }
 
 
@@ -405,10 +303,6 @@ const closeEfficiencyConfigModal = () => {
   font-size: 18px;
   font-weight: 600;
   color: #e0e0e0;
-}
-
-.device-category {
-  display: none;
 }
 
 /* ==================== 响应式布局 ==================== */

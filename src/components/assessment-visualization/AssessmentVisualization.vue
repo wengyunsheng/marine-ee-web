@@ -2,20 +2,24 @@
   <div class="assessment-visualization-container">
     <!-- 顶部全局控制栏 -->
     <div class="global-control-bar">
-      <el-select 
-        v-model="selectedCategoryId" 
-        placeholder="全部设备类别"
+      <el-tree-select 
+        v-model="selectedDeviceId" 
+        :data="categoryList"
+        :props="{ 
+          label: 'name', 
+          value: 'id', 
+          children: 'children',
+          disabled: (data) => data.children && data.children.length > 0
+        }"
+        placeholder="全部设备"
         clearable
+        check-strictly
+        :render-after-expand="false"
+        popper-class="device-tree-select-popper"
         @change="handleCategoryChange"
+        class="device-tree-select"
         style="width: 240px;"
-      >
-        <el-option
-          v-for="category in categoryList"
-          :key="category.code"
-          :label="category.name"
-          :value="category.code"
-        />
-      </el-select>
+      />
     </div>
 
     <!-- 左右布局内容区 -->
@@ -51,7 +55,7 @@
             </div>
             
             <!-- 搜索筛选区 -->
-            <div class="search-filter-bar">
+            <div v-if="selectedDevice && selectedDevice.parentCode === 'engine'" class="search-filter-bar">
               <el-form :inline="true" :model="searchForm">
                 <el-form-item label="品牌">
                   <el-input 
@@ -78,6 +82,7 @@
             
             <!-- 数据展示区 -->
             <DataDisplaySection
+              :device-type="selectedDevice?.parentCode || selectedDevice?.code"
               :engine-list="basicInfoData.engineList"
               :evaluating="evaluating"
               :evaluating-row-id="evaluatingRow"
@@ -160,29 +165,20 @@
       v-model="showConditionsDialog"
       :conditions-data="conditionsData"
       :conditions-columns="conditionsColumns"
-      :category-id="selectedCategoryId"
+      :device-code="selectedDevice?.code || ''"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Upload, View } from '@element-plus/icons-vue'
 import ThreeDModel from './components/ThreeDModel.vue'
 import EvaluationResultDialog from './components/EvaluationResultDialog.vue'
 import TestConditionDialog from './components/TestConditionDialog.vue'
 import ConditionsDataDialog from './components/ConditionsDataDialog.vue'
 import FileUploadDialog from './components/FileUploadDialog.vue'
 import DataDisplaySection from './components/DataDisplaySection.vue'
-
-// Props
-const props = defineProps({
-  globalState: {
-    type: Object,
-    required: true
-  }
-})
 
 // 可视化相关
 const threeDModelRef = ref(null)
@@ -191,9 +187,25 @@ const showPartDialog = ref(false)
 const currentPartData = ref(null)
 
 // 评估相关
-const selectedCategoryId = ref('')
+const selectedDeviceId = ref(null)  // 选中的设备ID
+const selectedDevice = computed(() => {  // 根据ID从categoryList中查找完整设备对象
+  if (!selectedDeviceId.value || !categoryList.value.length) return null
+  
+  // 递归查找设备对象
+  const findDevice = (nodes, id) => {
+    for (const node of nodes) {
+      if (node.id === id) return node
+      if (node.children && node.children.length > 0) {
+        const found = findDevice(node.children, id)
+        if (found) return found
+      }
+    }
+    return null
+  }
+  
+  return findDevice(categoryList.value, selectedDeviceId.value)
+})
 const importedFileName = ref('')
-const importedEngineId = ref(null)  // 导入的发动机ID
 const evaluating = ref(false)
 const evaluationResult = ref(null)
 const showImportDialog = ref(false)
@@ -223,31 +235,45 @@ const categoryList = ref([])
 // 获取类别选项
 const fetchCategoryOptions = async () => {
   try {
-    const response = await fetch('/api/devices/parent-options', {
-      method: 'GET'
+    const response = await fetch('/api/devices/tree', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({}) // 空对象，获取所有设备树
     })
     const result = await response.json()
     if (result.code === 200) {
       categoryList.value = result.data || []
       
       // 页面加载时默认选中第一个类别
-      if (categoryList.value.length > 0 && !selectedCategoryId.value) {
-        selectedCategoryId.value = categoryList.value[0].code
-        handleCategoryChange(selectedCategoryId.value)
+      if (categoryList.value.length > 0 && !selectedDeviceId.value) {
+        const firstCategory = categoryList.value[0]
+        
+        // 判断是否有子设备：如果有子设备且子设备数量>0，选择第一个子设备；否则选择自己
+        if (firstCategory.children && firstCategory.children.length > 0) {
+          selectedDeviceId.value = firstCategory.children[0].id
+        } else {
+          selectedDeviceId.value = firstCategory.id
+        }
+        
+        // 使用 nextTick 确保 DOM 更新后再触发查询
+        nextTick(() => {
+          handleCategoryChange(selectedDeviceId.value)
+        })
       }
     } else {
       ElMessage.error(result.message || '获取类别列表失败')
     }
   } catch (error) {
     ElMessage.error('获取类别列表失败')
-    console.error(error)
   }
 }
 
 // 类别变化处理
-const handleCategoryChange = (categoryId) => {
-  if (!categoryId) {
-    // 清空类别时，重置所有状态
+const handleCategoryChange = (deviceObj) => {
+  if (!deviceObj) {
+    // 清空选择时，重置所有状态
     modelParts.value = []
     conditionsColumns.value = []
     conditionsData.value = []
@@ -262,10 +288,6 @@ const handleCategoryChange = (categoryId) => {
 // 组件挂载时获取类别列表
 onMounted(() => {
   fetchCategoryOptions()
-  
-  // 页面加载后自动查询发动机数据
-  selectedCategoryId.value = 'engine'  // 默认选中发动机
-  fetchConditionsData()
   
   // 初始化左右面板宽度为50%
   initPanelWidth()
@@ -336,9 +358,9 @@ const handlePartClick = (part) => {
 
 // 打开导入数据弹窗
 const handleOpenImportDialog = () => {
-  // 检查是否选择了设备类别
-  if (!selectedCategoryId.value) {
-    ElMessage.warning('请先选择设备类别')
+  // 检查是否选择了设备
+  if (!selectedDevice.value) {
+    ElMessage.warning('请先选择设备')
     return
   }
   
@@ -347,9 +369,9 @@ const handleOpenImportDialog = () => {
 
 // 文件上传处理
 const handleFileChange = async (file) => {
-  // 检查是否选择了设备类别
-  if (!selectedCategoryId.value) {
-    ElMessage.warning('请先选择设备类别')
+  // 检查是否选择了设备
+  if (!selectedDevice.value) {
+    ElMessage.warning('请先选择设备')
     return
   }
   
@@ -365,8 +387,8 @@ const handleFileChange = async (file) => {
     const formData = new FormData()
     formData.append('file', file.raw)
     
-    // 根据不同设备类别调用不同的导入接口
-    const importApiUrl = getImportApiUrl(selectedCategoryId.value)
+    // 根据设备类型调用不同的导入接口
+    const importApiUrl = getImportApiUrl(selectedDevice.value)
     
     const response = await fetch(importApiUrl, {
       method: 'POST',
@@ -380,15 +402,11 @@ const handleFileChange = async (file) => {
     
     if (result.code === 200) {
       importedFileName.value = file.name
-      
-      // 打印后端返回的完整数据结构，用于调试
-      console.log('导入接口返回数据:', result.data)
-      
-      // 如果是发动机，保存返回的 engineId
-      if (selectedCategoryId.value === 'engine' && result.data) {
+          
+      // 如果是发动机,保存返回的 engineId
+      if (selectedDevice.value.code === 'engine' && result.data) {
         // 尝试多种可能的字段名
         importedEngineId.value = result.data.engineId || result.data.id || result.data
-        console.log('保存的engineId:', importedEngineId.value)
       }
       
       showImportDialog.value = false
@@ -402,12 +420,16 @@ const handleFileChange = async (file) => {
     }
   } catch (error) {
     ElMessage.error('导入失败：' + error.message)
-    console.error('导入错误:', error)
   }
 }
 
-// 根据不同设备类别获取导入接口URL
-const getImportApiUrl = (categoryId) => {
+// 根据设备类型获取导入接口URL
+const getImportApiUrl = (deviceObj) => {
+  if (!deviceObj) return '/api/device/import'
+  
+  const { code, parentCode } = deviceObj
+  
+  // 根据 code 和 parentCode 组合判断接口
   const apiMap = {
     'engine': '/api/engine/import',           // 船用发动机
     'gearbox': '/api/gearbox/import',         // 船用齿轮箱
@@ -426,28 +448,37 @@ const getImportApiUrl = (categoryId) => {
     'default': '/api/device/import'
   }
   
-  return apiMap[categoryId] || apiMap['default']
+  // 优先使用 code 匹配，如果没有则使用 default
+  return apiMap[code] || apiMap['default']
 }
 
 // 获取工况数据
 const fetchConditionsData = async () => {
+  if (!selectedDevice.value) {
+    return
+  }
+  
   try {
-    // 根据不同设备类别调用不同的查询接口
-    const queryApiUrl = getQueryApiUrl(selectedCategoryId.value)
+    // 根据设备类型调用不同的查询接口
+    const queryApiUrl = getQueryApiUrl(selectedDevice.value)
     
-    console.log('查询接口URL:', queryApiUrl)
+    // 如果未配置接口，直接返回
+    if (!queryApiUrl) {
+      return
+    }
     
     // 构建查询参数
+    const deviceCategory = selectedDevice.value.parentCode || selectedDevice.value.code
     let requestBody = {}
-    if (selectedCategoryId.value === 'engine') {
-      // 发动机：使用搜索表单的条件
+    
+    if (deviceCategory === 'engine') {
+      // 发动机：使用搜索表单的条件 + 设备ID
       requestBody = {
+        deviceId: selectedDevice.value.id,  // 具体的设备ID（数字类型）
         brand: searchForm.value.brand || '',
         model: searchForm.value.model || ''
       }
     }
-    
-    console.log('查询参数:', requestBody)
     
     const response = await fetch(queryApiUrl, {
       method: 'POST',
@@ -458,11 +489,11 @@ const fetchConditionsData = async () => {
     })
     const result = await response.json()
     
-    console.log('查询接口返回数据:', result)
-    
     if (result.code === 200 && result.data) {
-      // 根据设备类别处理不同的数据结构
-      if (selectedCategoryId.value === 'engine') {
+      // 根据设备类型处理不同的数据结构（使用 parentCode 判断）
+      const deviceCategory = selectedDevice.value.parentCode || selectedDevice.value.code
+      
+      if (deviceCategory === 'engine') {
         // 发动机：返回的是数组，直接展示列表
         const engineDataList = Array.isArray(result.data) ? result.data : [result.data]
         
@@ -476,7 +507,11 @@ const fetchConditionsData = async () => {
           // 工况数据：暂时为空，点击按钮后再加载对应发动机的工况数据
           conditionsData.value = []
         } else {
-          basicInfoData.value = {}
+          // 确保即使没有数据也初始化为空数组
+          basicInfoData.value = {
+            engineList: [],
+            engineInfo: null
+          }
           conditionsData.value = []
         }
       } else {
@@ -484,15 +519,17 @@ const fetchConditionsData = async () => {
         conditionsData.value = result.data
       }
     } else {
-      console.warn('获取工况数据返回空数据')
       conditionsData.value = []
       basicInfoData.value = {}
     }
   } catch (error) {
-    console.error('获取工况数据失败:', error)
-    // 即使获取失败也不报错，因为可能后端还没实现这个接口
+    // 即使获取失败也不报错,因为可能后端还没实现这个接口
     conditionsData.value = []
-    basicInfoData.value = {}
+    // 确保即使出错也初始化 engineList 为空数组
+    basicInfoData.value = {
+      engineList: [],
+      engineInfo: null
+    }
   }
 }
 
@@ -526,8 +563,20 @@ const viewConditionsData = (row) => {
   showConditionsDialog.value = true
 }
 
-// 根据不同设备类别获取查询接口URL
-const getQueryApiUrl = (categoryId) => {
+// 根据设备类型获取查询接口URL
+const getQueryApiUrl = (deviceObj) => {
+  if (!deviceObj) {
+    ElMessage.warning(`请选择设备`)
+    return undefined
+  }
+  
+  const { code, parentCode } = deviceObj
+    
+  // 根据 parentCode 判断接口(子设备的 parentCode 指向父级类别)
+  // 如果 parentCode 为 null,说明是顶级分类,使用 code
+  const categoryCode = parentCode || code
+    
+  // 根据类别编码映射到对应的接口
   const apiMap = {
     'engine': '/api/engine/list',  // 发动机使用POST查询接口
     'gearbox': '/api/gearbox/conditions',
@@ -542,11 +591,17 @@ const getQueryApiUrl = (categoryId) => {
     'chiller': '/api/chiller/conditions',
     'inert-gas': '/api/inert-gas/conditions',
     'co2-capture': '/api/co2-capture/conditions',
-    'propeller': '/api/propeller/conditions',
-    'default': '/api/device/conditions'
+    'propeller': '/api/propeller/conditions'
   }
   
-  return apiMap[categoryId] || apiMap['default']
+  // 使用 categoryCode 匹配接口
+  const apiUrl = apiMap[categoryCode]
+  if (!apiUrl) {
+    ElMessage.warning(`未配置该设备的查询接口 (code: ${code}, parentCode: ${parentCode})`)
+    return undefined
+  }
+  
+  return apiUrl
 }
 
 // 显示导入数据预览
@@ -561,18 +616,13 @@ const startEvaluation = async (row) => {
   evaluatingRow.value = row.id
   
   try {
-    // 判断是否已经评估过（支持多种类型：boolean、数字、字符串）
+    // 判断是否已经评估过(支持多种类型:boolean、数字、字符串)
     const isEvaluated = row.is_evaluated === 1 || row.is_evaluated === true || 
                         row.isEvaluated === 1 || row.isEvaluated === true ||
                         row.is_evaluated === '1' || row.isEvaluated === '1'
-    
-    console.log('行数据:', row)
-    console.log('is_evaluated 值:', row.is_evaluated, '类型:', typeof row.is_evaluated)
-    console.log('是否已评估:', isEvaluated)
-    
+        
     if (isEvaluated) {
-      // 已评估：调用 GET 接口查看结果
-      console.log('调用 GET 接口查看评估结果')
+      // 已评估:调用 GET 接口查看结果
       const response = await fetch(`/api/engine/evaluate/${row.id}`, {
         method: 'GET',
         headers: {
@@ -662,8 +712,6 @@ const startEvaluation = async (row) => {
     evaluatingRow.value = null
   }
 }
-
-// 获取等级类型
 </script>
 
 <style scoped>
@@ -792,7 +840,7 @@ const startEvaluation = async (row) => {
 }
 
 .result-section {
-  background: transparent;
+  background: #1e3a5f;
   border: none;
 }
 

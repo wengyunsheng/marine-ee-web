@@ -96,8 +96,7 @@ const handleUploadSuccess = (response) => {
 
 // 上传失败处理
 const handleUploadError = (error) => {
-  ElMessage.error('上传失败：' + (error.message || '网络错误'))
-  console.error(error)
+  ElMessage.error('上传失败:' + (error.message || '网络错误'))
 }
 </script>
 

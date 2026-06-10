@@ -17,28 +17,20 @@
       >
         <el-menu-item index="assessment-visualization">
           <el-icon><DataAnalysis /></el-icon>
-          <span>能效评估和可视化</span>
+          <span>能效评估与可视化</span>
         </el-menu-item>
 
         <el-menu-item index="device-management">
           <el-icon><Document /></el-icon>
-          <span>设备管理</span>
-        </el-menu-item>
-        
-        <el-menu-item index="history-data">
-          <el-icon><Folder /></el-icon>
-          <span>能效数据管理</span>
+          <span>设备信息管理</span>
         </el-menu-item>
       </el-menu>
     </div>
 
     <!-- 主内容区域 -->
     <el-main class="content">
-      <AssessmentVisualization v-if="currentModule === 'assessment-visualization'" :global-state="globalState" />
-      <template v-else-if="currentModule === 'system-management'">
-        <DeviceManagement v-if="currentSystemSubModule === 'device-management'" />
-        <EfficiencyDataManagement v-else-if="currentSystemSubModule === 'history-data'" :models="globalState.models" :global-state="globalState" />
-      </template>
+      <AssessmentVisualization v-if="currentModule === 'assessment-visualization'" />
+      <DeviceManagement v-else-if="currentModule === 'device-management'" />
     </el-main>
   </el-container>
 </template>
@@ -47,91 +39,22 @@
 import { ref, computed } from 'vue'
 import {
   DataAnalysis,
-  Document,
-  Folder
+  Document
 } from '@element-plus/icons-vue'
 
 import AssessmentVisualization from './components/assessment-visualization/AssessmentVisualization.vue'
 import DeviceManagement from './components/device-management/DeviceManagement.vue'
-import EfficiencyDataManagement from './components/efficiency-data-management/EfficiencyDataManagement.vue'
 
 const currentModule = ref('assessment-visualization')
-const currentSystemSubModule = ref('')
-
-// 全局状态管理
-const globalState = ref({
-  selectedModel: null, // 选中的模型
-  models: [
-    {
-      id: 1,
-      name: '散货船 - 船用柴油发动机（低速机）',
-      deviceType: '船用柴油发动机（低速机）',
-      category: 'engine',
-      description: '用于散货船柴油发动机的能效评估仿真模型',
-      createdAt: '2024-04-01'
-    },
-    {
-      id: 2,
-      name: '油轮 - 船用柴油发动机（中速机）',
-      deviceType: '船用柴油发动机（中速机）',
-      category: 'engine',
-      description: '用于油轮柴油发动机的能效评估仿真模型',
-      createdAt: '2024-04-02'
-    },
-    {
-      id: 3,
-      name: '集装箱船 - 船用LNG/柴油双燃料发动机（低速机）',
-      deviceType: '船用LNG/柴油双燃料发动机（低速机）',
-      category: 'engine',
-      description: '用于集装箱船LNG/柴油双燃料发动机的能效评估仿真模型',
-      createdAt: '2024-04-03'
-    },
-    {
-      id: 4,
-      name: '液化气船 - 船用LNG/柴油双燃料发动机（中速机）',
-      deviceType: '船用LNG/柴油双燃料发动机（中速机）',
-      category: 'engine',
-      description: '用于液化气船LNG/柴油双燃料发动机的能效评估仿真模型',
-      createdAt: '2024-04-04'
-    },
-    {
-      id: 5,
-      name: 'VLCC超大型油轮 - 船用甲醇/柴油双燃料发动机（低速机）',
-      deviceType: '船用甲醇/柴油双燃料发动机（低速机）',
-      category: 'engine',
-      description: '用于VLCC超大型油轮甲醇/柴油双燃料发动机的能效评估仿真模型',
-      createdAt: '2024-04-05'
-    },
-    {
-      id: 6,
-      name: '散货船 - 船用甲醇/柴油双燃料发动机（中速机）',
-      deviceType: '船用甲醇/柴油双燃料发动机（中速机）',
-      category: 'engine',
-      description: '用于散货船甲醇/柴油双燃料发动机的能效评估仿真模型',
-      createdAt: '2024-04-06'
-    }
-  ], // 模型列表
-  efficiencyData: [] // 能效接入数据（全局共享，供样机模型查看关联数据）
-})
 
 // 当前激活的菜单项
 const activeMenu = computed(() => {
-  if (currentSystemSubModule.value) {
-    return currentSystemSubModule.value
-  }
   return currentModule.value
 })
 
 // 处理菜单选择
 const handleMenuSelect = (index) => {
-  if (index === 'assessment-visualization') {
-    currentModule.value = index
-    currentSystemSubModule.value = ''
-  } else if (index === 'device-management' || index === 'history-data') {
-    // 系统管理子模块直接切换到对应模块
-    currentModule.value = 'system-management'
-    currentSystemSubModule.value = index
-  }
+  currentModule.value = index
 }
 </script>
 
@@ -283,7 +206,7 @@ const handleMenuSelect = (index) => {
 
 /* ---- 表格 Table ---- */
 .el-table {
-  background-color: transparent !important;
+  background-color: #1e3a5f !important;
   color: #e0e0e0;
   --el-table-border-color: rgba(255, 255, 255, 0.1) !important;
   --el-table-border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -316,7 +239,7 @@ const handleMenuSelect = (index) => {
 }
 
 .el-table__row {
-  background-color: transparent !important;
+  background-color: #1e3a5f !important;
 }
 
 .el-table__row:hover > td {
@@ -337,6 +260,39 @@ const handleMenuSelect = (index) => {
 
 .el-table__empty-text {
   color: #b0b0b0 !important;
+}
+
+/* ---- 表格固定列 Fixed Columns ---- */
+.el-table__fixed-right {
+  background: #1e3a5f !important;
+  background-color: #1e3a5f !important;
+}
+
+.el-table__fixed-right::before {
+  background-color: #1e3a5f !important;
+}
+
+.el-table__fixed-right .el-table__cell,
+.el-table__fixed-right td,
+.el-table__fixed-right th,
+.el-table__fixed-right tr,
+.el-table__fixed-right .el-table__row,
+.el-table__fixed-right tbody,
+.el-table__fixed-right thead {
+  background-color: #1e3a5f !important;
+  background: #1e3a5f !important;
+}
+
+/* 固定列悬停时也保持完全不透明 */
+.el-table__fixed-right .el-table__row:hover > td {
+  background-color: #1e3a5f !important;
+  background: #1e3a5f !important;
+}
+
+/* 最强力的选择器 - 覆盖所有可能的子元素 */
+.el-table__fixed-right .el-table__row td {
+  background-color: #1e3a5f !important;
+  background: #1e3a5f !important;
 }
 
 /* ---- 表格展开按钮 ---- */
@@ -595,7 +551,7 @@ const handleMenuSelect = (index) => {
 
 /* ---- 描述列表 Descriptions ---- */
 .el-descriptions {
-  background-color: transparent !important;
+  background-color: #1e3a5f !important;
   --el-descriptions-table-border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
@@ -617,7 +573,7 @@ const handleMenuSelect = (index) => {
 }
 
 .el-descriptions__body {
-  background-color: transparent !important;
+  background-color: #1e3a5f !important;
 }
 
 /* ---- 搜索筛选栏 Search Filter Bar ---- */
@@ -690,5 +646,49 @@ const handleMenuSelect = (index) => {
   margin: 0 20px;
   min-width: 120px;
   text-align: center;
+}
+
+/* ---- 设备树形选择器 Device Tree Select ---- */
+.device-tree-select-popper.el-tree-select__popper,
+.el-tree-select__popper.device-tree-select-popper {
+  background-color: #1e3a5f !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.device-tree-select-popper .el-tree,
+.el-tree-select__popper.device-tree-select-popper .el-tree {
+  background-color: #1e3a5f !important;
+}
+
+.device-tree-select-popper .el-tree-node__content,
+.el-tree-select__popper.device-tree-select-popper .el-tree-node__content {
+  background-color: #1e3a5f !important;
+  color: #e0e0e0 !important;
+}
+
+.device-tree-select-popper .el-tree-node__content:hover,
+.el-tree-select__popper.device-tree-select-popper .el-tree-node__content:hover {
+  background-color: rgba(64, 158, 255, 0.2) !important;
+}
+
+.device-tree-select-popper .el-tree-node.is-current > .el-tree-node__content,
+.el-tree-select__popper.device-tree-select-popper .el-tree-node.is-current > .el-tree-node__content {
+  background-color: rgba(64, 158, 255, 0.3) !important;
+}
+
+.device-tree-select-popper .el-tree-node__content .el-tree-node__label,
+.el-tree-select__popper.device-tree-select-popper .el-tree-node__content .el-tree-node__label {
+  color: #e0e0e0 !important;
+}
+
+.device-tree-select-popper .el-tree-node.is-disabled > .el-tree-node__content,
+.el-tree-select__popper.device-tree-select-popper .el-tree-node.is-disabled > .el-tree-node__content {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.device-tree-select-popper .el-tree-node__expand-icon,
+.el-tree-select__popper.device-tree-select-popper .el-tree-node__expand-icon {
+  color: #e0e0e0 !important;
 }
 </style>

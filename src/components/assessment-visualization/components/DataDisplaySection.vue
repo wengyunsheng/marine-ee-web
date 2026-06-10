@@ -3,7 +3,7 @@
     <!-- 数据展示区域 -->
     <div class="data-display-wrapper">
       <!-- 发动机基本信息列表 -->
-      <div v-if="engineList && engineList.length > 0" class="assessment-section">
+      <div v-if="deviceType === 'engine' && engineList && engineList.length > 0" class="assessment-section">
         <div class="section-title">发动机信息</div>
         <el-table :data="engineList" border stripe>
           <el-table-column type="index" label="序号" width="60" align="center" />
@@ -18,7 +18,7 @@
           <el-table-column prop="emissionStandard" label="排放标准" width="120" />
           <el-table-column prop="ratedSpeed" label="额定转速(rpm)" width="140" align="center" />
           <el-table-column prop="ratedPower" label="额定功率(kW)" width="140" align="center" />
-          <el-table-column label="操作" width="420" align="center" fixed="right">
+          <el-table-column label="操作" width="280" align="center" fixed="right">
             <template #default="{ row }">
               <div style="display: flex; gap: 6px; justify-content: center;">
                 <el-button size="small" @click="handleViewTestCondition(row)">测试条件</el-button>
@@ -36,8 +36,13 @@
         </el-table>
       </div>
       
+      <!-- 其他设备类型的提示（暂未开发） -->
+      <div v-if="deviceType && deviceType !== 'engine'" class="empty-state">
+        该设备类型的数据展示功能暂未开发
+      </div>
+      
       <!-- 暂无数据提示 -->
-      <div v-if="!engineList || engineList.length === 0" class="empty-state">
+      <div v-if="(deviceType === 'engine' && (!engineList || engineList.length === 0)) || !deviceType" class="empty-state">
         暂无数据
       </div>
     </div>
@@ -48,6 +53,11 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps({
+  // 设备类型（parentCode 或 code）
+  deviceType: {
+    type: String,
+    default: ''
+  },
   // 发动机列表数据
   engineList: {
     type: Array,
@@ -106,7 +116,52 @@ const handleStartEvaluation = (row) => {
 
 /* 表格样式 - 由于已在全局定义，这里只需要保留特定于组件的样式 */
 .data-display-wrapper :deep(.el-table) {
-  background-color: transparent;
+  background-color: #1e3a5f;
   color: #e0e0e0;
+}
+</style>
+
+<style>
+/* 固定列完全不透明背景 - 全局样式 */
+.el-table__fixed-right {
+  background: #1e3a5f !important;
+  background-color: #1e3a5f !important;
+}
+
+/* 固定列所有层级都完全不透明 */
+.el-table__fixed-right *,
+.el-table__fixed-right *:before,
+.el-table__fixed-right *:after {
+  background-color: #1e3a5f !important;
+  background: #1e3a5f !important;
+}
+
+/* 固定列容器和包装器 */
+.el-table__fixed-right,
+.el-table__fixed-right::before,
+.el-table__fixed-right::after,
+.el-table__fixed-right .el-table__header-wrapper,
+.el-table__fixed-right .el-table__body-wrapper,
+.el-table__fixed-right .el-table__fixed-body-wrapper,
+.el-table__fixed-right .el-table__header,
+.el-table__fixed-right .el-table__body,
+.el-table__fixed-right table,
+.el-table__fixed-right thead,
+.el-table__fixed-right tbody,
+.el-table__fixed-right tr,
+.el-table__fixed-right .el-table__row,
+.el-table__fixed-right .el-table__cell,
+.el-table__fixed-right td,
+.el-table__fixed-right th {
+  background-color: #1e3a5f !important;
+  background: #1e3a5f !important;
+}
+
+/* 悬停时也保持完全不透明 */
+.el-table__fixed-right .el-table__row:hover,
+.el-table__fixed-right .el-table__row:hover > td,
+.el-table__fixed-right .el-table__row:hover > .el-table__cell {
+  background-color: #1e3a5f !important;
+  background: #1e3a5f !important;
 }
 </style>
