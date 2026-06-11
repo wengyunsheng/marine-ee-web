@@ -273,12 +273,7 @@ const loadGLB = (url) => {
         loadedModel.value = gltf.scene
         scene.add(gltf.scene)
         
-        // 自动调整相机位置以适应模型
-        try {
-          fitCameraToObject(camera, gltf.scene, controls)
-        } catch (e) {
-          // 忽略相机调整错误，不影响模型显示
-        }
+        fitCameraToObject(camera, gltf.scene, controls)
         
         // 初始化材质效果（根据当前工况）
         if (allConditions.value.length > 0) {
@@ -311,11 +306,8 @@ const loadOBJ = async (url) => {
           (object) => {
             loadedModel.value = object
             scene.add(object)
-            try {
-              fitCameraToObject(camera, object, controls)
-            } catch (e) {
-              // 忽略相机调整错误，不影响模型显示
-            }
+
+            fitCameraToObject(camera, object, controls)
             
             // 初始化材质效果（根据当前工况）
             if (allConditions.value.length > 0) {
@@ -337,11 +329,7 @@ const loadOBJ = async (url) => {
           (object) => {
             loadedModel.value = object
             scene.add(object)
-            try {
-              fitCameraToObject(camera, object, controls)
-            } catch (e) {
-              // 忽略相机调整错误，不影响模型显示
-            }
+            fitCameraToObject(camera, object, controls)
             
             // 初始化材质效果（根据当前工况）
             if (allConditions.value.length > 0) {
@@ -367,11 +355,8 @@ const loadFBX = (url) => {
       (object) => {
         loadedModel.value = object
         scene.add(object)
-        try {
-          fitCameraToObject(camera, object, controls)
-        } catch (e) {
-          // 忽略相机调整错误，不影响模型显示
-        }
+        
+        fitCameraToObject(camera, object, controls)
         
         // 初始化材质效果（根据当前工况）
         if (allConditions.value.length > 0) {
@@ -403,12 +388,7 @@ const loadSTL = (url) => {
         loadedModel.value = mesh
         scene.add(mesh)
         
-        // 安全地调整相机位置
-        try {
-          fitCameraToObject(camera, mesh, controls)
-        } catch (e) {
-          // 忽略相机调整错误，不影响模型显示
-        }
+        fitCameraToObject(camera, mesh, controls)
         
         // 初始化材质效果（根据当前工况）
         if (allConditions.value.length > 0) {

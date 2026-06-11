@@ -185,13 +185,12 @@ import DataDisplaySection from './components/DataDisplaySection.vue'
 // 可视化相关
 const threeDModelRef = ref(null)
 
-// 直接加载外部3D模型（通过modelFilePath）
-const loadExternalModel = async (modelFilePath) => {
-  if (!threeDModelRef.value || !modelFilePath) return
+// 直接加载外部3D模型（通过modelFileUrl）
+const loadExternalModel = async (modelFileUrl) => {
+  if (!threeDModelRef.value || !modelFileUrl) return
   
-  // 直接调用ThreeDModel组件的loadExternalModel方法
-  // ThreeDModel内部会自动处理Windows路径转换并显示加载结果提示
-  threeDModelRef.value.loadExternalModel(modelFilePath)
+  // 调用ThreeDModel组件的loadExternalModel方法加载静态资源模型（URL以/开头）
+  threeDModelRef.value.loadExternalModel(modelFileUrl)
 }
 const modelParts = ref([])
 const showPartDialog = ref(false)
@@ -563,9 +562,6 @@ const fetchConditionsData = async () => {
           // 工况数据：暂时为空，点击按钮后再加载对应发动机的工况数据
           conditionsData.value = []
           
-          // 尝试加载父设备的3D模型（只有父设备才有modelFileUrl）
-          // selectedDevice.value 可能是子设备，需要通过 parentCode 查找父设备
-          
           // 判断当前设备是否是子设备（有 parentCode 且不为 null）
           let deviceToLoad = selectedDevice.value
           if (selectedDevice.value && selectedDevice.value.parentCode) {
@@ -594,10 +590,9 @@ const fetchConditionsData = async () => {
         // 其他设备：直接使用返回的数据
         conditionsData.value = result.data
         
-        // 如果有modelFilePath，加载3D模型
-        if (selectedDevice.value.modelFilePath) {
-          // modelFilePath是服务器路径，需要转换为URL
-          loadExternalModel(selectedDevice.value.modelFilePath)
+        // 如果有modelFileUrl，加载3D模型
+        if (selectedDevice.value.modelFileUrl) {
+          loadExternalModel(selectedDevice.value.modelFileUrl)
         }
       }
     } else {
