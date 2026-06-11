@@ -721,13 +721,13 @@ const startEvaluation = async (row) => {
         evaluationResult.value = {
           details: [
             { 
-              name: '能效等级', 
-              value: `${result.data.efficiencyLevel}级`, 
-              level: result.data.efficiencyLevel 
+              name: '评估结果', 
+              value: result.data.passed ? '通过' : '未通过', 
+              level: result.data.passed ? 1 : 3 
             },
             { 
-              name: '能效基值', 
-              value: `${result.data.baseValue}%`, 
+              name: '能效等级', 
+              value: `${result.data.efficiencyLevel}级`, 
               level: result.data.efficiencyLevel 
             },
             { 
@@ -736,9 +736,9 @@ const startEvaluation = async (row) => {
               level: result.data.efficiencyLevel 
             },
             { 
-              name: '评估结果', 
-              value: result.data.passed ? '通过' : '未通过', 
-              level: result.data.passed ? 1 : 3 
+              name: '能效基值', 
+              value: `${result.data.baseValue}%`, 
+              level: result.data.efficiencyLevel 
             }
           ]
         }
@@ -767,13 +767,13 @@ const startEvaluation = async (row) => {
         evaluationResult.value = {
           details: [
             { 
-              name: '能效等级', 
-              value: `${result.data.efficiencyLevel}级`, 
-              level: result.data.efficiencyLevel 
+              name: '评估结果', 
+              value: result.data.passed ? '通过' : '未通过', 
+              level: result.data.passed ? 1 : 3 
             },
             { 
-              name: '能效基值', 
-              value: `${result.data.baseValue}%`, 
+              name: '能效等级', 
+              value: `${result.data.efficiencyLevel}级`, 
               level: result.data.efficiencyLevel 
             },
             { 
@@ -782,9 +782,9 @@ const startEvaluation = async (row) => {
               level: result.data.efficiencyLevel 
             },
             { 
-              name: '评估结果', 
-              value: result.data.passed ? '通过' : '未通过', 
-              level: result.data.passed ? 1 : 3 
+              name: '能效基值', 
+              value: `${result.data.baseValue}%`, 
+              level: result.data.efficiencyLevel 
             }
           ]
         }
