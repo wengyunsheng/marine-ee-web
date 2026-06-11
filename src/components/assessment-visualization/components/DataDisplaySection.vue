@@ -3,9 +3,11 @@
     <!-- 数据展示区域 -->
     <div class="data-display-wrapper">
       <!-- 发动机基本信息列表 -->
-      <div v-if="deviceType === 'engine' && engineList && engineList.length > 0" class="assessment-section">
+      <div v-if="deviceType === 'engine'" class="assessment-section">
         <div class="section-title">发动机信息</div>
-        <el-table :data="engineList" border>
+        
+        <!-- 始终显示表格，无数据时显示空状态 -->
+        <el-table :data="engineList || []" border empty-text="暂无数据">
           <el-table-column type="index" label="序号" width="60" align="center" />
           <el-table-column prop="brand" label="品牌" width="120" />
           <el-table-column prop="model" label="型号" width="180" />
@@ -39,11 +41,6 @@
       <!-- 其他设备类型的提示（暂未开发） -->
       <div v-if="deviceType && deviceType !== 'engine'" class="empty-state">
         该设备类型的数据展示功能暂未开发
-      </div>
-      
-      <!-- 暂无数据提示 -->
-      <div v-if="(deviceType === 'engine' && (!engineList || engineList.length === 0)) || !deviceType" class="empty-state">
-        暂无数据
       </div>
     </div>
   </div>
@@ -112,5 +109,13 @@ const handleStartEvaluation = (row) => {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0; /* 允许滚动 */
+}
+
+/* 通用空状态样式 */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(148, 163, 184, 0.7);
+  font-size: 14px;
 }
 </style>

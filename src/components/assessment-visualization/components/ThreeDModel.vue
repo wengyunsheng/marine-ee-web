@@ -205,16 +205,12 @@ const updateModelForCondition = () => {
 
 // 清除当前加载的3D模型
 const clearModel = () => {
-  console.log('clearModel 被调用')
   if (loadedModel.value && scene) {
-    console.log('正在清除模型:', loadedModel.value)
     scene.remove(loadedModel.value)
     loadedModel.value = null
-    console.log('模型已清除')
   }
   // 重置旋转速度
   rotationSpeed = 0.005
-  console.log('旋转速度已重置')
 }
 
 // 处理3D模型点击事件 - 切换悬浮面板显示/隐藏

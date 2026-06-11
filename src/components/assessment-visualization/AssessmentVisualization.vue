@@ -290,8 +290,6 @@ const fetchCategoryOptions = async () => {
 
 // 类别变化处理
 const handleCategoryChange = (deviceObj) => {
-  console.log('设备切换:', deviceObj)
-  
   if (!deviceObj) {
     // 清空选择时，重置所有状态
     modelParts.value = []
@@ -300,7 +298,6 @@ const handleCategoryChange = (deviceObj) => {
     basicInfoData.value = {}
     // 清除3D模型
     if (threeDModelRef.value) {
-      console.log('清除3D模型 - 设备为空')
       threeDModelRef.value.clearModel()
     }
     return
@@ -308,17 +305,14 @@ const handleCategoryChange = (deviceObj) => {
   
   // 检查当前设备是否有3D模型
   const hasModelFile = deviceObj.modelFileUrl
-  console.log('是否有模型文件:', hasModelFile, 'URL:', deviceObj.modelFileUrl)
   
   if (!hasModelFile) {
     // 如果当前设备没有3D模型，清除已加载的模型
     if (threeDModelRef.value) {
-      console.log('清除3D模型 - 无模型文件')
       threeDModelRef.value.clearModel()
     }
   } else {
     // 如果有模型文件，加载它
-    console.log('加载3D模型:', deviceObj.modelFileUrl)
     loadExternalModel(deviceObj.modelFileUrl)
   }
   
