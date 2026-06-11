@@ -11,7 +11,7 @@
       drag
       :auto-upload="false"
       :on-change="handleFileChange"
-      accept=".csv,.xlsx,.xls"
+      accept=".xlsx,.xls"
       :limit="1"
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -20,7 +20,7 @@
       </div>
       <template #tip>
         <div class="el-upload__tip">
-          支持格式: CSV, XLSX, XLS，文件大小不超过10MB
+          支持格式: XLSX, XLS，文件大小不超过10MB
         </div>
       </template>
     </el-upload>

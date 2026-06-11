@@ -14,7 +14,7 @@
       :on-success="handleUploadSuccess"
       :on-error="handleUploadError"
       :before-upload="beforeUpload"
-      accept=".obj,.fbx,.gltf,.glb,.stl,.png,.jpg,.jpeg"
+      accept=".obj,.fbx,.gltf,.glb,.stl"
       name="file"
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>

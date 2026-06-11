@@ -3,74 +3,87 @@
     <div class="three-d-header">
       <el-space :size="12" class="header-controls">
         <el-tooltip content="放大" placement="top">
-          <div class="control-btn" @click="zoomIn">
+          <div class="control-btn" @click.stop="zoomIn">
             <el-icon><ZoomIn /></el-icon>
           </div>
         </el-tooltip>
         <el-tooltip content="缩小" placement="top">
-          <div class="control-btn" @click="zoomOut">
+          <div class="control-btn" @click.stop="zoomOut">
             <el-icon><ZoomOut /></el-icon>
           </div>
         </el-tooltip>
         <el-tooltip content="旋转" placement="top">
-          <div class="control-btn" @click="rotateModel">
+          <div class="control-btn" @click.stop="rotateModel">
             <el-icon><RefreshRight /></el-icon>
           </div>
         </el-tooltip>
         <el-tooltip content="显示/隐藏标签" placement="top">
-          <div class="control-btn" @click="toggleLabels">
+          <div class="control-btn" @click.stop="toggleLabels">
             <el-icon><PriceTag /></el-icon>
           </div>
         </el-tooltip>
         <el-tooltip content="截图" placement="top">
-          <div class="control-btn" @click="captureScreen">
+          <div class="control-btn" @click.stop="captureScreen">
             <el-icon><Camera /></el-icon>
           </div>
         </el-tooltip>
       </el-space>
     </div>
     
-    <div class="three-d-container" ref="threeContainer">
+    <div class="three-d-container" ref="threeContainer" @click="handleModelClick">
       <div class="three-d-background"></div>
       <div class="three-d-model" ref="modelContainer"></div>
       <div class="glow-effect"></div>
       
       <!-- 工况数据悬浮面板 -->
-      <div v-if="conditionsData && conditionsData.speed" class="hud-panel">
-        <div class="hud-header">
-          <div class="hud-title">实时工况</div>
-          <el-select 
-            v-model="currentConditionIndex" 
-            size="small"
-            class="condition-selector"
-            @change="handleConditionChange"
-          >
-            <el-option
-              v-for="(item, index) in allConditions"
-              :key="index"
-              :label="`${(item.loadFactor * 100).toFixed(0)}%负荷`"
-              :value="index"
-            />
-          </el-select>
-        </div>
-        <div class="hud-content">
-          <div class="hud-item">
-            <span class="hud-label">负荷</span>
-            <span class="hud-value">{{ (conditionsData.loadFactor * 100).toFixed(0) }}%</span>
+      <div v-if="showHudPanel" class="hud-panel" @click.stop>
+        <div class="hud-title">实时工况</div>
+        
+        <!-- 有数据时显示内容 -->
+        <template v-if="conditionsData && conditionsData.speed">
+          <div class="hud-header">
+            <el-select 
+              v-model="currentConditionIndex" 
+              size="small"
+              class="condition-selector"
+              @change="handleConditionChange"
+            >
+              <el-option
+                v-for="(item, index) in allConditions"
+                :key="index"
+                :label="`${(item.loadFactor * 100).toFixed(0)}%负荷`"
+                :value="index"
+              />
+            </el-select>
           </div>
-          <div class="hud-item">
-            <span class="hud-label">功率</span>
-            <span class="hud-value">{{ conditionsData.power }} kW</span>
+          <div class="hud-content">
+            <div class="hud-item">
+              <span class="hud-label">负荷</span>
+              <span class="hud-value">{{ (conditionsData.loadFactor * 100).toFixed(0) }}%</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">功率</span>
+              <span class="hud-value">{{ conditionsData.power }} kW</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">转速</span>
+              <span class="hud-value">{{ conditionsData.speed.toFixed(1) }} rpm</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">燃油消耗率</span>
+              <span class="hud-value">{{ conditionsData.bsfc }} g/kWh</span>
+            </div>
           </div>
-          <div class="hud-item">
-            <span class="hud-label">转速</span>
-            <span class="hud-value">{{ conditionsData.speed.toFixed(1) }} rpm</span>
+        </template>
+        
+        <!-- 无数据时显示提示 -->
+        <template v-else>
+          <div class="hud-empty">
+            <el-icon class="empty-icon"><InfoFilled /></el-icon>
+            <p class="empty-text">暂无工况数据</p>
+            <p class="empty-hint">请先点击“工况数据”按钮加载数据</p>
           </div>
-          <div class="hud-item">
-            <span class="hud-label">燃油消耗率</span>
-            <span class="hud-value">{{ conditionsData.bsfc }} g/kWh</span>
-          </div>
-        </div>
+        </template>
       </div>
       
       <div class="holographic-overlay">
@@ -112,7 +125,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader'
-import { ZoomIn, ZoomOut, RefreshRight, PriceTag, Camera } from '@element-plus/icons-vue'
+import { ZoomIn, ZoomOut, RefreshRight, PriceTag, Camera, InfoFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
@@ -135,6 +148,7 @@ const emit = defineEmits(['part-click'])
 const threeContainer = ref(null)
 const modelContainer = ref(null)
 const selectedPart = ref('')
+const showHudPanel = ref(false)  // 控制悬浮面板显示/隐藏
 
 let scene = null
 let camera = null
@@ -143,6 +157,7 @@ let controls = null
 let animationId = null
 
 // 动画相关变量
+let rotationSpeed = 0.005  // 基础旋转速度
 
 // 外部模型加载相关
 const loadedModel = ref(null)  // 存储加载的外部模型
@@ -154,6 +169,58 @@ const allConditions = ref([])  // 存储所有工况数据
 // 处理工况切换
 const handleConditionChange = (index) => {
   currentConditionIndex.value = index
+  // 触发3D模型动态效果 - 根据负荷改变颜色和旋转速度
+  updateModelForCondition()
+}
+
+// 根据工况更新模型显示效果
+const updateModelForCondition = () => {
+  if (!loadedModel.value || !scene) return
+  
+  const currentCondition = allConditions.value[currentConditionIndex.value]
+  const loadFactor = currentCondition ? currentCondition.loadFactor : 0.25
+  
+  // 1. 改变材质颜色：低负荷偏冷色（蓝绿色），高负荷偏暖色（橙红色）
+  const hue = 0.55 - (loadFactor - 0.25) * 0.8  // 0.55(青绿) -> 0.15(橙红)
+  const saturation = 0.8 + loadFactor * 0.2      // 饱和度随负荷增加
+  const lightness = 0.5 + loadFactor * 0.2       // 亮度随负荷增加
+  
+  scene.traverse((child) => {
+    if (child.material && child.material.color) {
+      // 设置基础颜色
+      child.material.color.setHSL(hue, saturation, lightness)
+      
+      // 2. 高负荷时增加自发光效果（模拟高温）
+      if (child.material.emissive) {
+        const emissiveIntensity = Math.max(0, (loadFactor - 0.5) / 0.5) * 0.6
+        child.material.emissive.setHSL(hue, saturation, lightness * 0.5)
+        child.material.emissiveIntensity = emissiveIntensity
+      }
+    }
+  })
+  
+  // 3. 更新旋转速度：负荷越高，转速越快
+  rotationSpeed = 0.002 + loadFactor * 0.02  // 0.007 ~ 0.022
+}
+
+// 清除当前加载的3D模型
+const clearModel = () => {
+  console.log('clearModel 被调用')
+  if (loadedModel.value && scene) {
+    console.log('正在清除模型:', loadedModel.value)
+    scene.remove(loadedModel.value)
+    loadedModel.value = null
+    console.log('模型已清除')
+  }
+  // 重置旋转速度
+  rotationSpeed = 0.005
+  console.log('旋转速度已重置')
+}
+
+// 处理3D模型点击事件 - 切换悬浮面板显示/隐藏
+const handleModelClick = () => {
+  // 直接切换显示/隐藏，无论是否有数据
+  showHudPanel.value = !showHudPanel.value
 }
 
 // 监听 allConditions 变化，更新下拉选项
@@ -173,54 +240,29 @@ const loadExternalModel = async (url) => {
     loadedModel.value = null
   }
   
-  let modelUrl = url
-  
-  // 处理服务器文件路径
-  // 如果是相对路径（以 / 开头），直接使用
-  // 如果是绝对URL（http:// 或 https://），直接使用
-  // 如果是Windows本地路径（包含 \ 或以 D: C: 开头），需要转换
-  if (url.includes('\\') || url.startsWith('D:') || url.startsWith('C:')) {
-    // Windows路径格式: D:\\uploads\\3d-models\\2026\\06\\10\\engine.STL
-    const normalizedPath = url.replace(/\\/g, '/')
-    const pathParts = normalizedPath.split('/')
-    const fileName = pathParts[pathParts.length - 1]
-    
-    if (normalizedPath.includes('/uploads/')) {
-      const uploadIndex = normalizedPath.indexOf('/uploads/')
-      const relativePath = normalizedPath.substring(uploadIndex + 1)
-      modelUrl = `/api/${relativePath}`
-    } else {
-      modelUrl = `/models/${fileName}`
-    }
-  } else if (url.startsWith('/')) {
-    // 相对路径，直接使用（例如: /uploads/2026/06/10/engine.STL）
-    modelUrl = url
-  }
-  
-  const fileExtension = modelUrl.split('.').pop().toLowerCase()
+  const fileExtension = url.split('.').pop().toLowerCase()
   
   try {
     switch (fileExtension) {
       case 'glb':
       case 'gltf':
-        await loadGLTF(modelUrl)
+        await loadGLTF(url)
         break
       case 'obj':
-        await loadOBJ(modelUrl)
+        await loadOBJ(url)
         break
       case 'fbx':
-        await loadFBX(modelUrl)
+        await loadFBX(url)
         break
       case 'stl':
-        await loadSTL(modelUrl)
+        await loadSTL(url)
         break
       default:
         ElMessage.warning(`不支持的文件格式: .${fileExtension}`)
         return
     }
     
-    // 只在真正成功时显示成功消息
-    ElMessage.success('3D模型加载成功')
+    // 模型加载完成，不显示提示消息
   } catch (error) {
     ElMessage.error('加载3D模型失败: ' + error.message)
   }
@@ -242,6 +284,12 @@ const loadGLTF = (url) => {
         } catch (e) {
           // 忽略相机调整错误，不影响模型显示
         }
+        
+        // 初始化材质效果（根据当前工况）
+        if (allConditions.value.length > 0) {
+          updateModelForCondition()
+        }
+        
         resolve(gltf)
       },
       undefined,
@@ -273,6 +321,12 @@ const loadOBJ = async (url) => {
             } catch (e) {
               // 忽略相机调整错误，不影响模型显示
             }
+            
+            // 初始化材质效果（根据当前工况）
+            if (allConditions.value.length > 0) {
+              updateModelForCondition()
+            }
+            
             resolve(object)
           },
           undefined,
@@ -293,6 +347,12 @@ const loadOBJ = async (url) => {
             } catch (e) {
               // 忽略相机调整错误，不影响模型显示
             }
+            
+            // 初始化材质效果（根据当前工况）
+            if (allConditions.value.length > 0) {
+              updateModelForCondition()
+            }
+            
             resolve(object)
           },
           undefined,
@@ -317,6 +377,12 @@ const loadFBX = (url) => {
         } catch (e) {
           // 忽略相机调整错误，不影响模型显示
         }
+        
+        // 初始化材质效果（根据当前工况）
+        if (allConditions.value.length > 0) {
+          updateModelForCondition()
+        }
+        
         resolve(object)
       },
       undefined,
@@ -349,6 +415,11 @@ const loadSTL = (url) => {
           // 忽略相机调整错误，不影响模型显示
         }
         
+        // 初始化材质效果（根据当前工况）
+        if (allConditions.value.length > 0) {
+          updateModelForCondition()
+        }
+        
         resolve(mesh)
       },
       (progress) => {
@@ -370,9 +441,10 @@ const fitCameraToObject = (camera, object, controls) => {
   const maxDim = Math.max(size.x, size.y, size.z)
   const fov = camera.fov * (Math.PI / 180)
   let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2))
-  cameraZ *= 2.5  // 留出一些边距
+  cameraZ *= 1.5  // 缩小边距，让模型更大
   
-  camera.position.set(center.x, center.y + cameraZ * 0.5, center.z + cameraZ)
+  // 设置相机位置，显示正面视角（从X轴正方向看）
+  camera.position.set(center.x + cameraZ, center.y + cameraZ * 0.3, center.z)
   camera.lookAt(center)
   
   if (controls) {
@@ -529,9 +601,6 @@ const initThreeScene = () => {
   rimLight.position.set(0, -5, 10)
   scene.add(rimLight)
 
-  const gridHelper = new THREE.GridHelper(20, 20, 0x4a90d9, 0x2d5a8a)
-  scene.add(gridHelper)
-
   animate()
 
   window.addEventListener('resize', onWindowResize)
@@ -542,6 +611,11 @@ const animate = () => {
   
   if (controls) {
     controls.update()
+  }
+  
+  // 让加载的模型持续旋转，模拟发动机运转
+  if (loadedModel.value && rotationSpeed > 0) {
+    loadedModel.value.rotation.y += rotationSpeed
   }
   
   if (renderer && scene && camera) {
@@ -609,7 +683,8 @@ defineExpose({
   rotateModel,
   toggleLabels,
   captureScreen,
-  loadExternalModel
+  loadExternalModel,
+  clearModel
 })
 </script>
 
@@ -858,7 +933,7 @@ defineExpose({
   font-size: 16px;
   font-weight: 700;
   color: #60a5fa;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
   border-bottom: 2px solid rgba(59, 130, 246, 0.3);
@@ -867,11 +942,9 @@ defineExpose({
 
 .hud-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
 }
 
 .condition-selector {
@@ -935,5 +1008,34 @@ defineExpose({
   font-weight: 700;
   font-family: 'Courier New', monospace;
   text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* 空状态样式 */
+.hud-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: rgba(59, 130, 246, 0.5);
+  margin-bottom: 12px;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.empty-hint {
+  font-size: 12px;
+  color: rgba(148, 163, 184, 0.7);
+  margin: 0;
 }
 </style>

@@ -290,13 +290,36 @@ const fetchCategoryOptions = async () => {
 
 // 类别变化处理
 const handleCategoryChange = (deviceObj) => {
+  console.log('设备切换:', deviceObj)
+  
   if (!deviceObj) {
     // 清空选择时，重置所有状态
     modelParts.value = []
     conditionsColumns.value = []
     conditionsData.value = []
     basicInfoData.value = {}
+    // 清除3D模型
+    if (threeDModelRef.value) {
+      console.log('清除3D模型 - 设备为空')
+      threeDModelRef.value.clearModel()
+    }
     return
+  }
+  
+  // 检查当前设备是否有3D模型
+  const hasModelFile = deviceObj.modelFileUrl
+  console.log('是否有模型文件:', hasModelFile, 'URL:', deviceObj.modelFileUrl)
+  
+  if (!hasModelFile) {
+    // 如果当前设备没有3D模型，清除已加载的模型
+    if (threeDModelRef.value) {
+      console.log('清除3D模型 - 无模型文件')
+      threeDModelRef.value.clearModel()
+    }
+  } else {
+    // 如果有模型文件，加载它
+    console.log('加载3D模型:', deviceObj.modelFileUrl)
+    loadExternalModel(deviceObj.modelFileUrl)
   }
   
   // 自动查询数据
@@ -621,9 +644,9 @@ const viewTestCondition = (row) => {
   showTestConditionDialog.value = true
 }
 
-// 查看工况数据
+// 查看工况数据 - 打开弹窗并设置数据供3D模型使用
 const viewConditionsData = (row) => {
-  // 将当前行的performanceCurves数据设置到弹窗
+  // 将当前行的performanceCurves数据设置到ThreeDModel组件和弹窗
   conditionsData.value = row.performanceCurves || []
   currentConditionIndex.value = 0  // 重置为第一个工况
   showConditionsDialog.value = true
