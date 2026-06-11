@@ -241,8 +241,7 @@ const loadExternalModel = async (url) => {
   try {
     switch (fileExtension) {
       case 'glb':
-      case 'gltf':
-        await loadGLTF(url)
+        await loadGLB(url)
         break
       case 'obj':
         await loadOBJ(url)
@@ -264,8 +263,8 @@ const loadExternalModel = async (url) => {
   }
 }
 
-// 加载GLTF/GLB格式
-const loadGLTF = (url) => {
+// 加载GLB格式（二进制glTF）
+const loadGLB = (url) => {
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader()
     loader.load(

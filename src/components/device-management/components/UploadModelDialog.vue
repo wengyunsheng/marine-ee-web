@@ -14,7 +14,7 @@
       :on-success="handleUploadSuccess"
       :on-error="handleUploadError"
       :before-upload="beforeUpload"
-      accept=".obj,.fbx,.gltf,.glb,.stl"
+      accept=".obj,.fbx,.glb,.stl"
       name="file"
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -23,7 +23,7 @@
       </div>
       <template #tip>
         <div class="el-upload__tip">
-          支持格式: OBJ, FBX, GLTF, GLB, STL，文件大小不超过100MB
+          支持格式: OBJ, FBX, GLB, STL，文件大小不超过100MB
         </div>
       </template>
     </el-upload>
@@ -66,11 +66,11 @@ const handleClose = () => {
 
 // 上传前验证
 const beforeUpload = (file) => {
-  const isValidType = ['.obj', '.fbx', '.gltf', '.glb', '.stl', '.png', '.jpg', '.jpeg'].some(ext => 
+  const isValidType = ['.obj', '.fbx', '.glb', '.stl'].some(ext => 
     file.name.toLowerCase().endsWith(ext)
   )
   if (!isValidType) {
-    ElMessage.error('只支持上传 OBJ, FBX, GLTF, GLB, STL, PNG, JPG, JPEG 格式的文件')
+    ElMessage.error('只支持上传 OBJ, FBX, GLB, STL 格式的文件')
     return false
   }
   
