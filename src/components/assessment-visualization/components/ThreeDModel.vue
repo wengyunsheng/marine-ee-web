@@ -37,7 +37,7 @@
       
       <!-- 工况数据悬浮面板 -->
       <div v-if="showHudPanel" class="hud-panel" @click.stop>
-        <div class="hud-title">实时工况</div>
+        <div class="hud-title">当前工况</div>
         
         <!-- 有数据时显示内容 -->
         <template v-if="conditionsData && conditionsData.speed">
@@ -355,7 +355,7 @@ const loadFBX = (url) => {
       (object) => {
         loadedModel.value = object
         scene.add(object)
-        
+
         fitCameraToObject(camera, object, controls)
         
         // 初始化材质效果（根据当前工况）

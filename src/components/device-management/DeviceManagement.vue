@@ -45,9 +45,18 @@
         </el-table-column>
         <el-table-column label="操作" width="450" fixed="right">
           <template #default="scope">
-            <template v-if="scope.row.children">
+            <!-- 只有父类别(parentCode为null)才显示上传/查看3D模型按钮 -->
+            <template v-if="scope.row.parentCode === null || scope.row.parentCode === undefined">
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <!-- 始终显示上传3D模型按钮 -->
                 <el-button size="small" @click="upload3DModel(scope.row)">上传3D模型</el-button>
+                <!-- 如果已上传模型，额外显示查看按钮 -->
+                <el-button 
+                  v-if="scope.row.modelFileUrl" 
+                  size="small" 
+                  @click="view3DModel(scope.row)">
+                  查看3D模型
+                </el-button>
                 <el-button v-if="isEngineCategory(scope.row)" size="small" @click="openWeightParamsModal(scope.row)">加权参数</el-button>
               </div>
             </template>
@@ -213,6 +222,25 @@ const resetFilter = () => {
 const upload3DModel = (categoryRow) => {
   currentCategory.value = categoryRow
   showUploadModal.value = true
+}
+
+// 查看3D模型（下载模型文件）
+const view3DModel = (categoryRow) => {
+  if (!categoryRow.modelFileUrl) {
+    ElMessage.warning('模型文件路径不存在')
+    return
+  }
+  
+  // 创建下载链接
+  const link = document.createElement('a')
+  link.href = categoryRow.modelFileUrl
+  // 从路径中提取文件名
+  const fileName = categoryRow.modelFileUrl.split('/').pop() || 'model.fbx'
+  link.download = fileName
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  ElMessage.success('模型文件下载成功')
 }
 
 const closeUploadModal = () => {
