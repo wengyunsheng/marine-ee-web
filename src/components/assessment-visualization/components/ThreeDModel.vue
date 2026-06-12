@@ -81,7 +81,6 @@
           <div class="hud-empty">
             <el-icon class="empty-icon"><InfoFilled /></el-icon>
             <p class="empty-text">暂无工况数据</p>
-            <p class="empty-hint">请先点击“工况数据”按钮加载数据</p>
           </div>
         </template>
       </div>
@@ -131,7 +130,7 @@ import { ElMessage } from 'element-plus'
 const props = defineProps({
   modelParts: {
     type: Array,
-    required: true
+    default: () => []
   },
   conditionsData: {
     type: Object,
@@ -143,7 +142,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['part-click'])
+const emit = defineEmits(['part-click', 'condition-change'])
 
 const threeContainer = ref(null)
 const modelContainer = ref(null)
@@ -169,6 +168,15 @@ const allConditions = ref([])  // 存储所有工况数据
 // 处理工况切换
 const handleConditionChange = (index) => {
   currentConditionIndex.value = index
+  
+  // 获取当前选中的工况数据
+  const selectedCondition = allConditions.value[index]
+  
+  // 触发事件通知父组件更新 currentCondition
+  if (selectedCondition) {
+    emit('condition-change', selectedCondition)
+  }
+  
   // 触发3D模型动态效果 - 根据负荷改变颜色和旋转速度
   updateModelForCondition()
 }
