@@ -151,10 +151,9 @@ const fetchEfficiencyData = async () => {
     const parentCode = props.deviceData.parentCode || ''
     
     // 根据 parentCode 的值判断设备类型,调用对应接口
-    const deviceName = props.deviceData.name || ''
     const deviceCode = props.deviceData.code || ''
     
-    if (parentCode.includes('engine')) {
+    if (parentCode === 'engine') {
       // 船用发动机
       apiUrl = `/api/efficiency/engine/list?engineType=${deviceCode}`
       // 设置表格列配置
@@ -165,9 +164,9 @@ const fetchEfficiencyData = async () => {
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 80 }
       ]
-    } else if (parentCode.includes('waste-heat') || parentCode.includes('organic-rankine')) {
-      // 余热回收类设备，根据设备名称或编码进一步区分
-      if (deviceName.includes('蒸汽透平') || deviceCode.includes('waste-heat-02')) {
+    } else if (parentCode === 'waste-heat') {
+      // 余热回收类设备，根据编码进一步区分
+      if (deviceCode === 'waste-heat-02') {
         // 船用蒸汽透平发电装置
         apiUrl = `/api/efficiency/steam-turbine/list`
         // 设置表格列配置
@@ -190,7 +189,7 @@ const fetchEfficiencyData = async () => {
           { prop: 'unit', label: '单位', minWidth: 120 }
         ]
       }
-    } else if (parentCode.includes('incinerator')) {
+    } else if (parentCode === 'incinerator') {
       // 船用焚烧炉
       apiUrl = `/api/efficiency/incinerator/list?incineratorType=${deviceCode}`
       // 设置表格列配置
@@ -200,7 +199,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 80 }
       ]
-    } else if (parentCode.includes('separator')) {
+    } else if (parentCode === 'separator') {
       // 船用碟式分离机
       apiUrl = `/api/efficiency/disc-separator/list`
       // 设置表格列配置
@@ -209,7 +208,7 @@ const fetchEfficiencyData = async () => {
         { type: 'range', label: '能效值范围(kW·h/m³)', minField: 'efficiencyValueMin', maxField: 'efficiencyValueMax', variableName: 'η', minWidth: 180 },
         { prop: 'description', label: '说明', minWidth: 100 }
       ]
-    } else if (parentCode.includes('ballast')) {
+    } else if (parentCode === 'ballast') {
       // 船用压载水处理设备
       apiUrl = `/api/efficiency/ballast-water-treatment/list`
       // 设置表格列配置
@@ -218,7 +217,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 100 }
       ]
-    } else if (parentCode.includes('windlass')) {
+    } else if (parentCode === 'windlass') {
       // 船用锚绞机
       apiUrl = `/api/efficiency/windlass/list?windlassType=${deviceCode}`
       // 设置表格列配置
@@ -227,7 +226,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'baseValue', label: '能效基值', minWidth: 120, prefix: '≥' },
         { prop: 'unit', label: '单位', minWidth: 80 }
       ]
-    } else if (parentCode.includes('crane')) {
+    } else if (parentCode === 'crane') {
       // 船用吊机
       apiUrl = `/api/efficiency/crane/list`
       // 设置表格列配置
@@ -237,7 +236,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
         { prop: 'thresholdExpression', label: '能效阈值', minWidth: 140 }
       ]
-    } else if (parentCode.includes('generator')) {
+    } else if (parentCode === 'generator') {
       // 船用发电机
       apiUrl = `/api/efficiency/generator/list?generatorType=${deviceCode}`
       // 设置表格列配置
@@ -250,7 +249,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 80 }
       ]
-    } else if (parentCode.includes('air-conditioner')) {
+    } else if (parentCode === 'air-conditioner') {
       // 船用组合式空调机组
       apiUrl = `/api/efficiency/ahu/list`
       // 设置表格列配置
@@ -261,7 +260,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 100 }
       ]
-    } else if (parentCode.includes('chiller')) {
+    } else if (parentCode === 'chiller') {
       // 船用冷水机组
       apiUrl = `/api/efficiency/chiller/list`
       // 设置表格列配置
@@ -274,7 +273,7 @@ const fetchEfficiencyData = async () => {
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 100 }
       ]
-    } else if (parentCode.includes('inert-gas')) {
+    } else if (parentCode === 'inert-gas') {
       // 船用惰性气体系统
       apiUrl = `/api/efficiency/inert-gas/list`
       // 设置表格列配置
@@ -283,7 +282,7 @@ const fetchEfficiencyData = async () => {
         { type: 'range', label: '能效基值', minField: 'baseValueMin', maxField: 'baseValueMax', variableName: 'η', minWidth: 160 },
         { prop: 'unit', label: '单位', minWidth: 120 }
       ]
-    } else if (parentCode.includes('co2-capture')) {
+    } else if (parentCode === 'co2-capture') {
       // 船用二氧化碳捕集设备
       apiUrl = `/api/efficiency/co2-capture/list`
       // 设置表格列配置
@@ -292,6 +291,32 @@ const fetchEfficiencyData = async () => {
         { prop: 'baseValue', label: '能效基值', minWidth: 100 },
         { prop: 'unit', label: '单位', minWidth: 100 }
       ]
+    } else if (parentCode === 'egcs') {
+      // 船用尾气处理装置（根据子设备类型区分）
+      
+      if (deviceCode === 'egcs-01') {
+        // 船用脱硫设备
+        apiUrl = `/api/efficiency/desulfurization/list`
+        // 设置表格列配置
+        tableColumns.value = [
+          { prop: 'deviceType', label: '设备类型', minWidth: 100, formatter: (row) => {
+            const typeMap = { 'open': '开式', 'hybrid': '混合式', 'closed': '闭式' }
+            return typeMap[row.deviceType] || row.deviceType
+          }},
+          { prop: 'operationMode', label: '运行模式', minWidth: 100 },
+          { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+          { prop: 'baseValue', label: '能效基值', minWidth: 100 }
+        ]
+      } else {
+        // 船用脱硝设备
+        apiUrl = `/api/efficiency/denitrification/list`
+        // 设置表格列配置
+        tableColumns.value = [
+          { prop: 'emissionTier', label: '排放等级', minWidth: 100 },
+          { prop: 'efficiencyLevel', label: '能效等级', minWidth: 100 },
+          { prop: 'baseValue', label: '能效基值', minWidth: 100 }
+        ]
+      }
     } else {
       // 其他设备类型，未配置接口
       ElMessage.error(`设备类型 "${parentCode}" 暂未配置能效接口`)
