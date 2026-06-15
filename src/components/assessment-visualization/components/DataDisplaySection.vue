@@ -3,35 +3,35 @@
     <!-- 数据展示区域 -->
     <div class="data-display-wrapper">
       <!-- 发动机基本信息详情 -->
-      <div v-if="deviceType === 'engine' && engineInfo" class="assessment-section">
+      <div v-if="deviceType === 'engine' && deviceInfo" class="assessment-section">
         <div class="subsection-title">基本信息</div>
         
         <!-- 使用 el-descriptions 展示详细信息 -->
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="品牌">{{ engineInfo.brand }}</el-descriptions-item>
-          <el-descriptions-item label="型号">{{ engineInfo.model }}</el-descriptions-item>
-          <el-descriptions-item label="气缸数">{{ engineInfo.cylinderCount }}</el-descriptions-item>
-          <el-descriptions-item label="缸径(mm)">{{ engineInfo.cylinderBore }}</el-descriptions-item>
-          <el-descriptions-item label="燃油类型">{{ engineInfo.fuelType }}</el-descriptions-item>
-          <el-descriptions-item label="燃油类型1">{{ engineInfo.fuelType1 }}</el-descriptions-item>
-          <el-descriptions-item label="热值(kJ/kg)">{{ engineInfo.fuelType1CalorificValue }}</el-descriptions-item>
-          <el-descriptions-item label="发动机用途">{{ engineInfo.engineUsage }}</el-descriptions-item>
-          <el-descriptions-item label="排放标准">{{ engineInfo.emissionStandard }}</el-descriptions-item>
-          <el-descriptions-item label="额定转速(rpm)">{{ engineInfo.ratedSpeed }}</el-descriptions-item>
-          <el-descriptions-item label="额定功率(kW)">{{ engineInfo.ratedPower }}</el-descriptions-item>
+          <el-descriptions-item label="品牌">{{ deviceInfo.brand }}</el-descriptions-item>
+          <el-descriptions-item label="型号">{{ deviceInfo.model }}</el-descriptions-item>
+          <el-descriptions-item label="气缸数">{{ deviceInfo.cylinderCount }}</el-descriptions-item>
+          <el-descriptions-item label="缸径(mm)">{{ deviceInfo.cylinderBore }}</el-descriptions-item>
+          <el-descriptions-item label="燃油类型">{{ deviceInfo.fuelType }}</el-descriptions-item>
+          <el-descriptions-item label="燃油类型1">{{ deviceInfo.fuelType1 }}</el-descriptions-item>
+          <el-descriptions-item label="热值(kJ/kg)">{{ deviceInfo.fuelType1CalorificValue }}</el-descriptions-item>
+          <el-descriptions-item label="发动机用途">{{ deviceInfo.engineUsage }}</el-descriptions-item>
+          <el-descriptions-item label="排放标准">{{ deviceInfo.emissionStandard }}</el-descriptions-item>
+          <el-descriptions-item label="额定转速(rpm)">{{ deviceInfo.ratedSpeed }}</el-descriptions-item>
+          <el-descriptions-item label="额定功率(kW)">{{ deviceInfo.ratedPower }}</el-descriptions-item>
         </el-descriptions>
 
         <!-- 测试条件展示 -->
-        <div v-if="engineInfo.testCondition" class="subsection">
+        <div v-if="deviceInfo.testCondition" class="subsection">
           <div class="subsection-title">测试条件</div>
           <el-descriptions :column="3" border size="small">
-            <el-descriptions-item label="环境温度(℃)">{{ engineInfo.testCondition.ambientTemp || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="环境湿度(%)">{{ engineInfo.testCondition.ambientHumidity || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="环境压力(kPa)">{{ engineInfo.testCondition.ambientPressure || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="排气温度(℃)">{{ engineInfo.testCondition.exhaustTemp || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="冷却水进口温度(℃)">{{ engineInfo.testCondition.coolantInlet || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="冷却水出口温度(℃)">{{ engineInfo.testCondition.coolantOutlet || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="润滑油温度(℃)">{{ engineInfo.testCondition.lubeOilTemp || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="环境温度(℃)">{{ deviceInfo.testCondition.ambientTemp || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="环境湿度(%)">{{ deviceInfo.testCondition.ambientHumidity || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="环境压力(kPa)">{{ deviceInfo.testCondition.ambientPressure || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="排气温度(℃)">{{ deviceInfo.testCondition.exhaustTemp || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="冷却水进口温度(℃)">{{ deviceInfo.testCondition.coolantInlet || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="冷却水出口温度(℃)">{{ deviceInfo.testCondition.coolantOutlet || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="润滑油温度(℃)">{{ deviceInfo.testCondition.lubeOilTemp || '-' }}</el-descriptions-item>
           </el-descriptions>
         </div>
 
@@ -59,31 +59,77 @@
           <div class="subsection-title">评估结果</div>
           <el-descriptions :column="2" border size="small">
             <el-descriptions-item label="评估结果">
-              <el-tag v-if="engineInfo.passed !== undefined" :type="engineInfo.passed ? 'success' : 'danger'" size="small">
-                {{ engineInfo.passed ? '通过' : '未通过' }}
+              <el-tag v-if="deviceInfo.passed !== undefined" :type="deviceInfo.passed ? 'success' : 'danger'" size="small">
+                {{ deviceInfo.passed ? '通过' : '未通过' }}
               </el-tag>
               <span v-else>-</span>
             </el-descriptions-item>
             <el-descriptions-item label="能效等级">
-              <el-tag v-if="engineInfo.efficiencyLevel" :type="getLevelTagType(engineInfo.efficiencyLevel)" size="small">
-                {{ engineInfo.efficiencyLevel }}级
+              <el-tag v-if="deviceInfo.efficiencyLevel" :type="getLevelTagType(deviceInfo.efficiencyLevel)" size="small">
+                {{ deviceInfo.efficiencyLevel }}级
               </el-tag>
               <span v-else>-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="能效指标">{{ engineInfo.efficiencyIndex !== undefined ? engineInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
-            <el-descriptions-item label="能效基值">{{ engineInfo.efficiencyBaseValue !== undefined ? engineInfo.efficiencyBaseValue + '%' : '-' }}</el-descriptions-item>
+            <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex !== undefined ? deviceInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
+            <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue !== undefined ? deviceInfo.efficiencyBaseValue + '%' : '-' }}</el-descriptions-item>
           </el-descriptions>
         </div>
       </div>
       
       <!-- 无数据提示 -->
-      <div v-if="deviceType === 'engine' && !engineInfo" class="empty-state">
+      <div v-if="deviceType === 'engine' && !deviceInfo" class="empty-state">
         请选择发动机查看详细信息
       </div>
       
       <!-- 其他设备类型的提示（暂未开发） -->
-      <div v-if="deviceType && deviceType !== 'engine'" class="empty-state">
+      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs'" class="empty-state">
         该设备类型的数据展示功能暂未开发
+      </div>
+      
+      <!-- EGCS 尾气处理装置信息展示 -->
+      <div v-if="deviceType === 'egcs' && deviceInfo" class="assessment-section">
+        <div class="subsection-title">基本信息</div>
+        
+        <!-- 使用 el-descriptions 展示详细信息 -->
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="品牌">{{ deviceInfo.brand || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="型号">{{ deviceInfo.model || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="类型">{{ deviceInfo.type || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="烟气流量(m³/h)">{{ deviceInfo.smokeFlowRate || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="脱硫效率(%)">{{ deviceInfo.removalEfficiency !== undefined ? deviceInfo.removalEfficiency.toFixed(2) + '%' : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="SO₂去除量(kg/h)">{{ deviceInfo.so2RemovalAmount !== undefined ? deviceInfo.so2RemovalAmount.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="NOx去除量(kg/h)">{{ deviceInfo.noxRemovalAmount !== undefined ? deviceInfo.noxRemovalAmount.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="功率(kW)">{{ deviceInfo.powerRating || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="能耗比(kJ/kg SO₂)">{{ deviceInfo.energyConsumptionRatio !== undefined ? deviceInfo.energyConsumptionRatio.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="硫含量(ppm)">{{ deviceInfo.sulfurContent || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="IMO合规性">{{ deviceInfo.imoCompliance || '-' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <!-- 评估结果展示 -->
+        <div class="subsection">
+          <div class="subsection-title">评估结果</div>
+          <el-descriptions :column="2" border size="small">
+            <el-descriptions-item label="评估结果">
+              <el-tag v-if="deviceInfo.passed !== undefined" :type="deviceInfo.passed ? 'success' : 'danger'" size="small">
+                {{ deviceInfo.passed ? '通过' : '未通过' }}
+              </el-tag>
+              <span v-else>-</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="能效等级">
+              <el-tag v-if="deviceInfo.efficiencyLevel" :type="getLevelTagType(deviceInfo.efficiencyLevel)" size="small">
+                {{ deviceInfo.efficiencyLevel }}级
+              </el-tag>
+              <span v-else>-</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex !== undefined ? deviceInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
+            <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue !== undefined ? deviceInfo.efficiencyBaseValue + '%' : '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </div>
+      
+      <!-- EGCS 无数据提示 -->
+      <div v-if="deviceType === 'egcs' && !deviceInfo" class="empty-state">
+        请选择EGCS设备查看详细信息
       </div>
     </div>
   </div>
@@ -98,8 +144,8 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  // 发动机详细信息（单条）
-  engineInfo: {
+  // 设备详细信息（单条）
+  deviceInfo: {
     type: Object,
     default: null
   },

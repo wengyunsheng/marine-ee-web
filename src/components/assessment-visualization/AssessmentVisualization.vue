@@ -55,7 +55,7 @@
                 clearable
                 filterable
                 style="width: 300px; margin-right: 8px;"
-                @change="handleEngineSelectChange"
+                @change="handleDeviceSelectChange"
               >
                 <el-option
                   v-for="engine in engineOptions"
@@ -72,7 +72,7 @@
             <!-- 数据展示区 -->
             <DataDisplaySection
               :device-type="selectedDevice?.parentCode || selectedDevice?.code"
-              :engine-info="basicInfoData.engineInfo"
+              :device-info="basicInfoData.deviceInfo"
               :performance-curves="conditionsData"
             />
           </div>
@@ -184,7 +184,7 @@ const fetchCategoryOptions = async () => {
 }
 
 // 类别变化处理
-const handleCategoryChange = (deviceObj) => {
+const handleCategoryChange = async (deviceObj) => {
   // 如果传入的是数字ID，需要查找对应的设备对象
   let actualDevice = deviceObj
   if (typeof deviceObj === 'number') {
@@ -197,6 +197,9 @@ const handleCategoryChange = (deviceObj) => {
     conditionsColumns.value = []
     conditionsData.value = []
     basicInfoData.value = {}
+    currentCondition.value = null
+    engineOptions.value = []
+    selectedEngineId.value = null
     // 清除3D模型
     if (threeDModelRef.value) {
       threeDModelRef.value.clearModel()
@@ -227,6 +230,9 @@ const handleCategoryChange = (deviceObj) => {
     // 如果有模型文件，加载它
     loadExternalModel(deviceWithModel.modelFileUrl)
   }
+  
+  // 重新获取设备数据列表（使用新选择设备的 parentCode）
+  await fetchDeviceOptions()
 }
 
 // 根据 id 递归查找设备对象
@@ -253,10 +259,10 @@ const findDeviceByCode = (nodes, code) => {
   return null
 }
 
-// 组件挂载时获取类别列表和发动机选项
+// 组件挂载时获取类别列表和设备选项
 onMounted(() => {
   fetchCategoryOptions()
-  fetchEngineOptions()
+  // 注意：不在这里调用 fetchDeviceOptions()，因为需要等用户选择设备后再调用
   
   // 初始化左右面板宽度为50%
   initPanelWidth()
@@ -319,10 +325,18 @@ const stopResize = () => {
   document.body.style.userSelect = ''
 }
 
-// 获取发动机选项列表
-const fetchEngineOptions = async () => {
+// 获取设备数据选项列表
+const fetchDeviceOptions = async () => {
+  // 如果没有选择设备，返回
+  if (!selectedDevice.value) {
+    engineOptions.value = []
+    return
+  }
+  
   try {
-    const response = await fetch('/api/engine/all', {
+    // 使用通用接口，参数为右上角设备的 parentCode
+    const parentCode = selectedDevice.value.parentCode || selectedDevice.value.code
+    const response = await fetch(`/api/base/all?parentCode=${parentCode}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -332,27 +346,27 @@ const fetchEngineOptions = async () => {
     if (result.code === 200) {
       engineOptions.value = result.data || []
       
-      // 如果有数据，默认选择第一个发动机
+      // 如果有数据，默认选择第一个
       if (engineOptions.value.length > 0) {
         selectedEngineId.value = engineOptions.value[0].id
-        // 触发加载第一个发动机的详情
-        await handleEngineSelectChange(selectedEngineId.value)
+        // 触发加载第一个设备的详情
+        await handleDeviceSelectChange(selectedEngineId.value)
       }
     } else {
-      ElMessage.error(result.message || '获取发动机列表失败')
+      ElMessage.error(result.message || '获取设备列表失败')
     }
   } catch (error) {
-    ElMessage.error('获取发动机列表失败')
+    ElMessage.error('获取设备列表失败')
   }
 }
 
-// 发动机选择变化处理
-const handleEngineSelectChange = async (engineId) => {
-  if (!engineId) {
-    // 清空选择时，重置发动机列表
+// 设备选择变化处理
+const handleDeviceSelectChange = async (deviceId) => {
+  if (!deviceId) {
+    // 清空选择时，重置设备列表
     basicInfoData.value = {
-      engineList: [],
-      engineInfo: null
+      deviceList: [],
+      deviceInfo: null
     }
     conditionsData.value = []
     currentCondition.value = null
@@ -360,8 +374,22 @@ const handleEngineSelectChange = async (engineId) => {
   }
   
   try {
-    // 调用单条发动机详情接口
-    const response = await fetch(`/api/engine/detail?engineId=${engineId}`, {
+    // 根据设备类型确定详情接口和参数名
+    const parentCode = selectedDevice.value?.parentCode || ''
+    const apiUrl = `/api/${parentCode}/detail?id=${deviceId}`
+    
+    // 设备名称映射
+    const deviceNameMap = {
+      'engine': '发动机',
+      'egcs': '尾气处理装置',
+      'inert-gas': '惰性气体系统',
+      'co2-capture': '二氧化碳捕集设备',
+      'propeller': '推进器'
+    }
+    const deviceName = deviceNameMap[parentCode] || '设备'
+    
+    // 调用详情接口
+    const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -372,8 +400,8 @@ const handleEngineSelectChange = async (engineId) => {
     if (result.code === 200 && result.data) {
       // 将单条数据包装成数组显示
       basicInfoData.value = {
-        engineList: [result.data],
-        engineInfo: result.data
+        deviceList: [result.data],
+        deviceInfo: result.data
       }
       
       // 加载工况数据（如果有）
@@ -390,19 +418,19 @@ const handleEngineSelectChange = async (engineId) => {
         currentCondition.value = null
       }
       
-      ElMessage.success('已加载发动机信息')
+      ElMessage.success(`已加载${deviceName}信息`)
     } else {
-      ElMessage.error(result.message || '获取发动机详情失败')
+      ElMessage.error(result.message || `获取${deviceName}详情失败`)
       basicInfoData.value = {
-        engineList: [],
-        engineInfo: null
+        deviceList: [],
+        deviceInfo: null
       }
     }
   } catch (error) {
-    ElMessage.error('获取发动机详情失败')
+    ElMessage.error(`获取${deviceName}详情失败`)
     basicInfoData.value = {
-      engineList: [],
-      engineInfo: null
+      deviceList: [],
+      deviceInfo: null
     }
   }
 }
@@ -478,38 +506,15 @@ const handleFileChange = async (file) => {
 
 // 根据设备类型获取导入接口URL
 const getImportApiUrl = (deviceObj) => {
-  if (!deviceObj) return '/api/device/import'
+  if (!deviceObj || !deviceObj.parentCode) return ''
   
-  const { code, parentCode, id } = deviceObj
+  const { parentCode, id } = deviceObj
   
-  // 根据 parentCode 判断接口(子设备的 parentCode 指向父级类别)
-  // 如果 parentCode 为 null,说明是顶级分类,使用 code
-  const categoryCode = parentCode || code
+  // 构建导入接口URL：/api/{parentCode}/import?deviceId={id}
+  let apiUrl = `/api/${parentCode}/import`
   
-  // 根据类别编码映射到对应的接口
-  const apiMap = {
-    'engine': '/api/engine/import',           // 船用发动机
-    'gearbox': '/api/gearbox/import',         // 船用齿轮箱
-    'waste-heat': '/api/waste-heat/import',   // 船用余热回收发电装置
-    'incinerator': '/api/incinerator/import', // 船用焚烧炉
-    'separator': '/api/separator/import',     // 船用碟式分离机
-    'ballast': '/api/ballast/import',         // 船用压载水处理设备
-    'windlass': '/api/windlass/import',       // 船用锚绞机
-    'crane': '/api/crane/import',             // 船用吊机
-    'generator': '/api/generator/import',     // 船用发电机
-    'air-conditioner': '/api/air-conditioner/import', // 船用组合式空调机组
-    'chiller': '/api/chiller/import',         // 船用冷水机组
-    'inert-gas': '/api/inert-gas/import',     // 船用惰性气体系统
-    'co2-capture': '/api/co2-capture/import', // 船用二氧化碳捕集设备
-    'propeller': '/api/propeller/import',     // 船用推进器
-    'default': '/api/device/import'
-  }
-  
-  // 优先使用 categoryCode 匹配，如果没有则使用 default
-  let apiUrl = apiMap[categoryCode] || apiMap['default']
-  
-  // 如果是发动机,需要在URL中传递deviceId参数
-  if (categoryCode === 'engine' && id) {
+  // 如果需要传递 deviceId 参数
+  if (id) {
     apiUrl += `?deviceId=${id}`
   }
   
