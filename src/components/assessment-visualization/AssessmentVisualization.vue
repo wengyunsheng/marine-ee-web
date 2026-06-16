@@ -465,42 +465,38 @@ const handleFileChange = async (file) => {
     return
   }
   
-  try {
-    // 显示加载状态
-    const loadingMsg = ElMessage({
-      message: '正在导入数据...',
-      type: 'info',
-      duration: 0
-    })
+  // 显示加载状态
+  const loadingMsg = ElMessage({
+    message: '正在导入数据...',
+    type: 'info',
+    duration: 0
+  })
+  
+  // 构建 FormData
+  const formData = new FormData()
+  formData.append('file', file.raw)
+  
+  // 根据设备类型调用不同的导入接口
+  const importApiUrl = getImportApiUrl(selectedDevice.value)
+  
+  const response = await fetch(importApiUrl, {
+    method: 'POST',
+    body: formData
+  })
+  
+  const result = await response.json()
+  
+  // 关闭加载提示
+  loadingMsg.close()
+  
+  if (result.code === 200) {
+    showImportDialog.value = false
     
-    // 构建 FormData
-    const formData = new FormData()
-    formData.append('file', file.raw)
+    ElMessage.success(result.message || '导入成功')
     
-    // 根据设备类型调用不同的导入接口
-    const importApiUrl = getImportApiUrl(selectedDevice.value)
-    
-    const response = await fetch(importApiUrl, {
-      method: 'POST',
-      body: formData
-    })
-    
-    const result = await response.json()
-    
-    // 关闭加载提示
-    loadingMsg.close()
-    
-    if (result.code === 200) {
-      showImportDialog.value = false
-      
-      ElMessage.success(result.message || '导入成功')
-      
-      // 注意：不再自动获取工况数据，需要通过下拉框选择发动机后手动触发
-    } else {
-      ElMessage.error(result.message || '导入失败')
-    }
-  } catch (error) {
-    ElMessage.error('导入失败：' + error.message)
+    // 注意：不再自动获取工况数据，需要通过下拉框选择发动机后手动触发
+  } else {
+    ElMessage.error(result.message || '导入失败')
   }
 }
 

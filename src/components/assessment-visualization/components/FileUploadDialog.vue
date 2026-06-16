@@ -7,6 +7,7 @@
     @close="handleClose"
   >
     <el-upload
+      ref="uploadRef"
       class="upload-data-file"
       drag
       :auto-upload="false"
@@ -28,7 +29,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -39,6 +40,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'file-change', 'close'])
+
+// 上传组件引用
+const uploadRef = ref(null)
 
 // 双向绑定控制弹窗显示
 const visible = computed({
@@ -53,6 +57,10 @@ const handleFileChange = (file) => {
 
 // 关闭弹窗
 const handleClose = () => {
+  // 清空已上传的文件
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
   emit('close')
 }
 </script>
