@@ -53,24 +53,6 @@
             <el-table-column prop="bsec" label="能量消耗率(kJ/kWh)" width="140" align="center" />
           </el-table>
         </div>
-
-        <!-- 评估结果展示 -->
-        <div class="subsection">
-          <div class="subsection-title">评估结果</div>
-          <el-descriptions :column="2" border size="small">
-            <el-descriptions-item label="评估结果">
-              <el-tag v-if="deviceInfo.passed !== undefined" :type="deviceInfo.passed ? 'success' : 'danger'" size="small">
-                {{ deviceInfo.passed ? '通过' : '未通过' }}
-              </el-tag>
-              <span v-else>-</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="能效等级">
-              {{ deviceInfo.efficiencyLevel !== undefined ? deviceInfo.efficiencyLevel + '级' : '-' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex !== undefined ? deviceInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
-            <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue !== undefined ? deviceInfo.efficiencyBaseValue + '%' : '-' }}</el-descriptions-item>
-          </el-descriptions>
-        </div>
       </div>
       
       <!-- 无数据提示 -->
@@ -79,7 +61,7 @@
       </div>
       
       <!-- 其他设备类型的提示（暂未开发） -->
-      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs'" class="empty-state">
+      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas'" class="empty-state">
         该设备类型的数据展示功能暂未开发
       </div>
       
@@ -103,29 +85,49 @@
           <el-descriptions-item v-if="showDesulfurization" label="适用硫含量 (%)">{{ deviceInfo.sulfurContent || '-' }}</el-descriptions-item>
           <el-descriptions-item label="IMO合规性">{{ deviceInfo.imoCompliance || '-' }}</el-descriptions-item>
         </el-descriptions>
-
-        <!-- 评估结果展示 -->
-        <div class="subsection">
-          <div class="subsection-title">评估结果</div>
-          <el-descriptions :column="2" border size="small">
-            <el-descriptions-item label="评估结果">
-              <el-tag v-if="deviceInfo.passed !== undefined" :type="deviceInfo.passed ? 'success' : 'danger'" size="small">
-                {{ deviceInfo.passed ? '通过' : '未通过' }}
-              </el-tag>
-              <span v-else>-</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="能效等级">
-              {{ deviceInfo.efficiencyLevel !== undefined ? deviceInfo.efficiencyLevel + '级' : '-' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex !== undefined ? deviceInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
-            <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue !== undefined ? deviceInfo.efficiencyBaseValue + '%' : '-' }}</el-descriptions-item>
-          </el-descriptions>
-        </div>
       </div>
       
       <!-- EGCS 无数据提示 -->
       <div v-if="deviceType === 'egcs' && !deviceInfo" class="empty-state">
         请选择EGCS设备查看详细信息
+      </div>
+      
+      <!-- 惰性气体系统信息展示 -->
+      <div v-if="deviceType === 'inert-gas' && deviceInfo" class="assessment-section">
+        <div class="subsection-title">基本信息</div>
+        
+        <!-- 使用 el-descriptions 展示详细信息 -->
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="惰气流量(Nm3/h)">{{ deviceInfo.inertGasFlowRate !== undefined ? deviceInfo.inertGasFlowRate.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="燃料消耗 (kg/h)">{{ deviceInfo.fuelConsumption !== undefined ? deviceInfo.fuelConsumption.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="风机电能消耗 (kW)">{{ deviceInfo.fanPowerConsumption !== undefined ? deviceInfo.fanPowerConsumption.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="柴油发电机燃油消耗率 (g/kWh)">{{ deviceInfo.dieselGeneratorFuelRate !== undefined ? deviceInfo.dieselGeneratorFuelRate.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="冷却海水消耗量 (m³/h)">{{ deviceInfo.coolingSeawaterConsumption !== undefined ? deviceInfo.coolingSeawaterConsumption.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="海水密度 (kg/m³)">{{ deviceInfo.seawaterDensity !== undefined ? deviceInfo.seawaterDensity.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="冷却水泵扬程 (m)">{{ deviceInfo.coolingPumpHead !== undefined ? deviceInfo.coolingPumpHead.toFixed(2) : '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+      
+      <!-- 惰性气体系统无数据提示 -->
+      <div v-if="deviceType === 'inert-gas' && !deviceInfo" class="empty-state">
+        请选择惰性气体系统设备查看详细信息
+      </div>
+      
+      <!-- 公共评估结果展示（所有设备类型通用） -->
+      <div v-if="deviceInfo && deviceType !== ''" class="assessment-section">
+        <div class="subsection-title">评估结果</div>
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="评估结果" v-if="deviceInfo.passed !== undefined">
+            <el-tag :type="deviceInfo.passed ? 'success' : 'danger'" size="small">
+              {{ deviceInfo.passed ? '通过' : '未通过' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="能效等级">
+            {{ deviceInfo.efficiencyLevel !== undefined ? deviceInfo.efficiencyLevel + '级' : '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex !== undefined ? deviceInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue !== undefined ? deviceInfo.efficiencyBaseValue.toFixed(2) : '-' }}</el-descriptions-item>
+        </el-descriptions>
       </div>
     </div>
   </div>
