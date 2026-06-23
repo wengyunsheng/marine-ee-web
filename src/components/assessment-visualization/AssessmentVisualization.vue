@@ -74,6 +74,7 @@
               :device-type="selectedDevice?.parentCode || selectedDevice?.code"
               :device-info="basicInfoData.deviceInfo"
               :performance-curves="conditionsData"
+              :device-code="selectedDevice?.code"
             />
           </div>
         </div>

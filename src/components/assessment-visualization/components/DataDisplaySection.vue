@@ -65,10 +65,7 @@
               <span v-else>-</span>
             </el-descriptions-item>
             <el-descriptions-item label="能效等级">
-              <el-tag v-if="deviceInfo.efficiencyLevel" :type="getLevelTagType(deviceInfo.efficiencyLevel)" size="small">
-                {{ deviceInfo.efficiencyLevel }}级
-              </el-tag>
-              <span v-else>-</span>
+              {{ deviceInfo.efficiencyLevel !== undefined ? deviceInfo.efficiencyLevel + '级' : '-' }}
             </el-descriptions-item>
             <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex !== undefined ? deviceInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
             <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue !== undefined ? deviceInfo.efficiencyBaseValue + '%' : '-' }}</el-descriptions-item>
@@ -94,14 +91,16 @@
         <el-descriptions :column="2" border size="small">
           <el-descriptions-item label="品牌">{{ deviceInfo.brand || '-' }}</el-descriptions-item>
           <el-descriptions-item label="型号">{{ deviceInfo.model || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="类型">{{ deviceInfo.type || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="烟气流量(m³/h)">{{ deviceInfo.smokeFlowRate || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="脱硫效率(%)">{{ deviceInfo.removalEfficiency !== undefined ? deviceInfo.removalEfficiency.toFixed(2) + '%' : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="SO₂去除量(kg/h)">{{ deviceInfo.so2RemovalAmount !== undefined ? deviceInfo.so2RemovalAmount.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="NOx去除量(kg/h)">{{ deviceInfo.noxRemovalAmount !== undefined ? deviceInfo.noxRemovalAmount.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDesulfurization" label="类型">{{ deviceInfo.type || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="烟气量 (kg/h)">{{ deviceInfo.smokeFlowRate || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDesulfurization" label="脱硫效率(%)">{{ deviceInfo.removalEfficiency !== undefined ? deviceInfo.removalEfficiency.toFixed(2) + '%' : '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDenitrification" label="脱硝效率(%)">{{ deviceInfo.removalEfficiency !== undefined ? deviceInfo.removalEfficiency.toFixed(2) + '%' : '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDesulfurization" label="SO₂去除量 (t/h)">{{ deviceInfo.removalAmount !== undefined ? deviceInfo.removalAmount.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDenitrification" label="NOx去除量 (kg/h)">{{ deviceInfo.removalAmount !== undefined ? deviceInfo.removalAmount.toFixed(2) : '-' }}</el-descriptions-item>
           <el-descriptions-item label="功率(kW)">{{ deviceInfo.powerRating || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="能耗比(kJ/kg SO₂)">{{ deviceInfo.energyConsumptionRatio !== undefined ? deviceInfo.energyConsumptionRatio.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="硫含量(ppm)">{{ deviceInfo.sulfurContent || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDesulfurization" label="能耗比 (kWh/t SOx)">{{ deviceInfo.energyConsumptionRatio !== undefined ? deviceInfo.energyConsumptionRatio.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDenitrification" label="能耗比 (kWh/kg NOx)">{{ deviceInfo.energyConsumptionRatio !== undefined ? deviceInfo.energyConsumptionRatio.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDesulfurization" label="适用硫含量 (%)">{{ deviceInfo.sulfurContent || '-' }}</el-descriptions-item>
           <el-descriptions-item label="IMO合规性">{{ deviceInfo.imoCompliance || '-' }}</el-descriptions-item>
         </el-descriptions>
 
@@ -116,10 +115,7 @@
               <span v-else>-</span>
             </el-descriptions-item>
             <el-descriptions-item label="能效等级">
-              <el-tag v-if="deviceInfo.efficiencyLevel" :type="getLevelTagType(deviceInfo.efficiencyLevel)" size="small">
-                {{ deviceInfo.efficiencyLevel }}级
-              </el-tag>
-              <span v-else>-</span>
+              {{ deviceInfo.efficiencyLevel !== undefined ? deviceInfo.efficiencyLevel + '级' : '-' }}
             </el-descriptions-item>
             <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex !== undefined ? deviceInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
             <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue !== undefined ? deviceInfo.efficiencyBaseValue + '%' : '-' }}</el-descriptions-item>
@@ -136,7 +132,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
   // 设备类型（parentCode 或 code）
@@ -153,6 +149,11 @@ const props = defineProps({
   performanceCurves: {
     type: Array,
     default: () => []
+  },
+  // 设备编码（用于判断展示脱硫还是脱硝字段）
+  deviceCode: {
+    type: String,
+    default: ''
   }
 })
 
@@ -163,6 +164,19 @@ const getLevelTagType = (level) => {
   if (level === 2) return 'warning'
   return 'danger'
 }
+
+// 判断是否显示脱硫数据（根据设备编码）
+const showDesulfurization = computed(() => {
+  // egcs-01 是脱硫设备
+  return props.deviceCode === 'egcs-01'
+})
+
+// 判断是否显示脱硝数据（根据设备编码）
+const showDenitrification = computed(() => {
+  // egcs-02 是脱硝设备
+  return props.deviceCode === 'egcs-02'
+})
+
 </script>
 
 <style scoped>
@@ -202,5 +216,11 @@ const getLevelTagType = (level) => {
   margin-bottom: 8px;
   padding-left: 8px;
   border-left: 3px solid #409eff;
+}
+
+/* 修改 el-descriptions 的 label 字体样式，与表格表头保持一致 */
+:deep(.el-descriptions__label) {
+  color: #e0e0e0 !important;
+  font-weight: 600 !important;
 }
 </style>
