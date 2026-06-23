@@ -337,7 +337,7 @@ const fetchDeviceOptions = async () => {
   try {
     // 使用通用接口，参数为右上角设备的 parentCode
     const parentCode = selectedDevice.value.parentCode || selectedDevice.value.code
-    const response = await fetch(`/api/base/all?parentCode=${parentCode}`, {
+    const response = await fetch(`/api/common/all?parentCode=${parentCode}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'

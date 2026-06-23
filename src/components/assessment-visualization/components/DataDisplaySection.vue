@@ -8,17 +8,17 @@
         
         <!-- 使用 el-descriptions 展示详细信息 -->
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="品牌">{{ deviceInfo.brand }}</el-descriptions-item>
-          <el-descriptions-item label="型号">{{ deviceInfo.model }}</el-descriptions-item>
-          <el-descriptions-item label="气缸数">{{ deviceInfo.cylinderCount }}</el-descriptions-item>
-          <el-descriptions-item label="缸径(mm)">{{ deviceInfo.cylinderBore }}</el-descriptions-item>
-          <el-descriptions-item label="燃油类型">{{ deviceInfo.fuelType }}</el-descriptions-item>
-          <el-descriptions-item label="燃油类型1">{{ deviceInfo.fuelType1 }}</el-descriptions-item>
-          <el-descriptions-item label="热值(kJ/kg)">{{ deviceInfo.fuelType1CalorificValue }}</el-descriptions-item>
-          <el-descriptions-item label="发动机用途">{{ deviceInfo.engineUsage }}</el-descriptions-item>
-          <el-descriptions-item label="排放标准">{{ deviceInfo.emissionStandard }}</el-descriptions-item>
-          <el-descriptions-item label="额定转速(rpm)">{{ deviceInfo.ratedSpeed }}</el-descriptions-item>
-          <el-descriptions-item label="额定功率(kW)">{{ deviceInfo.ratedPower }}</el-descriptions-item>
+          <el-descriptions-item label="品牌">{{ deviceInfo.brand || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="型号">{{ deviceInfo.model || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="气缸数">{{ deviceInfo.cylinderCount || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="缸径(mm)">{{ deviceInfo.cylinderBore || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="燃油类型">{{ deviceInfo.fuelType || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="燃油类型1">{{ deviceInfo.fuelType1 || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="热值(kJ/kg)">{{ deviceInfo.fuelType1CalorificValue || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="发动机用途">{{ deviceInfo.engineUsage || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="排放标准">{{ deviceInfo.emissionStandard || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="额定转速(rpm)">{{ deviceInfo.ratedSpeed || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="额定功率(kW)">{{ deviceInfo.ratedPower || '-' }}</el-descriptions-item>
         </el-descriptions>
 
         <!-- 测试条件展示 -->
@@ -61,7 +61,7 @@
       </div>
       
       <!-- 其他设备类型的提示（暂未开发） -->
-      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator'" class="empty-state">
+      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator' && deviceType !== 'propeller'" class="empty-state">
         该设备类型的数据展示功能暂未开发
       </div>
       
@@ -75,13 +75,13 @@
           <el-descriptions-item label="型号">{{ deviceInfo.model || '-' }}</el-descriptions-item>
           <el-descriptions-item v-if="showDesulfurization" label="类型">{{ deviceInfo.type || '-' }}</el-descriptions-item>
           <el-descriptions-item label="烟气量 (kg/h)">{{ deviceInfo.smokeFlowRate || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDesulfurization" label="脱硫效率(%)">{{ deviceInfo.removalEfficiency !== undefined ? deviceInfo.removalEfficiency.toFixed(2) + '%' : '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDenitrification" label="脱硝效率(%)">{{ deviceInfo.removalEfficiency !== undefined ? deviceInfo.removalEfficiency.toFixed(2) + '%' : '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDesulfurization" label="SO₂去除量 (t/h)">{{ deviceInfo.removalAmount !== undefined ? deviceInfo.removalAmount.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDenitrification" label="NOx去除量 (kg/h)">{{ deviceInfo.removalAmount !== undefined ? deviceInfo.removalAmount.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDesulfurization" label="脱硫效率(%)">{{ deviceInfo.removalEfficiency || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDenitrification" label="脱硝效率(%)">{{ deviceInfo.removalEfficiency || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDesulfurization" label="SO₂去除量 (t/h)">{{ deviceInfo.removalAmount || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDenitrification" label="NOx去除量 (kg/h)">{{ deviceInfo.removalAmount || '-' }}</el-descriptions-item>
           <el-descriptions-item label="功率(kW)">{{ deviceInfo.powerRating || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDesulfurization" label="能耗比 (kWh/t SOx)">{{ deviceInfo.energyConsumptionRatio !== undefined ? deviceInfo.energyConsumptionRatio.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDenitrification" label="能耗比 (kWh/kg NOx)">{{ deviceInfo.energyConsumptionRatio !== undefined ? deviceInfo.energyConsumptionRatio.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDesulfurization" label="能耗比 (kWh/t SOx)">{{ deviceInfo.energyConsumptionRatio || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="showDenitrification" label="能耗比 (kWh/kg NOx)">{{ deviceInfo.energyConsumptionRatio || '-' }}</el-descriptions-item>
           <el-descriptions-item v-if="showDesulfurization" label="适用硫含量 (%)">{{ deviceInfo.sulfurContent || '-' }}</el-descriptions-item>
           <el-descriptions-item label="IMO合规性">{{ deviceInfo.imoCompliance || '-' }}</el-descriptions-item>
         </el-descriptions>
@@ -98,13 +98,13 @@
         
         <!-- 使用 el-descriptions 展示详细信息 -->
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="惰气流量(Nm3/h)">{{ deviceInfo.inertGasFlowRate !== undefined ? deviceInfo.inertGasFlowRate.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="燃料消耗 (kg/h)">{{ deviceInfo.fuelConsumption !== undefined ? deviceInfo.fuelConsumption.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="风机电能消耗 (kW)">{{ deviceInfo.fanPowerConsumption !== undefined ? deviceInfo.fanPowerConsumption.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="柴油发电机燃油消耗率 (g/kWh)">{{ deviceInfo.dieselGeneratorFuelRate !== undefined ? deviceInfo.dieselGeneratorFuelRate.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="冷却海水消耗量 (m³/h)">{{ deviceInfo.coolingSeawaterConsumption !== undefined ? deviceInfo.coolingSeawaterConsumption.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="海水密度 (kg/m³)">{{ deviceInfo.seawaterDensity !== undefined ? deviceInfo.seawaterDensity.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="冷却水泵扬程 (m)">{{ deviceInfo.coolingPumpHead !== undefined ? deviceInfo.coolingPumpHead.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="惰气流量(Nm3/h)">{{ deviceInfo.inertGasFlowRate || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="燃料消耗 (kg/h)">{{ deviceInfo.fuelConsumption || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="风机电能消耗 (kW)">{{ deviceInfo.fanPowerConsumption || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="柴油发电机燃油消耗率 (g/kWh)">{{ deviceInfo.dieselGeneratorFuelRate || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="冷却海水消耗量 (m³/h)">{{ deviceInfo.coolingSeawaterConsumption || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="海水密度 (kg/m³)">{{ deviceInfo.seawaterDensity || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="冷却水泵扬程 (m)">{{ deviceInfo.coolingPumpHead || '-' }}</el-descriptions-item>
         </el-descriptions>
       </div>
       
@@ -119,14 +119,30 @@
         
         <!-- 使用 el-descriptions 展示详细信息 -->
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="工作周期内消耗的电能 (kW·h)">{{ deviceInfo.energyConsumption !== undefined ? deviceInfo.energyConsumption.toFixed(2) : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="工作周期内分离的悬浮液(或乳浊液)体积 (m³)">{{ deviceInfo.separatedVolume !== undefined ? deviceInfo.separatedVolume.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="工作周期内消耗的电能 (kW·h)">{{ deviceInfo.energyConsumption || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="工作周期内分离的悬浮液(或乳浊液)体积 (m³)">{{ deviceInfo.separatedVolume || '-' }}</el-descriptions-item>
         </el-descriptions>
       </div>
       
       <!-- 碟式分离机无数据提示 -->
       <div v-if="deviceType === 'separator' && !deviceInfo" class="empty-state">
         请选择碟式分离机设备查看详细信息
+      </div>
+      
+      <!-- 船用推进器信息展示 -->
+      <div v-if="deviceType === 'propeller' && deviceInfo" class="assessment-section">
+        <div class="subsection-title">基本信息</div>
+        
+        <!-- 使用 el-descriptions 展示详细信息 -->
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="螺旋桨收到功率 (kW)">{{ deviceInfo.receivedPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="螺旋桨有效功率 (kW)">{{ deviceInfo.effectivePower || '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+      
+      <!-- 船用推进器无数据提示 -->
+      <div v-if="deviceType === 'propeller' && !deviceInfo" class="empty-state">
+        请选择船用推进器设备查看详细信息
       </div>
       
       <!-- 公共评估结果展示（所有设备类型通用） -->
@@ -138,11 +154,9 @@
               {{ deviceInfo.passed ? '通过' : '未通过' }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="能效等级">
-            {{ deviceInfo.efficiencyLevel !== undefined ? deviceInfo.efficiencyLevel + '级' : '-' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex !== undefined ? deviceInfo.efficiencyIndex.toFixed(2) + '%' : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue !== undefined ? deviceInfo.efficiencyBaseValue.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="能效等级">{{ deviceInfo.efficiencyLevel || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="能效指标">{{ deviceInfo.efficiencyIndex || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="能效基值">{{ deviceInfo.efficiencyBaseValue || '-' }}</el-descriptions-item>
         </el-descriptions>
       </div>
     </div>
