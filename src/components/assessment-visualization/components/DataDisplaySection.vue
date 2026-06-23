@@ -61,7 +61,7 @@
       </div>
       
       <!-- 其他设备类型的提示（暂未开发） -->
-      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas'" class="empty-state">
+      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator'" class="empty-state">
         该设备类型的数据展示功能暂未开发
       </div>
       
@@ -111,6 +111,22 @@
       <!-- 惰性气体系统无数据提示 -->
       <div v-if="deviceType === 'inert-gas' && !deviceInfo" class="empty-state">
         请选择惰性气体系统设备查看详细信息
+      </div>
+      
+      <!-- 碟式分离机信息展示 -->
+      <div v-if="deviceType === 'separator' && deviceInfo" class="assessment-section">
+        <div class="subsection-title">基本信息</div>
+        
+        <!-- 使用 el-descriptions 展示详细信息 -->
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="工作周期内消耗的电能 (kW·h)">{{ deviceInfo.energyConsumption !== undefined ? deviceInfo.energyConsumption.toFixed(2) : '-' }}</el-descriptions-item>
+          <el-descriptions-item label="工作周期内分离的悬浮液(或乳浊液)体积 (m³)">{{ deviceInfo.separatedVolume !== undefined ? deviceInfo.separatedVolume.toFixed(2) : '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+      
+      <!-- 碟式分离机无数据提示 -->
+      <div v-if="deviceType === 'separator' && !deviceInfo" class="empty-state">
+        请选择碟式分离机设备查看详细信息
       </div>
       
       <!-- 公共评估结果展示（所有设备类型通用） -->
