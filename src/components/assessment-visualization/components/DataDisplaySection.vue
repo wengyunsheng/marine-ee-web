@@ -61,7 +61,7 @@
       </div>
       
       <!-- 其他设备类型的提示（暂未开发） -->
-      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator' && deviceType !== 'propeller' && deviceType !== 'chiller'" class="empty-state">
+      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator' && deviceType !== 'propeller' && deviceType !== 'chiller' && deviceType !== 'waste-heat'" class="empty-state">
         该设备类型的数据展示功能暂未开发
       </div>
       
@@ -73,16 +73,16 @@
         <el-descriptions :column="2" border size="small">
           <el-descriptions-item label="品牌">{{ deviceInfo.brand || '-' }}</el-descriptions-item>
           <el-descriptions-item label="型号">{{ deviceInfo.model || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDesulfurization" label="类型">{{ deviceInfo.type || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 46" label="类型">{{ deviceInfo.type || '-' }}</el-descriptions-item>
           <el-descriptions-item label="烟气量 (kg/h)">{{ deviceInfo.smokeFlowRate || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDesulfurization" label="脱硫效率(%)">{{ deviceInfo.removalEfficiency || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDenitrification" label="脱硝效率(%)">{{ deviceInfo.removalEfficiency || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDesulfurization" label="SO₂去除量 (t/h)">{{ deviceInfo.removalAmount || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDenitrification" label="NOx去除量 (kg/h)">{{ deviceInfo.removalAmount || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 46" label="脱硫效率(%)">{{ deviceInfo.removalEfficiency || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 47" label="脱硝效率(%)">{{ deviceInfo.removalEfficiency || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 46" label="SO₂去除量 (t/h)">{{ deviceInfo.removalAmount || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 47" label="NOx去除量 (kg/h)">{{ deviceInfo.removalAmount || '-' }}</el-descriptions-item>
           <el-descriptions-item label="功率(kW)">{{ deviceInfo.powerRating || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDesulfurization" label="能耗比 (kWh/t SOx)">{{ deviceInfo.energyConsumptionRatio || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDenitrification" label="能耗比 (kWh/kg NOx)">{{ deviceInfo.energyConsumptionRatio || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="showDesulfurization" label="适用硫含量 (%)">{{ deviceInfo.sulfurContent || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 46" label="能耗比 (kWh/t SOx)">{{ deviceInfo.energyConsumptionRatio || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 47" label="能耗比 (kWh/kg NOx)">{{ deviceInfo.energyConsumptionRatio || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 46" label="适用硫含量 (%)">{{ deviceInfo.sulfurContent || '-' }}</el-descriptions-item>
           <el-descriptions-item label="IMO合规性">{{ deviceInfo.imoCompliance || '-' }}</el-descriptions-item>
         </el-descriptions>
       </div>
@@ -147,6 +147,28 @@
         </el-descriptions>
       </div>
       
+      <!-- 船用余热装置信息展示 -->
+      <div v-if="deviceType === 'waste-heat' && deviceInfo" class="assessment-section">
+        <div class="subsection-title">基本信息</div>
+        
+        <!-- 使用 el-descriptions 展示详细信息 -->
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="装置类型">{{ deviceInfo.deviceType || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="热源温度(℃)">{{ deviceInfo.heatSourceTemp || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '蒸汽透平'" label="蒸汽压力(barg)">{{ deviceInfo.steamPressure || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '蒸汽透平'" label="蒸汽类型">{{ deviceInfo.steamType || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="额定输出功率(kW)">{{ deviceInfo.ratedOutputPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="实测输出功率(kW)">{{ deviceInfo.actualOutputPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="消耗功率(kW)">{{ deviceInfo.consumptionPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="吸热量(kW)">{{ deviceInfo.heatAbsorption || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="热源质量流量(kg/s)">{{ deviceInfo.heatSourceMassFlow || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="热源进口温度(℃)">{{ deviceInfo.heatSourceInletTemp || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="热源出口温度(℃)">{{ deviceInfo.heatSourceOutletTemp || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'"  label="比热容(J/(kg·℃))">{{ deviceInfo.specificHeatCapacity || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceType === '蒸汽透平'" label="焓降(J/kg)">{{ deviceInfo.enthalpyDrop || '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+      
       <!-- 公共评估结果展示（所有设备类型通用） -->
       <div v-if="deviceInfo && deviceType !== ''" class="assessment-section">
         <div class="subsection-title">评估结果</div>
@@ -166,7 +188,6 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
   // 设备类型（parentCode 或 code）
@@ -189,26 +210,6 @@ const props = defineProps({
     type: String,
     default: ''
   }
-})
-
-// 获取能效等级标签类型
-const getLevelTagType = (level) => {
-  if (!level) return 'info'
-  if (level === 1) return 'success'
-  if (level === 2) return 'warning'
-  return 'danger'
-}
-
-// 判断是否显示脱硫数据（根据设备编码）
-const showDesulfurization = computed(() => {
-  // egcs-01 是脱硫设备
-  return props.deviceCode === 'egcs-01'
-})
-
-// 判断是否显示脱硝数据（根据设备编码）
-const showDenitrification = computed(() => {
-  // egcs-02 是脱硝设备
-  return props.deviceCode === 'egcs-02'
 })
 
 </script>
