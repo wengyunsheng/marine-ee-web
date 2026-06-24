@@ -55,13 +55,13 @@
         </div>
       </div>
       
-      <!-- 无数据提示 -->
-      <div v-if="deviceType === 'engine' && !deviceInfo" class="empty-state">
-        请选择发动机查看详细信息
+      <!-- 已支持设备类型的通用无数据提示 -->
+      <div v-if="deviceType && deviceInfo === null" class="empty-state">
+        请选择设备查看详细信息
       </div>
       
       <!-- 其他设备类型的提示（暂未开发） -->
-      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator' && deviceType !== 'propeller'" class="empty-state">
+      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator' && deviceType !== 'propeller' && deviceType !== 'chiller'" class="empty-state">
         该设备类型的数据展示功能暂未开发
       </div>
       
@@ -87,11 +87,6 @@
         </el-descriptions>
       </div>
       
-      <!-- EGCS 无数据提示 -->
-      <div v-if="deviceType === 'egcs' && !deviceInfo" class="empty-state">
-        请选择EGCS设备查看详细信息
-      </div>
-      
       <!-- 惰性气体系统信息展示 -->
       <div v-if="deviceType === 'inert-gas' && deviceInfo" class="assessment-section">
         <div class="subsection-title">基本信息</div>
@@ -108,11 +103,6 @@
         </el-descriptions>
       </div>
       
-      <!-- 惰性气体系统无数据提示 -->
-      <div v-if="deviceType === 'inert-gas' && !deviceInfo" class="empty-state">
-        请选择惰性气体系统设备查看详细信息
-      </div>
-      
       <!-- 碟式分离机信息展示 -->
       <div v-if="deviceType === 'separator' && deviceInfo" class="assessment-section">
         <div class="subsection-title">基本信息</div>
@@ -122,11 +112,6 @@
           <el-descriptions-item label="工作周期内消耗的电能 (kW·h)">{{ deviceInfo.energyConsumption || '-' }}</el-descriptions-item>
           <el-descriptions-item label="工作周期内分离的悬浮液(或乳浊液)体积 (m³)">{{ deviceInfo.separatedVolume || '-' }}</el-descriptions-item>
         </el-descriptions>
-      </div>
-      
-      <!-- 碟式分离机无数据提示 -->
-      <div v-if="deviceType === 'separator' && !deviceInfo" class="empty-state">
-        请选择碟式分离机设备查看详细信息
       </div>
       
       <!-- 船用推进器信息展示 -->
@@ -140,9 +125,26 @@
         </el-descriptions>
       </div>
       
-      <!-- 船用推进器无数据提示 -->
-      <div v-if="deviceType === 'propeller' && !deviceInfo" class="empty-state">
-        请选择船用推进器设备查看详细信息
+      <!-- 船用冷水机组信息展示 -->
+      <div v-if="deviceType === 'chiller' && deviceInfo" class="assessment-section">
+        <div class="subsection-title">基本信息</div>
+        
+        <!-- 使用 el-descriptions 展示详细信息 -->
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="评估类型">{{ deviceInfo.evaluationType || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="型式">{{ deviceInfo.model || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="名义制冷量(kW)">{{ deviceInfo.nominalCoolingCapacity || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="实测制冷量(kW)">{{ deviceInfo.actualCoolingCapacity || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="实测输入总功率(kW)">{{ deviceInfo.inputPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="100%负荷时制冷量(kW)">{{ deviceInfo.load100CoolingCapacity || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="100%负荷时输入总功率(kW)">{{ deviceInfo.load100InputPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="75%负荷时制冷量(kW)">{{ deviceInfo.load75CoolingCapacity || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="75%负荷时输入总功率(kW)">{{ deviceInfo.load75InputPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="50%负荷时制冷量(kW)">{{ deviceInfo.load50CoolingCapacity || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="50%负荷时输入总功率(kW)">{{ deviceInfo.load50InputPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="25%负荷时制冷量(kW)">{{ deviceInfo.load25CoolingCapacity || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="25%负荷时输入总功率(kW)">{{ deviceInfo.load25InputPower || '-' }}</el-descriptions-item>
+        </el-descriptions>
       </div>
       
       <!-- 公共评估结果展示（所有设备类型通用） -->
