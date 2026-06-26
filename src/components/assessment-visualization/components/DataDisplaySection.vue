@@ -61,7 +61,7 @@
       </div>
       
       <!-- 其他设备类型的提示（暂未开发） -->
-      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator' && deviceType !== 'propeller' && deviceType !== 'chiller' && deviceType !== 'waste-heat'" class="empty-state">
+      <div v-if="deviceType && deviceType !== 'engine' && deviceType !== 'egcs' && deviceType !== 'inert-gas' && deviceType !== 'separator' && deviceType !== 'propeller' && deviceType !== 'chiller' && deviceType !== 'waste-heat' && deviceType !== 'ballast'" class="empty-state">
         该设备类型的数据展示功能暂未开发
       </div>
       
@@ -153,20 +153,62 @@
         
         <!-- 使用 el-descriptions 展示详细信息 -->
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="装置类型">{{ deviceInfo.deviceType || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="热源温度(℃)">{{ deviceInfo.heatSourceTemp || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '蒸汽透平'" label="蒸汽压力(barg)">{{ deviceInfo.steamPressure || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '蒸汽透平'" label="蒸汽类型">{{ deviceInfo.steamType || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="额定输出功率(kW)">{{ deviceInfo.ratedOutputPower || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 23" label="热源温度(℃)">{{ deviceInfo.heatSourceTemp || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 24" label="蒸汽压力(barg)">{{ deviceInfo.steamPressure || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 24" label="蒸汽类型">{{ deviceInfo.steamType || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 23" label="额定输出功率(kW)">{{ deviceInfo.ratedOutputPower || '-' }}</el-descriptions-item>
           <el-descriptions-item label="实测输出功率(kW)">{{ deviceInfo.actualOutputPower || '-' }}</el-descriptions-item>
           <el-descriptions-item label="消耗功率(kW)">{{ deviceInfo.consumptionPower || '-' }}</el-descriptions-item>
           <el-descriptions-item label="吸热量(kW)">{{ deviceInfo.heatAbsorption || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="热源质量流量(kg/s)">{{ deviceInfo.heatSourceMassFlow || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="热源进口温度(℃)">{{ deviceInfo.heatSourceInletTemp || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'" label="热源出口温度(℃)">{{ deviceInfo.heatSourceOutletTemp || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '有机朗肯循环'"  label="比热容(J/(kg·℃))">{{ deviceInfo.specificHeatCapacity || '-' }}</el-descriptions-item>
-          <el-descriptions-item v-if="deviceInfo.deviceType === '蒸汽透平'" label="焓降(J/kg)">{{ deviceInfo.enthalpyDrop || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 23" label="热源质量流量(kg/s)">{{ deviceInfo.heatSourceMassFlow || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 23" label="热源进口温度(℃)">{{ deviceInfo.heatSourceInletTemp || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 23" label="热源出口温度(℃)">{{ deviceInfo.heatSourceOutletTemp || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 23"  label="比热容(J/(kg·℃))">{{ deviceInfo.specificHeatCapacity || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="deviceInfo.deviceId === 24" label="焓降(J/kg)">{{ deviceInfo.enthalpyDrop || '-' }}</el-descriptions-item>
         </el-descriptions>
+      </div>
+      
+      <!-- 船用压载水处理设备信息展示 -->
+      <div v-if="deviceType === 'ballast' && deviceInfo" class="assessment-section">
+        <div class="subsection-title">基本信息</div>
+        
+        <!-- 使用 el-descriptions 展示详细信息 -->
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="处理方法类型">{{ deviceInfo.methodType || '-' }}</el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- EER1 - 淡水工况 -->
+        <div class="subsection">
+          <div class="subsection-title">EER1 - 淡水工况</div>
+          <el-descriptions :column="2" border size="small">
+            <el-descriptions-item label="压载平均电能(kW)">{{ deviceInfo.eer1FreshLoadPowerAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="排载平均电能(kW)">{{ deviceInfo.eer1FreshDischargePowerAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="压载平均流量(m³/h)">{{ deviceInfo.eer1FreshLoadFlowAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="排载平均流量(m³/h)">{{ deviceInfo.eer1FreshDischargeFlowAvg || '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+        
+        <!-- EER2 - 半咸水工况 -->
+        <div class="subsection">
+          <div class="subsection-title">EER2 - 半咸水工况</div>
+          <el-descriptions :column="2" border size="small">
+            <el-descriptions-item label="压载平均电能(kW)">{{ deviceInfo.eer2BrackishLoadPowerAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="排载平均电能(kW)">{{ deviceInfo.eer2BrackishDischargePowerAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="压载平均流量(m³/h)">{{ deviceInfo.eer2BrackishLoadFlowAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="排载平均流量(m³/h)">{{ deviceInfo.eer2BrackishDischargeFlowAvg || '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+        
+        <!-- EER3 - 海水工况 -->
+        <div class="subsection">
+          <div class="subsection-title">EER3 - 海水工况</div>
+          <el-descriptions :column="2" border size="small">
+            <el-descriptions-item label="压载平均电能(kW)">{{ deviceInfo.eer3SeawaterLoadPowerAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="排载平均电能(kW)">{{ deviceInfo.eer3SeawaterDischargePowerAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="压载平均流量(m³/h)">{{ deviceInfo.eer3SeawaterLoadFlowAvg || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="排载平均流量(m³/h)">{{ deviceInfo.eer3SeawaterDischargeFlowAvg || '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
       </div>
       
       <!-- 公共评估结果展示（所有设备类型通用） -->
